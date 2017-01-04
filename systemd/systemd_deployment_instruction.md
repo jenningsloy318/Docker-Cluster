@@ -9,7 +9,7 @@ kube-node1:|192.168.49.135
 
 
 *Configure on master node*
-> **1.get kubernetes binary and etcd binary**
+> **1. Get kubernetes binary and etcd binary**
 
   a. get kubernetes binary 
 
@@ -38,7 +38,7 @@ kubernetes/client/kubernetes-client-linux-amd64.tar.gz
 
 ```
 
-then copy all binaries to /usr/bin.
+then copy all binaries to /usr/bin on master and node 
 
   b. get etcd binary
 
@@ -46,4 +46,18 @@ then copy all binaries to /usr/bin.
 # wget https://github.com/coreos/etcd/releases/download/v3.0.15/etcd-v3.0.15-linux-amd64.tar.gz
 #tar xf etcd-v3.0.15-linux-amd64.tar.gz
 then copy all binary to /usr/bin
+```
+> **2. Start etcd on master **
+
+copy [etcd.service](./init/etcd.service) to /etc/systemd/system/multi-user.target.wants/;
+
+copy [etcd.conf](./conf/etcd.conf) to /etc/etcd/
+
+```shell
+#systemctl daemon-reload
+#systemctl start etcd
+# ss -lptn | column -n |grep etcd
+LISTEN     0      128         :::2379                    :::*                   users:(("etcd",pid=2108,fd=6))
+LISTEN     0      128         :::2380                    :::*                   users:(("etcd",pid=2108,fd=5))
+
 ```

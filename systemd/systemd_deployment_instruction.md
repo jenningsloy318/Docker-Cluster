@@ -129,57 +129,58 @@ Installation
 
 **1. Get kubernetes binary and etcd binary.**
 
-  a. get kubernetes binary 
+  1.1 get kubernetes binary 
+   
+   ```shell
+   
+   # wget https://github.com/kubernetes/kubernetes/releases/download/v1.5.0/kubernetes.tar.gz
+   # untar kubernetes.tar.gz 
+   # cd kubernetes
+   # cluster/get-kube-binaries.sh
+   Kubernetes release: v1.5.0
+   Server: linux/amd64
+   Client: linux/amd64
+   
+   Will download kubernetes-server-linux-amd64.tar.gz from https://storage.googleapis.com/kubernetes-release/release/v1.5.0
+   Will download and extract kubernetes-client-linux-amd64.tar.gz from https://storage.googleapis.com/kubernetes-release/release/v1.5.0
+   
+   Will download and extract kubernetes-client-linux-amd64.tar.gz from https://storage.googleapis.com/kubernetes-release/release/v1.5.0
+   Is this ok? [Y]/n y
+   
+   
+   kubernetes/server/kubernetes-server-linux-amd64.tar.gz 
+   kubernetes/client/kubernetes-client-linux-amd64.tar.gz 
+   
+   #tar xf kubernetes/server/kubernetes-server-linux-amd64.tar.gz 
+   # tar xf kubernetes/client/kubernetes-client-linux-amd64.tar.gz 
+  
+   ```
 
-```shell
+   then copy all binaries to /usr/bin on master and node 
 
-# wget https://github.com/kubernetes/kubernetes/releases/download/v1.5.0/kubernetes.tar.gz
-# untar kubernetes.tar.gz 
-# cd kubernetes
-# cluster/get-kube-binaries.sh
-Kubernetes release: v1.5.0
-Server: linux/amd64
-Client: linux/amd64
+  1.2 get etcd binary
+    
+   ```shell
+   # wget https://github.com/coreos/etcd/releases/download/v3.0.15/etcd-v3.0.15-linux-amd64.tar.gz
+   #tar xf etcd-v3.0.15-linux-amd64.tar.gz
+   ```
 
-Will download kubernetes-server-linux-amd64.tar.gz from https://storage.googleapis.com/kubernetes-release/release/v1.5.0
-Will download and extract kubernetes-client-linux-amd64.tar.gz from https://storage.googleapis.com/kubernetes-release/release/v1.5.0
-
-Will download and extract kubernetes-client-linux-amd64.tar.gz from https://storage.googleapis.com/kubernetes-release/release/v1.5.0
-Is this ok? [Y]/n y
-
-
-kubernetes/server/kubernetes-server-linux-amd64.tar.gz 
-kubernetes/client/kubernetes-client-linux-amd64.tar.gz 
-
-#tar xf kubernetes/server/kubernetes-server-linux-amd64.tar.gz 
-# tar xf kubernetes/client/kubernetes-client-linux-amd64.tar.gz 
-
-```
-
-then copy all binaries to /usr/bin on master and node 
-
-  b. get etcd binary
-
-```shell
-# wget https://github.com/coreos/etcd/releases/download/v3.0.15/etcd-v3.0.15-linux-amd64.tar.gz
-#tar xf etcd-v3.0.15-linux-amd64.tar.gz
-then copy all binary to /usr/bin
-```
+   then copy all binary to /usr/bin
 
 **2. Start etcd on master.**
 
-copy [etcd.service](./init/etcd.service) to /etc/systemd/system/multi-user.target.wants/;
-
-copy [etcd.conf](./conf/etcd.conf) to /etc/etcd/
-
-```shell
-#systemctl daemon-reload
-#systemctl start etcd
-# ss -lptn | column -n |grep etcd
-LISTEN     0      128         :::2379                    :::*                   users:(("etcd",pid=2108,fd=6))
-LISTEN     0      128         :::2380                    :::*                   users:(("etcd",pid=2108,fd=5))
-
-```
+   copy [etcd.service](./init/etcd.service) to /etc/systemd/system/multi-user.target.wants/;
+   
+   copy [etcd.conf](./conf/etcd.conf) to /etc/etcd/
+   
+   ```shell
+   #systemctl daemon-reload
+   #systemctl start etcd
+   # ss -lptn | column -n |grep etcd
+   LISTEN     0      128         :::2379                    :::*                   users:(("etcd",pid=2108,fd=6))
+   LISTEN     0      128         :::2380                    :::*                   users:(("etcd",pid=2108,fd=5))
+    
+   ```
 
 **3 prepare the authentications for communication between master and node.**
 
@@ -252,5 +253,43 @@ LISTEN     0      128         :::2380                    :::*                   
         #openssl x509 -req -in apiserver.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out apiserver.pem -days 365 -extensions v3_req -extfile openssl.cnf
    ```
  3.3  if we want to create other service account key, repeat step 2. 
+ 
+ 3.4 All of these key and cert are stored in /etc/kubernetes/pki. 
 
+**4 start apiserver service**. 
 
+ 4.1 command and parameters used when starting apiserver service
+   
+   ```shell  
+   /usr/bin/hyperkube apiserver \
+   --insecure-bind-address=127.0.0.1 \
+   --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,ResourceQuota \
+   --service-cluster-ip-range=10.96.0.0/12 \
+   --service-account-key-file=/etc/kubernetes/pki/apiserver-key.pem \
+   --client-ca-file=/etc/kubernetes/pki/ca.pem \
+   --tls-cert-file=/etc/kubernetes/pki/apiserver.pem \
+   --tls-private-key-file=/etc/kubernetes/pki/apiserver-key.pem \
+   --token-auth-file=/etc/kubernetes/pki/tokens.csv \
+   --secure-port=6443 \
+   --allow-privileged \
+   --advertise-address=192.168.49.135 \
+   --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname \
+   --anonymous-auth=false \
+   --etcd-servers=http://127.0.0.1:2379 \
+   --v=5
+   ```
+   explanation: 
+
+   * ```--admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,ResourceQuota ``` : determine the admission control to access apiserver;
+   * ```--service-cluster-ip-range=10.96.0.0/12 ```: define the service cluster IP pool,this is mentioned in the openssl,cnf, its first IP(10.96.0.1) is the value of IP.1 ;
+   * ```--client-ca-file=/etc/kubernetes/pki/ca.pem ```: CA cert use for signning client certificate, not the ca priviate key or public key;
+   * ```--tls-cert-file=/etc/kubernetes/pki/apiserver.pem ```: server certificate
+   * ```--tls-private-key-file=/etc/kubernetes/pki/apiserver-key.pem ```: server priviate key
+   * ```--token-auth-file=/etc/kubernetes/pki/tokens.csv ```: token authentication
+   * ```--etcd-servers=http://127.0.0.1:2379```: **etcd server endpoint**, it is very important;
+   * ```--advertise-address=192.168.49.135```:  the IP address on which to advertise the apiserver to members of the cluster.
+   
+ 
+ 4.2 apiserver service listen at two ports  default, one it http://localhost:8080, which is not encrypted; so when other services running on the same master, it can use this endpoint, the other is https://{external_IP}:6443, whose connections are encrypted by TLS, it serves other node and services securely. 
+
+ 4.3 now we use the systemd service file [kube-apiservice.service](./init/kube-apiserver.service)

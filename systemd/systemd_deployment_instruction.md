@@ -92,23 +92,74 @@ LISTEN     0      128         :::2380                    :::*                   
 
 **3 prepare the authentications for communication between master and node.**
 
- *create certification for  authentication, using [EasyRSA](https://github.com/OpenVPN/easy-rsa).* 
+ *create certification for  authentication, using openssl.*
 
 
-* create CA cert for overall certificaion.
+ 3.1  create CA key pair.
+   * Create CA priviate key
+      
+   ```shell
+          # openssl genrsa -out ca-key.pem 2048
+   ```
 
-```shell
-# wget https://github.com/OpenVPN/easy-rsa/releases/download/3.0.1/EasyRSA-3.0.1.tgz
-#tar xfEasyRSA-3.0.1.tgz
-#cd EasyRSA
-#./easyrsa init-pki
-# MASTER=192.168.49.141
-#./easyrsa --batch "--req-cn=$MASTER@`date +%s`" build-ca nopass
-```
+   * Extract the public key
+       
+   ```shell
+            # openssl rsa -in ca-key.pem -pubout -out ca-pub.pem
+   ```
 
-* create server cert/key for HTTPS using on master.
+   * create CA  self  signed cert
+        
+   ```shell
+            # openssl req -x509 -new -nodes -key ca-key.pem -days 10000 -out ca.pem -subj "/CN=kube-ca"
+   ```
 
-```shell
-#./easyrsa --subject-alt-name="IP:$MASTER" build-server-full server nopass
-# cp pki/ca.crt  pki/issued/server.crt pki/private/server.key  /var/run/kubernetes
-```
+
+ 3.2  Create apiserver key pair signed by preceding created CA.
+   * Create CA priviate key
+        
+   ```shell
+            # openssl genrsa -out apiserver-key.pem 2048
+   ```
+
+   * Extract the public key
+        
+    ```shell
+            # openssl rsa -in apiserver-key.pem -pubout -out apiserver-pub.pem
+    ```
+        
+   * Edit openssl.cnf to feed the needs,modify the DNS.n and IP.n, the DNSs is the internal service cluster DNS domain, and IP.1 is the first ```IP``` in the ```SERVICE_IP_RANGE```, and IP.2 is the master IP address. refter to [Cluster TLS using OpenSSL](https://coreos.com/kubernetes/docs/latest/openssl.html)
+        
+    ```shell
+        # cat openssl.cnf
+        [req]
+        req_extensions = v3_req
+        distinguished_name = req_distinguished_name
+        [req_distinguished_name]
+        [ v3_req ]
+        basicConstraints = CA:FALSE
+        keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+        subjectAltName = @alt_names
+        [alt_names]
+        DNS.1 = kubernetes
+        DNS.2 = kubernetes.default
+        DNS.3 = kubernetes.default.svc
+        DNS.4 = kubernetes.default.svc.cluster.local
+        IP.1 = 10.96.0.1
+        IP.2 = 192.168.49.141
+    ```
+
+   * Create sign request for apiserver key
+        
+   ```shell
+            # penssl req -new -key apiserver-key.pem -out apiserver.csr -subj "/CN=kube-apiserver" -config openssl.cnf
+   ```
+
+   * Sign apiserver key
+
+   ```
+        #openssl x509 -req -in apiserver.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out apiserver.pem -days 365 -extensions v3_req -extfile openssl.cnf
+   ```
+ 3.3  if we want to create other service account key, repeat step 2. 
+
+

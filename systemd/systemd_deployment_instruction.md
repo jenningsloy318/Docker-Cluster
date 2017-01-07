@@ -390,7 +390,8 @@ Installation
    * ``` --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin```: we should use third-party plugins to provide the network function, later we will deploy calico plugin with pod.
 
 
-  * ``` --cluster-dns=10.96.0.10 --cluster-domain=cluster.local```: this setting is related with the cluster internal DNS setting, we will deploy the DNS pod after calico is deployed. 
+
+   * ``` --cluster-dns=10.96.0.10 --cluster-domain=cluster.local```: this setting is related with the cluster internal DNS setting, we will deploy the DNS pod after calico is deployed. 
 
  7.3 now we can use [kubelet.service](./init/kubelet.service) to start kubelet 
 
@@ -404,6 +405,15 @@ Installation
    #/usr/bin/hyperkube proxy --kubeconfig=/etc/kubernetes/kubelet.conf --master=https://192.168.49.141:6443
    ```
  8.3 now we can start kube-proxy by [kube-proxy.service](./init/kube-proxy.service)
+
+ 8.4 check the node 
+
+  ```shell
+  # kubectl get node
+  NAME         STATUS    AGE
+  kube-master   Ready     1d
+  ```
+
 
 
 **9. now this cluster is up without network plugin, as I mentioned earlier, I will install calico plugin to provide the networking.**
@@ -591,3 +601,118 @@ Installation
    
    
        
+
+
+
+**Configure on  node**
+
+
+
+**1. Create client certificate.**
+  
+ 1.1 crate a client_openssl.cnf, for each client, we'd replace the value of IP.1 when create its certificate.
+     
+ ```shell
+ # cat client-openssl.cnf
+ [req]
+ req_extensions = v3_req
+ distinguished_name = req_distinguished_name
+ [req_distinguished_name]
+ [ v3_req ]
+ basicConstraints = CA:FALSE
+ keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+ subjectAltName = @alt_names
+ [alt_names]
+ IP.1 = 192.168.49.135
+ ```
+ 1.2  create client priviate key 
+
+ ```shell
+ # openssl genrsa -out client-key.pem 2048
+ ```
+
+ 1.3 extract client public key
+
+ ```shell
+ # openssl rsa -in client-key.pem -pubout -out client-pub.pem
+ ```
+ 1.4 create sign request
+
+ ```shell
+ # openssl req -new -key client-key.pem -out client.csr -subj "/CN=client" -config client-openssl.cnf
+ ```
+ 1.5 sign the client certificae
+
+ ```shell
+ # openssl x509 -req -in client.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out client.pem -days 365 -extensions v3_req -extfile client-openssl.cnf
+ ```
+
+**2. create ```/etc/kubernetes/kubelet.conf```**
+  
+ 2.1  setup the cluster info 
+
+ ```shell
+ #kubectl config set-cluster kubernetes --certificate-authority=/etc/kubernetes/pki/ca.pem --embed-certs=true --server=https://192.168.49.141:6443 --kubeconfig=/etc/kubernetes/kubelet.conf
+ ```
+
+
+ 2.2 set kubelet user and context
+   
+ ```shell
+ # kubectl config set-credentials kubelet --client-certificate=/etc/kubernetes/pki/client.pem --client-key=/etc/kubernetes/pki/client-key.pem --embed-certs=true  --kubeconfig=/etc/kubernetes/kubelet.conf
+ # kubectl config set-context kubelet@kubernetes --cluster=kubernetes --user=kubelet  --kubeconfig=/etc/kubernetes/kubelet.conf
+ ```
+
+ 2.3 set current context 
+
+ ```shell
+ # kubectl config  use-context kubelet@kubernetes  --kubeconfig=/etc/kubernetes/kubelet.conf
+ ```
+
+
+**3. start kubelet service.**
+  
+ 3.1 command and parameters to start kubelet service. 
+   
+   ```shell
+   # /usr/bin/kubelet --kubeconfig=/etc/kubernetes/kubelet.conf --require-kubeconfig=true --allow-privileged=true \
+   --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin \
+   --cluster-dns=10.96.0.10 --cluster-domain=cluster.local
+   ```
+
+   explanation
+
+   * ``` --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin```: we should use third-party plugins to provide the network function, later we will deploy calico plugin with pod.
+
+
+   * ``` --cluster-dns=10.96.0.10 --cluster-domain=cluster.local```: this setting is related with the cluster internal DNS setting, we will deploy the DNS pod after calico is deployed. 
+
+
+ 3.2 now we can use [kubelet-node.service](./init/kubelet-node.service) to start kubelet 
+
+
+
+**4. start kube-proxy service .**
+ 
+ 4.1 for simplistic, this service is to make TCP,UDP stream forwarding or round robin TCP,UDP forwarding accross the cluster.
+ 
+ 4.2 command and parameters used to start kube-proxy service
+
+
+  ```shell
+  #/usr/bin/hyperkube proxy --kubeconfig=/etc/kubernetes/kubelet.conf --master=https://192.168.49.141:6443
+  ```
+
+
+ 4.3 now we can start kube-proxy by [kube-proxy.service](./init/kube-proxy.service).
+
+  
+**5. Check the nodes**
+ 
+ ```shell
+ # kubectl get node --kubeconfig=/etc/kubernetes/kubelet.conf
+ NAME         STATUS    AGE
+ kube-master   Ready     1d
+ kube-node1   Ready     25m
+ ```
+

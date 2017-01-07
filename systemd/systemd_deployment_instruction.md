@@ -428,7 +428,7 @@ Installation
 
   next step is to deploy kubeDNS
 
-**10. install kubeDNS in kubernetes cluster to provide internal dns parse. 
+**10. install kubeDNS in kubernetes cluster to provide internal dns parse.**
 
  10.1 since we don't bring up kubeDNS with kubernetes cluster, we need to deploy it seperately, first we need to prepar the pod. I got the pod definination from [coreos install addons](https://coreos.com/kubernetes/docs/latest/deploy-addons.html)
    
@@ -561,9 +561,15 @@ Installation
            - containerPort: 8080
              protocol: TCP
          dnsPolicy: Default
-    ```
+   ```
  
- 10.2 we can create it with ```kubectl crate -f dns-addon.yml```
+
+
+ 10.2  we can create it with 
+ 
+   ```shell
+   kubectl crate -f dns-addon.yml
+   ```
 
  10.3 check the pod 
    

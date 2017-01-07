@@ -1,0 +1,9 @@
+[Unit]
+Description=kubelet service
+
+[Service]
+ExecStart=/usr/bin/hyperkube proxy --kubeconfig=/etc/kubernetes/kubelet.conf --master=https://192.168.49.141:6443
+
+[Install]
+WantedBy=multi-user.target
+

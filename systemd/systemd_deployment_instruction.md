@@ -366,6 +366,41 @@ Installation
    * ```--master=http://localhost:8080```: is the address of apiserver endpoint
    * ```--kubeconfig=/etc/kubernetes/admin.conf```: kubeconfig file with authorization and master location information.
 
+   
  6.3 now we can start scheduler service via [scheduler service file] (./init/kube-scheduler.service)
 
 **Untill now all master services are started, since in most cases, master can also be node role, so next step we will configure kubelte and kube-proxy service to provide node function**
+
+**7. (optional) start kubelet service.**
+
+ 7.1 set the conf file /etc/kubernetes/kubelet.conf
+    
+   * at this point, the node role is co-exist with master node, so the conf is same with admin.conf, we can just copy admin.conf to kubelet.conf
+
+ 7.2 command and parameters to start kubelet service. 
+   
+   ```shell
+   # /usr/bin/kubelet --kubeconfig=/etc/kubernetes/kubelet.conf --require-kubeconfig=true --allow-privileged=true \
+   --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin \
+   --cluster-dns=10.96.0.10 --cluster-domain=cluster.local
+   ```
+
+   explanation
+
+   * ``` --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin```: we should use third-party plugins to provide the network function, later we will deploy calico plugin with pod.
+
+
+  * ``` --cluster-dns=10.96.0.10 --cluster-domain=cluster.local```: this setting is related with the cluster internal DNS setting, we will deploy the DNS pod after calico is deployed. 
+
+ 7.3 now we can use [kubelet.service](./init/kubelet.service) to start kubelet 
+
+**8. (optional) start kube-proxy service .**
+ 
+ 8.1 for simplistic, this service is to make TCP,UDP stream forwarding or round robin TCP,UDP forwarding accross the cluster.
+ 
+ 8.2 command and parameters used to start kube-proxy service
+
+   ```shell
+   #/usr/bin/hyperkube proxy --kubeconfig=/etc/kubernetes/kubelet.conf --master=https://192.168.49.141:6443
+   ```
+ 8.3 now we can start kube-proxy by [kube-proxy.service](./init/kube-proxy.service)

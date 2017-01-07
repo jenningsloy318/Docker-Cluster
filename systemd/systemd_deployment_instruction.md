@@ -23,7 +23,6 @@ Preparation before install:
 --
 
 
-Compoents selections:
 
 1. Network : CNI model with calico plugin, in the nework area, there are IP ranges: 	 
 
@@ -261,7 +260,7 @@ Installation
  4.1 command and parameters used when starting apiserver service
    
    ```shell  
-   /usr/bin/hyperkube apiserver \
+   #/usr/bin/hyperkube apiserver \
    --insecure-bind-address=127.0.0.1 \
    --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,ResourceQuota \
    --service-cluster-ip-range=10.96.0.0/12 \
@@ -292,4 +291,60 @@ Installation
  
  4.2 apiserver service listen at two ports  default, one it http://localhost:8080, which is not encrypted; so when other services running on the same master, it can use this endpoint, the other is https://{external_IP}:6443, whose connections are encrypted by TLS, it serves other node and services securely. 
 
- 4.3 now we use the systemd service file [kube-apiservice.service](./init/kube-apiserver.service)
+ 4.3 now we use the systemd service file [kube-apiservice.service](./init/kube-apiserver.service) to start apiserver service.
+
+5. start controller-manager service.
+ 
+ 5.1 prepare the configuration file located  at /etc/kubernetes/admin.conf which can be passed to it via  ```--kubeconfig=```. This file contains the   authorization and master location information.
+   
+   * setup the cluster info 
+
+   ```shell
+   #kubectl config set-cluster kubernetes --certificate-authority=/etc/kubernetes/pki/ca.pem --embed-certs=true --server=https://192.168.49.141:6443 --kubeconfig=/etc/kubernetes/admin.conf
+   ```
+
+   * set admin user and context
+   
+   ```shell
+   # kubectl config set-credentials admin --client-certificate=/etc/kubernetes/pki/apiserver.pem --client-key=/etc/kubernetes/pki/apiserver-key.pem --embed-certs=true  --kubeconfig=/etc/kubernetes/admin.conf
+   # kubectl config set-context admin@kubernetes --cluster=kubernetes --user=admin  --kubeconfig
+   ```
+
+   * set kubelet user and context
+   
+   ```shell
+   # kubectl config set-credentials kubelet --client-certificate=/etc/kubernetes/pki/apiserver.pem --client-key=/etc/kubernetes/pki/apiserver-key.pem --embed-certs=true  --kubeconfig=/etc/kubernetes/admin.conf
+   # kubectl config set-context kubelet@kubernetes --cluster=kubernetes --user=kubelet  --kubeconfig=/etc/kubernetes/admin.conf
+   ```
+
+   * set current context 
+
+   ```shell
+   # kubectl config  use-context admin@kubernetes  --kubeconfig=/etc/kubernetes/admin.conf
+   ```
+ 5.2  command and  parameters used in starting controller-manager
+  
+   ```shell
+    #/usr/bin/hyperkube controller-manager \
+   --leader-elect --master=http://localhost:8080 \
+   --cluster-name=kubernetes \
+   --root-ca-file=/etc/kubernetes/pki/ca.pem \
+   --service-account-private-key-file=/etc/kubernetes/pki/apiserver-key.pem \
+   --cluster-signing-cert-file=/etc/kubernetes/pki/ca.pem \
+   --cluster-signing-key-file=/etc/kubernetes/pki/ca-key.pem \
+   --kubeconfig=/etc/kubernetes/admin.conf \
+   --v=5  
+   ```
+
+   explanation: 
+
+   * ```--root-ca-file=/etc/kubernetes/pki/ca.pem ``` : This **root certificate authority** will be included in service account's token secret. This must be a valid PEM-encoded CA bundle.
+
+   * ```--cluster-signing-cert-file=/etc/kubernetes/pki/ca.pem ```: Filename containing a PEM-encoded X509 **CA certificate** used to issue cluster-scoped certificates.
+   * ```--cluster-signing-key-file=/etc/kubernetes/pki/ca-key.pem```: Filename containing a PEM-encoded RSA or ECDSA **private key** used to sign cluster-scoped certificates
+   * ```--kubeconfig=/etc/kubernetes/admin.conf```: kubeconfig file with authorization and master location information.
+ 
+ 5.3 now we can use [kube-controller-manager.service](./init/kube-contorller-manager.service) to start controller-manager service.
+
+
+

@@ -293,7 +293,7 @@ Installation
 
  4.3 now we use the systemd service file [kube-apiservice.service](./init/kube-apiserver.service) to start apiserver service.
 
-5. start controller-manager service.
+**5. start controller-manager service.**
  
  5.1 prepare the configuration file located  at /etc/kubernetes/admin.conf which can be passed to it via  ```--kubeconfig=```. This file contains the   authorization and master location information.
    
@@ -347,4 +347,25 @@ Installation
  5.3 now we can use [kube-controller-manager.service](./init/kube-contorller-manager.service) to start controller-manager service.
 
 
+**6. start scheduler service**
+ 
+ 6.1 prepare the confi file, this file is identical  with the one used in controller-manager service.
 
+ 6.2 command and parameters used to start scheduler service
+   
+   ```shell
+   /usr/bin/hyperkube scheduler \
+   --master=http://localhost:8080 \
+   --leader-elect=true \
+   --kubeconfig=/etc/kubernetes/admin.conf \
+   --v=2 
+   ```
+
+   explanation
+
+   * ```--master=http://localhost:8080```: is the address of apiserver endpoint
+   * ```--kubeconfig=/etc/kubernetes/admin.conf```: kubeconfig file with authorization and master location information.
+
+ 6.3 now we can start scheduler service via [scheduler service file] (./init/kube-scheduler.service)
+
+**Untill now all master services are started, since in most cases, master can also be node role, so next step we will configure kubelte and kube-proxy service to provide node function**

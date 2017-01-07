@@ -404,3 +404,184 @@ Installation
    #/usr/bin/hyperkube proxy --kubeconfig=/etc/kubernetes/kubelet.conf --master=https://192.168.49.141:6443
    ```
  8.3 now we can start kube-proxy by [kube-proxy.service](./init/kube-proxy.service)
+
+
+**9. now this cluster is up without network plugin, as I mentioned earlier, I will install calico plugin to provide the networking.**
+  
+  From the homepage of calico, there are several deployment types. here I choose [Standard Hosted Install](http://docs.projectcalico.org/v2.0/getting-started/kubernetes/installation/hosted/hosted)
+
+  the only thing which need to chagne is ```etcd_endpoints: https://192.168.49.141:6443``` in calico.yaml, and then create it. 
+  
+  ```shell 
+  # wget http://docs.projectcalico.org/v2.0/getting-started/kubernetes/installation/hosted/calico.yaml
+  
+  change the etcd_endpoints value
+  
+  # kubectl apply -f calico.yaml
+  ```
+  all pods and networkpolicies will be deployed without any errors, although  below dns may be not correctly resolved, but after DNS is resolved, it will be ok. actually this name will resolved to ```10.96.0.1```, the first IP of service cluster.
+  
+  ```yaml
+   - name: K8S_API
+     value: "https://kubernetes.default:443"
+  ```
+
+  next step is to deploy kubeDNS
+
+**10. install kubeDNS in kubernetes cluster to provide internal dns parse. 
+
+ 10.1 since we don't bring up kubeDNS with kubernetes cluster, we need to deploy it seperately, first we need to prepar the pod. I got the pod definination from [coreos install addons](https://coreos.com/kubernetes/docs/latest/deploy-addons.html)
+   
+   The content of the file ```dns-addon.yml```, we need to modify ```${DNS_SERVICE_IP}``` to an address we'd like to set the pod , for example ```10.96.0.10```.
+
+   ```yaml
+
+   apiVersion: v1
+   kind: Service
+   metadata:
+     name: kube-dns
+     namespace: kube-system
+     labels:
+       k8s-app: kube-dns
+       kubernetes.io/cluster-service: "true"
+       kubernetes.io/name: "KubeDNS"
+   spec:
+     selector:
+       k8s-app: kube-dns
+     clusterIP: 10.96.0.10
+     ports:
+     - name: dns
+       port: 53
+       protocol: UDP
+     - name: dns-tcp
+       port: 53
+       protocol: TCP
+   
+   
+   ---
+   
+   
+   apiVersion: v1
+   kind: ReplicationController
+   metadata:
+     name: kube-dns-v20
+     namespace: kube-system
+     labels:
+       k8s-app: kube-dns
+       version: v20
+       kubernetes.io/cluster-service: "true"
+   spec:
+     replicas: 1
+     selector:
+       k8s-app: kube-dns
+       version: v20
+     template:
+       metadata:
+         labels:
+           k8s-app: kube-dns
+           version: v20
+         annotations:
+           scheduler.alpha.kubernetes.io/critical-pod: ''
+           scheduler.alpha.kubernetes.io/tolerations: '[{"key":"CriticalAddonsOnly", "operator":"Exists"}]'
+       spec:
+         containers:
+         - name: kubedns
+           image: gcr.io/google_containers/kubedns-amd64:1.8
+           resources:
+             limits:
+               memory: 170Mi
+             requests:
+               cpu: 100m
+               memory: 70Mi
+           livenessProbe:
+             httpGet:
+               path: /healthz-kubedns
+               port: 8080
+               scheme: HTTP
+             initialDelaySeconds: 60
+             timeoutSeconds: 5
+             successThreshold: 1
+             failureThreshold: 5
+           readinessProbe:
+             httpGet:
+               path: /readiness
+               port: 8081
+               scheme: HTTP
+             initialDelaySeconds: 3
+             timeoutSeconds: 5
+           args:
+           - --domain=cluster.local.
+           - --dns-port=10053
+           ports:
+           - containerPort: 10053
+             name: dns-local
+             protocol: UDP
+           - containerPort: 10053
+             name: dns-tcp-local
+             protocol: TCP
+         - name: dnsmasq
+           image: gcr.io/google_containers/kube-dnsmasq-amd64:1.4
+           livenessProbe:
+             httpGet:
+               path: /healthz-dnsmasq
+               port: 8080
+               scheme: HTTP
+             initialDelaySeconds: 60
+             timeoutSeconds: 5
+             successThreshold: 1
+             failureThreshold: 5
+           args:
+           - --cache-size=1000
+           - --no-resolv
+           - --server=127.0.0.1#10053
+           - --log-facility=-
+           ports:
+           - containerPort: 53
+             name: dns
+             protocol: UDP
+           - containerPort: 53
+             name: dns-tcp
+             protocol: TCP
+         - name: healthz
+           image: gcr.io/google_containers/exechealthz-amd64:1.2
+           resources:
+             limits:
+               memory: 50Mi
+             requests:
+               cpu: 10m
+               memory: 50Mi
+           args:
+           - --cmd=nslookup kubernetes.default.svc.cluster.local 127.0.0.1 >/dev/null
+           - --url=/healthz-dnsmasq
+           - --cmd=nslookup kubernetes.default.svc.cluster.local 127.0.0.1:10053 >/dev/null
+           - --url=/healthz-kubedns
+           - --port=8080
+           - --quiet
+           ports:
+           - containerPort: 8080
+             protocol: TCP
+         dnsPolicy: Default
+    ```
+ 
+ 10.2 we can create it with ```kubectl crate -f dns-addon.yml```
+
+ 10.3 check the pod 
+   
+
+   ```shell
+   # kubectl get pod -n kube-system  -o wide
+   NAME                                        READY     STATUS    RESTARTS   AGE       IP               NODE
+   kube-dns-v20-hvbbz                          3/3       Running   3          1d        192.168.9.77     kube-node1
+   ```
+
+ 10.4 check the service 
+  
+   ```shell
+   #kubectl get svc -n kube-system  -o wide
+   NAME                   CLUSTER-IP       EXTERNAL-IP   PORT(S)         AGE       SELECTOR
+   kube-dns               10.96.0.10       <none>        53/UDP,53/TCP   1d        k8s-app=kube-dns
+   ```
+
+   
+   
+       

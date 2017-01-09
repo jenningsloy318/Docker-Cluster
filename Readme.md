@@ -7,6 +7,6 @@ Introduction
 
    This is a big step of thinking how to make a sophisticated system, "copy" is not a bad idea, I chose a mirror to make me understand in-depth.  I summarized all the steps and problems during this procedure. finally I will also try to build such cluster in dockerized way through pod/kubelet.
     
-   Ways of building kubernetes cluster:
+   There are at least three docker orchestrations, I will try them one by one to do a whole test. 
 
-   * [Build kubernetes with systemd](./systemd)
+   * [Kubernetes](./Kubernetes)

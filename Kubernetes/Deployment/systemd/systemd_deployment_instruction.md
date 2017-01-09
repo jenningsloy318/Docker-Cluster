@@ -307,7 +307,7 @@ Installation
    
    ```shell
    # kubectl config set-credentials admin --client-certificate=/etc/kubernetes/pki/apiserver.pem --client-key=/etc/kubernetes/pki/apiserver-key.pem --embed-certs=true  --kubeconfig=/etc/kubernetes/admin.conf
-   # kubectl config set-context admin@kubernetes --cluster=kubernetes --user=admin  --kubeconfig
+   # kubectl config set-context admin@kubernetes --cluster=kubernetes --user=admin  --kubeconfig=/etc/kubernetes/admin.conf
    ```
 
    * set kubelet user and context

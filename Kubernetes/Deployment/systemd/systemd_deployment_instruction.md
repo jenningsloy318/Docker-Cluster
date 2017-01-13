@@ -79,6 +79,60 @@ Authentication in Kubernetes:
 6. Authentications used in kubernetes
     * we should create basic auth, with user/password to provide the login to dashboard.
     * service account is mandatory as described in preceeding section.
+    
+
+
+
+Docker-engine
+  
+  * install the binary
+
+  ```shell
+
+  #apt-key adv  --keyserver hkp://ha.pool.sks-keyservers.net:80  --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+  #echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main"  |tee /etc/apt/sources.list.d/docker.list
+  #apt update && apt install docker-engine -y
+  ```shell
+
+  * modify the docker service file, add ```-g /data/docker```and proxy if necessary. ```Environment="HTTP_PROXY=http://proxy:8080/"```, then restart docker service.
+
+  ```shell
+  # cat docker.service
+
+  [Unit]
+  Description=Docker Application Container Engine
+  Documentation=https://docs.docker.com
+  After=network.target docker.socket
+
+  [Service]
+  Type=notify
+  # the default is not to use systemd for cgroups because the delegate issues still
+  # exists and systemd currently does not support the cgroup feature set required
+  # for containers run by docker
+
+  Environment="HTTP_PROXY=http://proxy:8080/"
+  ExecStart=/usr/bin/dockerd -H fd:// -g /data/docker
+  ExecReload=/bin/kill -s HUP $MAINPID
+  # Having non-zero Limit*s causes performance problems due to accounting overhead
+  # in the kernel. We recommend using cgroups to do container-local accounting.
+  LimitNOFILE=infinity
+  LimitNPROC=infinity
+  LimitCORE=infinity
+  # Uncomment TasksMax if your systemd version supports it.
+  # Only systemd 226 and above support this version.
+  TasksMax=infinity
+  TimeoutStartSec=0
+  # set delegate yes so that systemd does not reset the cgroups of docker containers
+  Delegate=yes
+  # kill only the docker process, not all processes in the cgroup
+  KillMode=process
+
+  [Install]
+  WantedBy=multi-user.target
+
+  # systemctl daemon-reload
+  # systemctl restart docker
+  ```
 
 
 
@@ -161,7 +215,7 @@ Installation
    then copy all binaries to /usr/bin on master and node 
 
   1.2 get etcd binary
-​    
+
 ```shell
    # wget https://github.com/coreos/etcd/releases/download/v3.0.15/etcd-v3.0.15-linux-amd64.tar.gz
    #tar xf etcd-v3.0.15-linux-amd64.tar.gz
@@ -246,7 +300,7 @@ Installation
 * Create sign request for apiserver key
 
 ```shell
-            # penssl req -new -key apiserver-key.pem -out apiserver.csr -subj "/CN=kube-apiserver" -config openssl.cnf
+            # openssl req -new -key apiserver-key.pem -out apiserver.csr -subj "/CN=kube-apiserver" -config openssl.cnf
 ```
 
 * Sign apiserver key
@@ -271,6 +325,7 @@ Installation
    --client-ca-file=/etc/kubernetes/pki/ca.pem \
    --tls-cert-file=/etc/kubernetes/pki/apiserver.pem \
    --tls-private-key-file=/etc/kubernetes/pki/apiserver-key.pem \
+   --basic-auth-file=/etc/kubernetes/pki/basic.csv \
    --token-auth-file=/etc/kubernetes/pki/tokens.csv \
    --secure-port=6443 \
    --allow-privileged \
@@ -282,14 +337,15 @@ Installation
 ```
    explanation: 
 
-* ```--admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,ResourceQuota ``` : determine the admission control to access apiserver;
-* ```--service-cluster-ip-range=10.96.0.0/12 ```: define the service cluster IP pool,this is mentioned in the openssl,cnf, its first IP(10.96.0.1) is the value of IP.1 ;
+   * ```--admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,ResourceQuota ``` : determine the admission control to access apiserver;
+   * ```--service-cluster-ip-range=10.96.0.0/12 ```: define the service cluster IP pool,this is mentioned in the openssl,cnf, its first IP(10.96.0.1) is the value of IP.1 ;
    * ```--client-ca-file=/etc/kubernetes/pki/ca.pem ```: CA cert use for signning client certificate, not the ca priviate key or public key;
    * ```--tls-cert-file=/etc/kubernetes/pki/apiserver.pem ```: server certificate
    * ```--tls-private-key-file=/etc/kubernetes/pki/apiserver-key.pem ```: server priviate key
    * ```--token-auth-file=/etc/kubernetes/pki/tokens.csv ```: token authentication
    * ```--etcd-servers=http://127.0.0.1:2379```: **etcd server endpoint**, it is very important;
-   * ```--advertise-address=192.168.49.135```:  the IP address on which to advertise the apiserver to members of the cluster.
+   * ```--advertise-address=192.168.49.141```:  the IP address on which to advertise the apiserver to members of the cluster.
+   * ```--basic-auth-file=/etc/kubernetes/pki/basic.csv```: the basic authentication
 
 
  4.2 apiserver service listen at two ports  default, one it http://localhost:8080, which is not encrypted; so when other services running on the same master, it can use this endpoint, the other is https://{external_IP}:6443, whose connections are encrypted by TLS, it serves other node and services securely. 

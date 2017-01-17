@@ -85,17 +85,15 @@ Authentication in Kubernetes:
 
 Docker-engine
   
-  * install the binary
+  1 install the binary
 
   ```shell
+  #wget https://experimental.docker.com/builds/Linux/x86_64/docker-1.12.5.tgz
+  #tar xvf docker-1.12.5.tgz
+  #mv docker/* /usr/bin/
+  ```
 
-  #apt-key adv  --keyserver hkp://ha.pool.sks-keyservers.net:80  --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-  #echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main"  |tee /etc/apt/sources.list.d/docker.list
-  #apt update && apt install docker-engine -y
-  
-  ```shell
-
-  * modify the docker service file, add ```-g /data/docker```and proxy if necessary. ```Environment="HTTP_PROXY=http://proxy:8080/"```, then restart docker service.
+  2 modify the docker service file, add ```-g /data/docker```and proxy if necessary. ```Environment="HTTP_PROXY=http://proxy:8080/"```, then restart docker service.
 
   ```shell
 

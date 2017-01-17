@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ name: kubernetes-dashboard-ingress
+spec:
+ rules:
+   - host: kube-master
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: kubernetes-dashboard
+             servicePort: 80
+

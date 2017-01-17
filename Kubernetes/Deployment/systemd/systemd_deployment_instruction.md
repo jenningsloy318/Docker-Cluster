@@ -92,11 +92,13 @@ Docker-engine
   #apt-key adv  --keyserver hkp://ha.pool.sks-keyservers.net:80  --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
   #echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main"  |tee /etc/apt/sources.list.d/docker.list
   #apt update && apt install docker-engine -y
+  
   ```shell
 
   * modify the docker service file, add ```-g /data/docker```and proxy if necessary. ```Environment="HTTP_PROXY=http://proxy:8080/"```, then restart docker service.
 
   ```shell
+
   # cat docker.service
 
   [Unit]
@@ -397,9 +399,9 @@ Installation
 
    explanation: 
 
-* ```--root-ca-file=/etc/kubernetes/pki/ca.pem ``` : This **root certificate authority** will be included in service account's token secret. This must be a valid PEM-encoded CA bundle.
+   * ```--root-ca-file=/etc/kubernetes/pki/ca.pem ``` : This **root certificate authority** will be included in service account's token secret. This must be a valid PEM-encoded CA bundle.
 
-* ```--cluster-signing-cert-file=/etc/kubernetes/pki/ca.pem ```: Filename containing a PEM-encoded X509 **CA certificate** used to issue cluster-scoped certificates.
+   * ```--cluster-signing-cert-file=/etc/kubernetes/pki/ca.pem ```: Filename containing a PEM-encoded X509 **CA certificate** used to issue cluster-scoped certificates.
    * ```--cluster-signing-key-file=/etc/kubernetes/pki/ca-key.pem```: Filename containing a PEM-encoded RSA or ECDSA **private key** used to sign cluster-scoped certificates
    * ```--kubeconfig=/etc/kubernetes/admin.conf```: kubeconfig file with authorization and master location information.
 
@@ -501,138 +503,7 @@ Installation
 
  10.1 since we don't bring up kubeDNS with kubernetes cluster, we need to deploy it seperately, first we need to prepar the pod. I got the pod definination from [coreos install addons](https://coreos.com/kubernetes/docs/latest/deploy-addons.html)
 
-   The content of the file ```dns-addon.yml```, we need to modify ```${DNS_SERVICE_IP}``` to an address we'd like to set the pod , for example ```10.96.0.10```.
-
-```yaml
-
-   apiVersion: v1
-   kind: Service
-   metadata:
-     name: kube-dns
-     namespace: kube-system
-     labels:
-       k8s-app: kube-dns
-       kubernetes.io/cluster-service: "true"
-       kubernetes.io/name: "KubeDNS"
-   spec:
-     selector:
-       k8s-app: kube-dns
-     clusterIP: 10.96.0.10
-     ports:
-     - name: dns
-       port: 53
-       protocol: UDP
-     - name: dns-tcp
-       port: 53
-       protocol: TCP
-   
-   
-   ---
-   
-   
-   apiVersion: v1
-   kind: ReplicationController
-   metadata:
-     name: kube-dns-v20
-     namespace: kube-system
-     labels:
-       k8s-app: kube-dns
-       version: v20
-       kubernetes.io/cluster-service: "true"
-   spec:
-     replicas: 1
-     selector:
-       k8s-app: kube-dns
-       version: v20
-     template:
-       metadata:
-         labels:
-           k8s-app: kube-dns
-           version: v20
-         annotations:
-           scheduler.alpha.kubernetes.io/critical-pod: ''
-           scheduler.alpha.kubernetes.io/tolerations: '[{"key":"CriticalAddonsOnly", "operator":"Exists"}]'
-       spec:
-         containers:
-         - name: kubedns
-           image: gcr.io/google_containers/kubedns-amd64:1.8
-           resources:
-             limits:
-               memory: 170Mi
-             requests:
-               cpu: 100m
-               memory: 70Mi
-           livenessProbe:
-             httpGet:
-               path: /healthz-kubedns
-               port: 8080
-               scheme: HTTP
-             initialDelaySeconds: 60
-             timeoutSeconds: 5
-             successThreshold: 1
-             failureThreshold: 5
-           readinessProbe:
-             httpGet:
-               path: /readiness
-               port: 8081
-               scheme: HTTP
-             initialDelaySeconds: 3
-             timeoutSeconds: 5
-           args:
-           - --domain=cluster.local.
-           - --dns-port=10053
-           ports:
-           - containerPort: 10053
-             name: dns-local
-             protocol: UDP
-           - containerPort: 10053
-             name: dns-tcp-local
-             protocol: TCP
-         - name: dnsmasq
-           image: gcr.io/google_containers/kube-dnsmasq-amd64:1.4
-           livenessProbe:
-             httpGet:
-               path: /healthz-dnsmasq
-               port: 8080
-               scheme: HTTP
-             initialDelaySeconds: 60
-             timeoutSeconds: 5
-             successThreshold: 1
-             failureThreshold: 5
-           args:
-           - --cache-size=1000
-           - --no-resolv
-           - --server=127.0.0.1#10053
-           - --log-facility=-
-           ports:
-           - containerPort: 53
-             name: dns
-             protocol: UDP
-           - containerPort: 53
-             name: dns-tcp
-             protocol: TCP
-         - name: healthz
-           image: gcr.io/google_containers/exechealthz-amd64:1.2
-           resources:
-             limits:
-               memory: 50Mi
-             requests:
-               cpu: 10m
-               memory: 50Mi
-           args:
-           - --cmd=nslookup kubernetes.default.svc.cluster.local 127.0.0.1 >/dev/null
-           - --url=/healthz-dnsmasq
-           - --cmd=nslookup kubernetes.default.svc.cluster.local 127.0.0.1:10053 >/dev/null
-           - --url=/healthz-kubedns
-           - --port=8080
-           - --quiet
-           ports:
-           - containerPort: 8080
-             protocol: TCP
-         dnsPolicy: Default
-```
-
-
+   The [dns-addon.yml](./addons/dns-addon.yml), we need to modify ```${DNS_SERVICE_IP}``` to an address we'd like to set the pod , for example ```10.96.0.10```.
 
  10.2  we can create it with 
 
@@ -669,7 +540,7 @@ Installation
             kubernetes.io/hostname: kube-master
      ```
 
-*    also want to use a dedicated port  and IP(I ada another IP on master) for dashboard servie, modify ```service```section.
+*    also want to use a dedicated port  and IP(added another IP on master) for dashboard servie, modify ```service```section.
 
      ```yaml
          
@@ -812,3 +683,41 @@ Installation
  kube-node1   Ready     25m
 ```
 
+**Ingress configuration**
+
+  *Kubernetes has several ways to expose the service to outside.*
+
+*1. Nodeport: as we discussed in the ```dashboard``` section, use ```Nodeport``` plus ```externalIPs```to expose the service, and this can be integreated with outside loadbalancer*
+
+*2. we can also use ingres to expose the services.*
+   
+  2.1 for details about ingress, refer to [kubernetes userguide](https://kubernetes.io/docs/user-guide/ingress/) and [ingress github](https://github.com/kubernetes/ingress)
+
+
+  2.2 since we have some special demands about the ingress, we need to change the some default settings in nginx, so we create [nginx.tmpl](./ingress/nginx.tmpl).
+
+  2.3 create the configmap for it  
+   
+  ```shell
+  # kubectl create configmap nginx-template --from-file=nginx.tmpl=./nginx.tmpl
+  ```
+
+  2.4 create [default-backend](./ingress/default-backend.yaml) for ingress controller. 
+   
+   ```shell
+   # kubecte create -f default-backend.yaml
+   ```
+  2.5 create [ingress controller](./ingress/nginx-ingress-controller.yaml) 
+    
+   ```shell
+   # kubectl create -f nginx-ingress-controller.yaml
+   ```
+
+   2.6 create [dashboard ingress](./ingress/dashboard-ingress.yaml) 
+
+   ```yaml
+   # kubectl create -f dashboard-ingress.yaml
+   ```
+    
+   
+   now we can access dashboard via ```http://kube-node1/``` ![dashboard](./img/dashboard2.png)

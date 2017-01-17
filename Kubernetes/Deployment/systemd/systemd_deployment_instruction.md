@@ -102,7 +102,6 @@ Docker-engine
   [Unit]
   Description=Docker Application Container Engine
   Documentation=https://docs.docker.com
-  After=network.target docker.socket
 
   [Service]
   Type=notify
@@ -111,7 +110,7 @@ Docker-engine
   # for containers run by docker
 
   Environment="HTTP_PROXY=http://proxy:8080/"
-  ExecStart=/usr/bin/dockerd -H fd:// -g /data/docker
+  ExecStart=/usr/bin/dockerd  -g /data/docker
   ExecReload=/bin/kill -s HUP $MAINPID
   # Having non-zero Limit*s causes performance problems due to accounting overhead
   # in the kernel. We recommend using cgroups to do container-local accounting.

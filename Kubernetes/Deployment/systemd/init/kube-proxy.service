@@ -2,7 +2,7 @@
 Description=kubelet service
 
 [Service]
-ExecStart=/usr/bin/hyperkube proxy --kubeconfig=/etc/kubernetes/kubelet.conf --master=https://192.168.49.141:6443
+ExecStart=/usr/bin/hyperkube proxy --kubeconfig=/etc/kubernetes/kubelet.conf  --cluster-cidr=192.168.0.0/16
 
 [Install]
 WantedBy=multi-user.target

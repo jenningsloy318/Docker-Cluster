@@ -13,9 +13,6 @@ KUBERNETES_DOWNLOAD_URL_PREFIX="${KUBERNETES_RELEASE_URL}/${KUBERNETES_RELEASE}"
 SERVER_PLATFORM="linux"
 SERVER_ARCH="amd64"
 
-ETCD_RELEASE=v3.0.15
-ETCD_RELEASE_URL="${ETCD_URL_PREFIX:-https://github.com/coreos/etcd/releases/download}"
-ETCD_DOWNLOAD_URL_PREFIX="${ETCD_RELEASE_URL}/${ETCD_RELEASE}"
 
 function download_tarball() {
   local -r download_path="$1"
@@ -31,7 +28,6 @@ function download_tarball() {
     echo "Couldn't find curl or wget.  Bailing out." >&2
     exit 4
   fi
-  # TODO: add actual verification
 }
 
 
@@ -59,4 +55,4 @@ tar xvf ${KUBE_ROOT}/${SERVER_TAR}   --exclude="*.tar"   --exclude="*.docker_tag
 ## copy binary to /usr/bin
 
 cp ${KUBE_ROOT}/server/* /usr/bin/
-curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/    kubectl -o /usr/bin/kubectl
+curl -LO https://storage.googleapis.com/kubernetes-release/release/${KUBERNETES_RELEASE}/bin/linux/amd64/kubectl -o /usr/bin/kubectl && chmod +x /usr/bin/kubectl

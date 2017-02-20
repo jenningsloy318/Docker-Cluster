@@ -6,7 +6,7 @@ server {
 upstream apiservers {
     
     {% for host  in MASTER_HOSTS %}
-    server https://{{ host }}:6443;
+    server {{ host }}:6443;
     {% endfor %}
 
 }

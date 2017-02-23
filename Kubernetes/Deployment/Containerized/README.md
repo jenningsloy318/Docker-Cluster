@@ -35,6 +35,8 @@ This time I deploy a tree-master and one loadbalancer k8s cluster.
 
 3. Setup a loadbalancer reverse-proxy 3 apiservers, expose only one apiserver endpoint to all cluster, other component(kubelet service) can talk to this loadbalancer eventually communitating to actual apiserver. and also setup a etcd-proxy to connect to etcd cluster also exposing one etcd endpoint, which used in calico to store all network info. 
    apiserver proxy is setup with tcp stream proxy, and etcd-proxy is stup with etcd software with ```proxy: 'on'```, don't forget the single quotation(```'```). I encontered failed without it.
+    
+     
+4. for kublet.service, sometimes when add ```--hostname-override=```  to a readable name is very useful to distinguish each sever when we are running k8s in a cloud, inside the cloud the hostname of each VM is not easy to remember. 
 
-
-
+5.  for apiserver service running in pod, it is esential to set ```--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname```, thus when we issue kubectl commands, it will not to lookup the ip address of each node.  

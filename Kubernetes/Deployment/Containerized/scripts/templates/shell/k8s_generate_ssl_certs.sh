@@ -26,7 +26,7 @@ create_self_sign_apiserver_cert(){
 
 
 create_basic_auth_file(){
-    echo  "kubernetes,admin,admin" > basic-auth.csv
+    echo  "kubernetes,admin,admin" > basic_auth.csv
 }
 
 create_token_auth_file(){

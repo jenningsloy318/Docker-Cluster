@@ -316,7 +316,7 @@ Installation
               ```
     3.3  if we want to create other service account key, repeat step 2. 
 
-    3.4 All of these key and cert are stored in /etc/kubernetes/pki. 
+    3.4  All of these key and cert are stored in /etc/kubernetes/pki. 
 
 **4 start apiserver service**. 
 
@@ -344,13 +344,21 @@ Installation
         explanation: 
 
         * ```--tls-cert-file=/etc/kubernetes/pki/apiserver.pem ``` and ```--tls-private-key-file=/etc/kubernetes/pki/apiserver-key.pem```: used for secure the connection between apiserver and client, which is https.
+        
         * ```--admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,ResourceQuota ``` : determine the admission control to access apiserver;
+        
         * ```--service-cluster-ip-range=10.96.0.0/12 ```: define the service cluster IP pool,this is mentioned in the openssl,cnf, its first IP(10.96.0.1) is the value of IP.1 ;
+        
         * ```--client-ca-file=/etc/kubernetes/pki/ca.pem ```: CA cert use for signning client certificate, not the ca priviate key or public key, used when certificate authentication is enabled
+        
         * ```--token-auth-file=/etc/kubernetes/pki/tokens.csv ```: token authentication
+        
         * ```--basic-auth-file=/etc/kubernetes/pki/basic.csv```: the basic authentication
+        
         * ```--service-account-key-file=/etc/kubernetes/pki/apiserver-key.pem``` combined with  ```ServiceAccount```in ```--admission-control``` will enable service account authentication.  
+        
         * ```--etcd-servers=http://127.0.0.1:2379```: **etcd server endpoint**, it is very important;
+        
         * ```--advertise-address=192.168.49.141```:  the IP address on which to advertise the apiserver to members of the cluster.
         
     4.2 apiserver service listen at two ports  default, one it http://localhost:8080, which is not encrypted; so when other services running on the same master, it can use this endpoint, the other is https://{external_IP}:6443, whose connections are encrypted by TLS, it serves other node and services securely. 
@@ -360,27 +368,30 @@ Installation
 **5 start controller-manager service.**
 
 
-    5.1  command and  parameters used in starting controller-manager
+    5.1 command and  parameters used in starting controller-manager
 
-    ```shell
-    #/usr/bin/hyperkube controller-manager \
-    --leader-elect \
-    --master=http://localhost:8080 \
-    --cluster-name=kubernetes \
-    --root-ca-file=/etc/kubernetes/pki/ca.pem \
-    --service-account-private-key-file=/etc/kubernetes/pki/apiserver-key.pem \
-    --cluster-signing-cert-file=/etc/kubernetes/pki/ca.pem \
-    --cluster-signing-key-file=/etc/kubernetes/pki/ca-key.pem \
-    --v=5  
-    ```
+        ```shell
+        #/usr/bin/hyperkube controller-manager \
+        --leader-elect \
+        --master=http://localhost:8080 \
+        --cluster-name=kubernetes \
+        --root-ca-file=/etc/kubernetes/pki/ca.pem \
+        --service-account-private-key-file=/etc/kubernetes/pki/apiserver-key.pem \
+        --cluster-signing-cert-file=/etc/kubernetes/pki/ca.pem \
+        --cluster-signing-key-file=/etc/kubernetes/pki/ca-key.pem \
+        --v=5  
+        ```
 
-    explanation: 
+        explanation: 
  
-    * ```--root-ca-file=/etc/kubernetes/pki/ca.pem ``` : If set,this **root certificate authority** will be included in service account's token secret. This must be a valid PEM-encoded CA bundle.
- 
-    * ```--cluster-signing-cert-file=/etc/kubernetes/pki/ca.pem ```: Filename containing a PEM-encoded X509 **CA certificate** used to issue cluster-scoped certificates.
-    * ```--cluster-signing-key-file=/etc/kubernetes/pki/ca-key.pem```: Filename containing a PEM-encoded RSA or ECDSA **private key** used to sign cluster-scoped certificates
- 
+      
+        * ```--root-ca-file=/etc/kubernetes/pki/ca.pem ``` : If set,this **root certificate authority** will be included in service account's token secret. This must be a valid PEM-encoded CA bundle.
+    
+      
+        * ```--cluster-signing-cert-file=/etc/kubernetes/pki/ca.pem ```: Filename containing a PEM-encoded X509 **CA certificate** used to issue cluster-scoped certificates.
+       
+        * ```--cluster-signing-key-file=/etc/kubernetes/pki/ca-key.pem```: Filename containing a PEM-encoded RSA or ECDSA **private key** used to sign cluster-scoped certificates
+    
     5.2 now we can use [kube-controller-manager.service](./init/kube-contorller-manager.service) to start controller-manager service.
 
 
@@ -390,16 +401,17 @@ Installation
 
     6.2 command and parameters used to start scheduler service
 
-    ```shell
-    #/usr/bin/hyperkube scheduler \
-    --master=http://localhost:8080 \
-    --leader-elect=true \
-    --v=2 
-    ```
+        ```shell
+        #/usr/bin/hyperkube scheduler \
+        --master=http://localhost:8080 \
+        --leader-elect=true \
+        --v=2 
+        ```
 
-    explanation
+        explanation
 
-    * ```--master=http://localhost:8080```: is the address of apiserver endpoint
+        
+        * ```--master=http://localhost:8080```: is the address of apiserver endpoint
     
     
     6.3 now we can start scheduler service via [scheduler service file] (./init/kube-scheduler.service)
@@ -412,37 +424,37 @@ Installation
     7.1 set the conf file /etc/kubernetes/kubelet.conf,for the master node, we can chose ```--api-servers=127.0.0.1:8080```parameter without authentication. 
 
         7.1.1 setup the cluster info
-
-        ```shell
-        #kubectl config set-cluster kubernetes --certificate-authority=/etc/kubernetes/pki/ca.pem --embed-certs=true --server=https://192.168.49.141:6443 --kubeconfig=/etc/kubernetes/kubelet.conf
-        ```
+   
+              ```shell
+              #kubectl config set-cluster kubernetes --certificate-authority=/etc/kubernetes/pki/ca.pem --embed-certs=true --server=https://192.168.49.141:6443 --kubeconfig=/etc/kubernetes/kubelet.conf
+              ```
         7.1.2 set kubelet user and context
 
-        ```shell
-        # kubectl config set-credentials kubelet --client-certificate=/etc/kubernetes/pki/apiserver.pem --client-key=/etc/kubernetes/pki/apiserver-key.pem --embed-certs=true      --kubeconfig=/etc/kubernetes/kubelet.conf
-        # kubectl config set-context kubelet@kubernetes --cluster=kubernetes --user=kubelet  --kubeconfig=/etc/kubernetes/kubelet.conf
-        ```
+              ```shell
+              # kubectl config set-credentials kubelet --client-certificate=/etc/kubernetes/pki/apiserver.pem --client-key=/etc/kubernetes/pki/apiserver-key.pem --embed-certs=true      --kubeconfig=/etc/kubernetes/kubelet.conf
+              # kubectl config set-context kubelet@kubernetes --cluster=kubernetes --user=kubelet  --kubeconfig=/etc/kubernetes/kubelet.conf
+              ```
 
         7.1.3 set current context
 
-        ```shell
-        # kubectl config  use-context kubelet@kubernetes  --kubeconfig=/etc/kubernetes/kubelet.conf
-        ```
+              ```shell
+              # kubectl config  use-context kubelet@kubernetes  --kubeconfig=/etc/kubernetes/kubelet.conf
+              ```
     7.2 command and parameters to start kubelet service. 
 
-    ```shell
-    # /usr/bin/kubelet --kubeconfig=/etc/kubernetes/kubelet.conf --require-kubeconfig=true --allow-privileged=true \
-    --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin \
-    --cluster-dns=10.96.0.10 --cluster-domain=cluster.local --root-dir=/data/kubelet
-    ```
+        ```shell
+        # /usr/bin/kubelet --kubeconfig=/etc/kubernetes/kubelet.conf --require-kubeconfig=true --allow-privileged=true \
+        --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin \
+        --cluster-dns=10.96.0.10 --cluster-domain=cluster.local --root-dir=/data/kubelet
+        ```
 
-    explanation
+        explanation
 
-    * ``` --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin```: we should use third-party plugins to provide the network function, later we will deploy calico plugin with pod.
+        * ``` --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin```: we should use third-party plugins to provide the network function, later we will deploy calico plugin with pod.
    
    
    
-    * ``` --cluster-dns=10.96.0.10 --cluster-domain=cluster.local```: this setting is related with the cluster internal DNS setting, we will deploy the DNS pod after calico is deployed. 
+        * ``` --cluster-dns=10.96.0.10 --cluster-domain=cluster.local```: this setting is related with the cluster internal DNS setting, we will deploy the DNS pod after calico is deployed. 
    
     7.3 now we can use [kubelet.service](./init/kubelet.service) to start kubelet 
    
@@ -452,18 +464,20 @@ Installation
 
     8.2 command and parameters used to start kube-proxy service
 
-    ```shell
-    #/usr/bin/hyperkube proxy --kubeconfig=/etc/kubernetes/kubelet.conf --master=https://192.168.49.141:6443
-    ```
+    
+        ```shell
+        #/usr/bin/hyperkube proxy --kubeconfig=/etc/kubernetes/kubelet.conf --master=https://192.168.49.141:6443
+        ```
+
     8.3 now we can start kube-proxy by [kube-proxy.service](./init/kube-proxy.service)
 
     8.4 check the node 
 
-    ```shell
-    # kubectl get node
-    NAME         STATUS    AGE
-    kube-master   Ready     1d
-    ```
+        ```shell
+        # kubectl get node
+        NAME         STATUS    AGE
+        kube-master   Ready     1d
+        ```
 
 
 
@@ -473,6 +487,7 @@ Installation
 
     the only thing which need to chagne is ```etcd_endpoints: https://192.168.49.141:6443``` in calico.yaml, and then create it. 
 
+
     ```shell 
     # wget http://docs.projectcalico.org/v2.0/getting-started/kubernetes/installation/hosted/calico.yaml
   
@@ -480,7 +495,9 @@ Installation
   
     # kubectl apply -f calico.yaml
     ```
+
     all pods and networkpolicies will be deployed without any errors, although  below dns may be not correctly resolved, but after DNS is resolved, it will be ok. actually this name will resolved to ```10.96.0.1```, the first IP of service cluster.
+
 
     ```yaml
     - name: K8S_API
@@ -497,26 +514,26 @@ Installation
 
      10.2  we can create it with 
 
-     ```shell
-     kubectl create -f dns-addon.yml
-     ```
+           ```shell
+           kubectl create -f dns-addon.yml
+           ```
 
      10.3 check the pod 
 
 
-     ```shell
-     # kubectl get pod -n kube-system  -o wide
-     NAME                                        READY     STATUS    RESTARTS   AGE       IP               NODE
-     kube-dns-v20-hvbbz                          3/3       Running   3          1d        192.168.9.77     kube-node1
-     ```
+          ```shell
+          # kubectl get pod -n kube-system  -o wide
+          NAME                                        READY     STATUS    RESTARTS   AGE       IP               NODE
+          kube-dns-v20-hvbbz                          3/3       Running   3          1d        192.168.9.77     kube-node1
+          ```
 
      10.4 check the service 
 
-     ```shell
-     #kubectl get svc -n kube-system  -o wide
-     NAME                   CLUSTER-IP       EXTERNAL-IP   PORT(S)         AGE       SELECTOR
-     kube-dns               10.96.0.10       <none>        53/UDP,53/TCP   1d        k8s-app=kube-dns
-     ```
+          ```shell
+          #kubectl get svc -n kube-system  -o wide
+          NAME                   CLUSTER-IP       EXTERNAL-IP   PORT(S)         AGE       SELECTOR
+          kube-dns               10.96.0.10       <none>        53/UDP,53/TCP   1d        k8s-app=kube-dns
+          ```
 
 
 **11 Install dashboard.**
@@ -541,8 +558,8 @@ Installation
              app: kubernetes-dashboard
            name: kubernetes-dashboard
            namespace: kube-system
-         spec:
-           type: NodePort
+      spec:
+        type: NodePort
       ports:
       - port: 80
         targetPort: 9090
@@ -574,18 +591,18 @@ Installation
 
     2.1 command and parameters to start kubelet service. 
   
-    ```shell
-    # /usr/bin/kubelet --kubeconfig=/etc/kubernetes/kubelet.conf --require-kubeconfig=true --allow-privileged=true \
-    --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin \
-    --cluster-dns=10.96.0.10 --cluster-domain=cluster.local --root-dir=/data/kubelet
-    ```
+        ```shell
+        # /usr/bin/kubelet --kubeconfig=/etc/kubernetes/kubelet.conf --require-kubeconfig=true --allow-privileged=true \
+        --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin \
+        --cluster-dns=10.96.0.10 --cluster-domain=cluster.local --root-dir=/data/kubelet
+        ```
 
-    explanation
+        explanation
 
-    * ``` --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin```: we should use third-party plugins to provide the network function, later we will deploy calico plugin with pod.
+        * ``` --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin```: we should use third-party plugins to provide the network function, later we will deploy calico plugin with pod.
 
 
-    * ``` --cluster-dns=10.96.0.10 --cluster-domain=cluster.local```: this setting is related with the cluster internal DNS setting, we will deploy the DNS pod after calico is deployed. 
+        * ``` --cluster-dns=10.96.0.10 --cluster-domain=cluster.local```: this setting is related with the cluster internal DNS setting, we will deploy the DNS pod after calico is deployed. 
 
 
     2.2 now we can use [kubelet-node.service](./init/kubelet-node.service) to start kubelet 
@@ -599,9 +616,9 @@ Installation
     3.2 command and parameters used to start kube-proxy service
 
   
-    ```shell
-    #/usr/bin/hyperkube proxy --kubeconfig=/etc/kubernetes/kubelet.conf --master=https://192.168.49.141:6443
-    ```
+        ```shell
+        #/usr/bin/hyperkube proxy --kubeconfig=/etc/kubernetes/kubelet.conf --master=https://192.168.49.141:6443
+        ```
 
 
     3.3 now we can start kube-proxy by [kube-proxy.service](./init/kube-proxy.service).
@@ -630,27 +647,27 @@ Installation
    2.2 since we have some special demands about the ingress, we need to change the some default settings in nginx, so we create [nginx.tmpl](./ingress/nginx.tmpl).
 
    2.3 create the configmap for it  
-   
-   ```shell
-   # kubectl create configmap nginx-template --from-file=nginx.tmpl=./nginx.tmpl
-   ```
+       
+       ```shell
+       # kubectl create configmap nginx-template --from-file=nginx.tmpl=./nginx.tmpl
+       ```
 
    2.4 create [default-backend](./ingress/default-backend.yaml) for ingress controller. 
     
-   ```shell
-   # kubecte create -f default-backend.yaml
-   ```
+       ```shell
+       # kubecte create -f default-backend.yaml
+       ```
    2.5 create [ingress controller](./ingress/nginx-ingress-controller.yaml) 
-    
-   ```shell
-   # kubectl create -f nginx-ingress-controller.yaml
-   ```
+       
+       ```shell
+       # kubectl create -f nginx-ingress-controller.yaml
+       ```
 
    2.6 create [dashboard ingress](./ingress/dashboard-ingress.yaml) 
-
-   ```yaml
-   # kubectl create -f dashboard-ingress.yaml
-   ```
+   
+       ```yaml
+       # kubectl create -f dashboard-ingress.yaml
+       ```
     
    
-   now we can access dashboard via ```http://kube-node1/``` ![dashboard](./img/dashboard2.png)
+       now we can access dashboard via ```http://kube-node1/``` ![dashboard](./img/dashboard2.png)

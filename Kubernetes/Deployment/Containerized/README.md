@@ -39,4 +39,9 @@ This time I deploy a tree-master and one loadbalancer k8s cluster.
      
 4. for kublet.service, sometimes when add ```--hostname-override=```  to a readable name is very useful to distinguish each sever when we are running k8s in a cloud, inside the cloud the hostname of each VM is not easy to remember. 
 
+
 5.  for apiserver service running in pod, it is esential to set ```--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname```, thus when we issue kubectl commands, it will not to lookup the ip address of each node.  
+
+6.  my script also support to deploy single master k8s, and  has some different parametes in the ```etcd.yaml``` and kubelet service. especially for kubelet service,we'd split them into master and worker node, there are different paramters for the way they connect  to apiserver service. 
+
+

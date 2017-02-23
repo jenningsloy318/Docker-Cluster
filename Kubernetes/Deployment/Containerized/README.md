@@ -34,7 +34,7 @@ This time I deploy a tree-master and one loadbalancer k8s cluster.
      This time we should change the value to ```new``` since  maybe the cluster info is lost, we can re-bootstrap it again.
 
 3. Setup a loadbalancer reverse-proxy 3 apiservers, expose only one apiserver endpoint to all cluster, other component(kubelet service) can talk to this loadbalancer eventually communitating to actual apiserver. and also setup a etcd-proxy to connect to etcd cluster also exposing one etcd endpoint, which used in calico to store all network info. 
-   apiserver proxy is setup with tcp stream proxy, and etcd-proxy is stup with etcd software with ```proxy: 'on'```, don't forget the single quotation(```,```). I encontered failed without it.
+   apiserver proxy is setup with tcp stream proxy, and etcd-proxy is stup with etcd software with ```proxy: 'on'```, don't forget the single quotation(```'```). I encontered failed without it.
 
 
 

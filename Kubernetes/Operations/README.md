@@ -2,7 +2,7 @@
 
 Here I listed the aspects about how to run k8s better.
 
-1. Ingress 
+1. [Ingress](./ingress)
    
    we use Ingress controller and individual ingress rules to expose services. 
 *Kubernetes has several ways to expose the service to outside.*
@@ -11,7 +11,7 @@ Here I listed the aspects about how to run k8s better.
 
    - we can also use ingres to expose the services.
 
-     - for details about ingress, refer to [kubernetes userguide](https://kubernetes.io/docs/user-guide/ingress/) and [ingress github](https://github.com/kubernetes/ingress).
+     - for details about ingress, refer to [kubernetes userguide](https://kubernetes.io/docs/user-guide/ingress/) and [ingress github](https://github.com/kubernetes/ingress) and [ingress configuration](https://github.com/kubernetes/ingress/blob/master/controllers/nginx/configuration.md)
 
      - since we have some special demands about the ingress, we need to change the some default settings in nginx, so we create [nginx.tmpl](./ingress/nginx.tmpl), I changed the default http port to 8080 since 80 port is disabed by fault in our datacenter. 
 
@@ -31,7 +31,7 @@ Here I listed the aspects about how to run k8s better.
          ```sh
          $ kubectl create -f nginx-ingress-controller.yaml
          ```
-
+		 **since ingress controller will watch all namespaces, so we can deploy ingress controller and backend service in any namespces, it will listen other namespaces's requests**
      - create [dashboard ingress](./ingress/dashboard-ingress.yaml)
 
          ```yaml

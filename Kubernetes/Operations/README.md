@@ -38,4 +38,27 @@ Here I listed the aspects about how to run k8s better.
          $ kubectl create -f dashboard-ingress.yaml
          ```
 
+     - basic authentication 
+        
+        - create auth configmap
+
+            ```sh
+            htpasswd -b -c  auth  admin kubernetes
+            kubectl create secret generic dashboard-basic-auth --from-file=auth  -n kube-system
+            ```
+        
+        -  modify the ingress rules  and add 
+            
+            ```yaml
+            metadata:
+             name: kubernetes-dashboard-ingress
+             namespace: kube-system
+             annotations:
+                ingress.kubernetes.io/auth-type: "basic"
+                ingress.kubernetes.io/auth-secret: "dashboard-basic-auth"
+                ingress.kubernetes.io/auth-realm: "Authentication Required, please inpurt user and password"
+            ```
+            
+            now we have to input user and password to get into the dashboard
     now we can access dashboard via ```http://kube-master/```
+

@@ -9,7 +9,7 @@ Here I listed the aspects about how to run k8s better.
 
    - Nodeport: as we discussed in the ```deployment/dashboard``` section, use ```Nodeport``` plus ```externalIPs```to expose the service, and this can be integreated with outside loadbalancer
 
-   -we can also use ingres to expose the services.
+   - we can also use ingres to expose the services.
 
      - for details about ingress, refer to [kubernetes userguide](https://kubernetes.io/docs/user-guide/ingress/) and [ingress github](https://github.com/kubernetes/ingress).
 

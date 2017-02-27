@@ -53,6 +53,8 @@ spec:
       readOnly: true
     - mountPath: /var/log
       name: varlog
+    - mountPath: /data/etcd
+      name: dataetcd
   volumes:
   - hostPath:
       path: /var/etcd/data
@@ -90,3 +92,6 @@ spec:
   - hostPath:
       path: /var/log
     name: varlog
+  - hostPath:
+      path: /data/etcd
+    name: dataetcd

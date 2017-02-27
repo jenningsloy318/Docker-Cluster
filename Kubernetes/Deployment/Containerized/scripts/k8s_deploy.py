@@ -13,6 +13,7 @@ import subprocess
 def create_etcd_cluster_conf(hostIP,name,endpoints,conf):
     etcd_conf_content=open(conf,'w')
     etcd_conf_content.write("name: '%s'\n"%name)
+    etcd_conf_content.write("data-dir: /data/etcd/")
     etcd_conf_content.write("initial-cluster: %s\n"%','.join(endpoints))
     etcd_conf_content.write("initial-advertise-peer-urls: http://%s:2380\n"%hostIP)
     etcd_conf_content.write("initial-cluster-token: etcd-cluster\n")
@@ -36,6 +37,7 @@ def create_etcd_cluster_proxy_conf(endpoints,conf):
 def create_single_etcd_conf(hostIP,conf):
     etcd_conf_content=open(conf,'w')
     etcd_conf_content.write("name: 'default'\n")
+    etcd_conf_content.write("data-dir: /data/etcd/")
     etcd_conf_content.write("initial-cluster: default=http://%s:2380\n"%hostIP)
     etcd_conf_content.write("initial-advertise-peer-urls: http://%s:2380\n"%hostIP)
     etcd_conf_content.write("initial-cluster-token: etcd-cluster\n")

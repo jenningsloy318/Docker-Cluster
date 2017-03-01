@@ -3,6 +3,10 @@ kind: Ingress
 metadata:
  name: kubernetes-dashboard-ingress
 spec:
+ tls:
+ - hosts:
+   - kube-master
+   secretName: kube-master-secret
  rules:
    - host: kube-master
      http:

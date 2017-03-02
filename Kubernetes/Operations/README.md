@@ -134,3 +134,20 @@ Here I listed the aspects about how to run k8s better.
       - configure host docker service , which can accept the request from tcp socket, not only unix socket;
       - running the jenkins in non-previleged way, which is more secure;
       - use ingress to expose the jenkins services.
+
+3. Persistent Volume
+    
+    Types of Persistent volume:
+      - static: each PV and PVC should be created before it is used in the pod, and the restrict it one pv can only be bound to one pvc. 
+      - dynamic: create storageclass to host the backend storages, then each pvc can claim its storage volumes from the storageclass; thus we only need to create the storageclass and it can be used mulitple times when multiple pvc is created. 
+
+    we still have enough flexible choices to serve the backend storages, we don't have cloud storage service, and it is also expensive to build a openstack cinder or gluster or ceph cluster which need at least 2-3 nodes. we only have one choice *NFS*. luckily I found a incubate project [nfs-provisioner](https://github.com/kubernetes-incubator/nfs-provisioner) which can meet our need. 
+      
+    3.1 use nfs-provisioner to create nfs service, which use hostpath as its volume; then nfs-provisioner will be used as the backend of storageclass.
+				here we use StatefulSet to host the nfs service as suggested.
+
+  	3.2 Create storageClass
+						
+				
+    the  whole content of the file is [nfs-provisoner.yaml](./nfs-provisioner/nfs-provisoner.yaml)
+              

@@ -1,0 +1,62 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: k8s-pvc-pg
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "devops-k8s-nfs"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+---
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  labels:
+    app: pg
+  name: pg
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pg
+  template:
+    metadata:
+      labels:
+        app: pg
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: devops-k8s-master2
+      containers:
+      - name: pg
+        image: sameersbn/postgresql:9.5-3
+        env:
+        - name: PG_TRUST_LOCALNET
+          value: 'true'
+        - name: PG_PASSWORD
+          value: Initial0
+        - name: DB_USER
+          value: sa
+        - name: DB_PASS
+          value: Initial0
+        - name: DB_NAME
+          value: sample
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5432
+          protocol: TCP
+        args:
+        volumeMounts:
+        - mountPath: /var/lib/postgresql
+          name: pgdata
+        imagePullPolicy: IfNotPresent
+      volumes:
+      - name: pgdata
+        persistentVolumeClaim:
+          claimName: k8s-pvc-pg
+      - name: etcresolv
+        hostPath:
+           path: /etc/resolv.conf

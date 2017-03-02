@@ -151,6 +151,7 @@ Here I listed the aspects about how to run k8s better.
 				
     the  whole content of the file is [nfs-provisoner.yaml](./nfs-provisioner/nfs-provisoner.yaml)
               
+    a example is create a [postgresql](./nfs-provisioner/pg.yaml) with this persistent volume.
 
 4. Auto-deploy option
 		

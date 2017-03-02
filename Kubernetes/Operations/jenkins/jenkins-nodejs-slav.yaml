@@ -1,0 +1,51 @@
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  labels:
+    app: jslave-nodejs
+  name: jslave-nodejs
+  namespace: default
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: jslave-nodejs
+  template:
+    metadata:
+      labels:
+        app: jslave-nodejs
+    spec:
+      hostNetwork: true
+      containers:
+      - name: nodejs
+        image: mo-b166c2b61.mo.sap.corp/nodejs/maven3-nodejs:latest 
+        imagePullPolicy: IfNotPresent
+        command:
+          - bash
+          - -exc
+          - |
+            /usr/sbin/sshd -D -p 30023
+        ports:
+        - containerPort: 30023
+          hostPort: 30023
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /var/run/docker.sock
+          name: docker
+        - mountPath: /data/docker
+          name: datadocker
+        - mountPath: /var/lib/docker
+          name: varlib
+      volumes:
+        - hostPath:
+            path: /var/run/docker.sock
+          name: docker
+        - hostPath:
+            path: /tmp
+          name: tmp
+        - hostPath:
+            path: /data/docker
+          name: datadocker
+        - hostPath:
+            path: /var/lib/docker
+          name: varlib

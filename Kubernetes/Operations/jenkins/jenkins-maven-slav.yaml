@@ -1,0 +1,53 @@
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  labels:
+    app: jslave-maven3
+  name: jslave-maven3
+  namespace: default
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: jslave-maven3
+  template:
+    metadata:
+      labels:
+        app: jslave-maven3
+    spec:
+      hostNetwork: true
+      containers:
+      - name: maven3
+        image: mo-b166c2b61.mo.sap.corp/maven/maven3-jdk8:latest
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
+        command:
+          - bash
+          - -exc
+          - |
+            /usr/sbin/sshd -D -p 30022
+        ports:
+        - containerPort: 30022
+          hostPort: 30022
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /var/run/docker.sock
+          name: docker
+        - mountPath: /data/docker
+          name: datadocker
+        - mountPath: /var/lib/docker
+          name: varlib
+      volumes:
+        - hostPath:
+            path: /var/run/docker.sock
+          name: docker
+        - hostPath:
+            path: /tmp
+          name: tmp
+        - hostPath:
+            path: /data/docker
+          name: datadocker
+        - hostPath:
+            path: /var/lib/docker
+          name: varlib

@@ -123,3 +123,14 @@ Here I listed the aspects about how to run k8s better.
                          serviceName: kubernetes-dashboard
                          servicePort: 80
                                           
+2. CI/CD integration
+
+    we use jenkins to triger CI/CD jobs, now we have depoyed two kinds of jenkins instances in our environment, with super privilege, because it will utilize docker service on the hosts. 
+    Jenkins jobs will be excuting inside these PODs, buiding docker images leveraging host docker service , then pushed to our priviate docker registry.  at the same time CD jobs will be trigered which use ```kubectl apply -f pod.ymal```to create the deployment/pod/replica/svc/ingress rules. 
+    examples of the jenkins pod are listed in [jenkins](./jenkins).
+
+    we still have another things to do:
+      - configure host docker service, which can be running under normal users but not root user;
+      - configure host docker service , which can accept the request from tcp socket, not only unix socket;
+      - running the jenkins in non-previleged way, which is more secure;
+      - use ingress to expose the jenkins services.

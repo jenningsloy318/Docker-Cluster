@@ -155,8 +155,7 @@ Here I listed the aspects about how to run k8s better.
 
 4. Auto-deploy option
 		
-		As we describe ealier, use CI/CD to trigger the deployment is one option, here I listed two more options.
-      
+	As we describe ealier, use CI/CD to trigger the deployment is one option, here I listed two more options.
       - static pods started by kubelet service, kubelet service will scan the directory ```--pod-manifest-path``` to start them.
       - another one  which is inspired by the kubernetes official addon-manager, I created app-manager. it use fswatch to watch the directory, create new kubernete resources once new changes detected. 
 

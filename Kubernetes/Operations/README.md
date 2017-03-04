@@ -160,4 +160,34 @@ Here I listed the aspects about how to run k8s better.
       - another one  which is inspired by the kubernetes official addon-manager, I created app-manager. it use fswatch to watch the directory, create new kubernete resources once new changes detected. 
 
     we use  [Dockerfile](./app-manager/Dockerfile) to create the docker images which includes [app-manager.sh](./app-manager/app-manager.sh) and optional [kubeconfig](./app-manager/kubeconfig)
-	 
+
+5. supervisor
+    
+    when we want to running more than one application, we choose to use supervisor to handle them, as example [supervisor example](https://docs.docker.com/engine/admin/using_supervisord/).
+
+    example ```/etc/supervisor/supervisord.conf```
+
+    ```conf
+    [unix_http_server]
+    file=/var/run/supervisor.sock   ; (the path to the socket file)
+
+    [supervisord]
+    logfile=/var/log/supervisor/supervisord.log;
+    pidfile=/var/run/supervisord.pid;
+    childlogdir=/var/log/supervisor;
+    loglevel=debug
+    nodaemon=true               ; (start in foreground if true;default false)
+
+    [program:app1]
+    command=app1
+    autorestart=true
+    redirect_stderr=true
+    stdout_logfile=/dev/stdout
+
+    [program:app2]
+    command=app2
+    autorestart=true
+    redirect_stderr=true
+	  stdout_logfile=/dev/stdout
+
+    ```

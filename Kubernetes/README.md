@@ -16,4 +16,5 @@ to do list:
 7.  better service exposure method ;
 8.  configure docker service, un-previleged docker/tcp socket.
 9.  integrate jenkins CI/CD 
-10. priviate  docker registry 
+10. priviate  docker registry(jfrog/artifactory,vmware/harbor) 
+11. auto-create pod/devployment config based on template(python/jinja2, go/template), we can reference ingress as an example, which can create nginx conf to based on ingress  rule

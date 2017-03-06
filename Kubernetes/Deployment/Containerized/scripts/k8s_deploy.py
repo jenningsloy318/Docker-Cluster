@@ -238,6 +238,17 @@ if __name__ == '__main__':
 
 
 
+    print('Generating kube-proxy.yaml.\n')
+    proxy_pod_file=manifests_dir+'/kube-proxy.yaml'
+    proxy_dict={'POD_CIDR':POD_CIDR}
+    proxy_template=k8s_env.get_template('kube-proxy.yaml.jinja2')
+    with open(proxy_pod_file,'w') as kube_proxy_yaml:
+        kube_proxy_yaml.write(proxy_template.render(proxy_dict))
+
+
+
+
+
     print('Generating etcd.yaml.\n')
     etcd_pod_file=manifests_dir+'/etcd.yaml'
     etcd_dict={'ETCD_VER':ETCD_VER}
@@ -269,7 +280,8 @@ if __name__ == '__main__':
 
 
 ### modify kubelet.service and kube-proxy.service 
-    print('Generating kubelet.service kube-proxy.service  file in ./init/.')
+    print('Generating kubelet.service file in ./init/.')
+    #print('Generating kubelet.service kube-proxy.service  file in ./init/.')
     init_dir='./init'
     init_path=Path(init_dir)
     if not init_path.exists():
@@ -293,12 +305,12 @@ if __name__ == '__main__':
 
 
 
-    print('Generating kube-proxy.service.\n')
-    kube_proxy_service_file=init_dir+'/kube-proxy.service'
-    kube_proxy_service_dict={'POD_CIDR':POD_CIDR}
-    kube_proxy_service_template=init_env.get_template('kube-proxy.service.jinja2')
-    with open(kube_proxy_service_file,'w') as kube_proxy_service:
-        kube_proxy_service.write(kube_proxy_service_template.render(kube_proxy_service_dict))
+    #print('Generating kube-proxy.service.\n')
+    #kube_proxy_service_file=init_dir+'/kube-proxy.service'
+    #kube_proxy_service_dict={'POD_CIDR':POD_CIDR}
+    #kube_proxy_service_template=init_env.get_template('kube-proxy.service.jinja2')
+    #with open(kube_proxy_service_file,'w') as kube_proxy_service:
+    #    kube_proxy_service.write(kube_proxy_service_template.render(kube_proxy_service_dict))
 
 
     print('Generating docker.service.\n')

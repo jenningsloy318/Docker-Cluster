@@ -1,0 +1,35 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: k8s-proxy-v1
+  namespace: kube-system
+  labels:
+    k8s-app: k8s-proxy
+    version: v1
+    kubernetes.io/cluster-service: "true"
+spec:
+  template:
+    metadata:
+      labels:
+        k8s-app: k8s-proxy
+        version: v1
+        kubernetes.io/cluster-service: "true"
+    spec:
+      hostNetwork: true
+      containers:
+      - name: kube-proxy
+        image: REGISTRY/hyperkube-ARCH:VERSION
+        command:
+        - /usr/bin/kube-proxy --kubeconfig=/data/kubernetes/kubeconfig 
+        - --cluster-cidr={{ POD_CIDR }}
+        - --v=5
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: kubeconfig
+          mountPath: /data/kubernetes/kubeconfig
+          readOnly: true
+      volumes:
+      - name: kubeconfig
+        hostPath:
+          path: /data/kubernetes/kubeconfig

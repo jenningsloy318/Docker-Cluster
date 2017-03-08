@@ -191,3 +191,31 @@ Here I listed the aspects about how to run k8s better.
 	  stdout_logfile=/dev/stdout
 
     ```
+6. ELK
+   
+   We usually use ELK suite to analyze the logs, here we deploy it to view and summarize the docker container logs
+
+   6.1 first to deploy fluentd agent via [fluentd.yaml](./ELK/fluentd.yaml) on each node to fetch all logs and send to elasticsearch server/cluster, so we use daemonset to run this agent.
+
+   6.2 create the configmap via [elasticsearch.configmap](./ELK/elasticsearch.configmap) which contains all configurations used in elastic. this configmap contains two config files ```elasticsearch.yml``` and ```log4j2.properties```; in ```elasticsearch.yml```, I added two more parameters  ```http.cors.enabled: true``` and ```http.cors.allow-origin: "*"```, thus grafana can also get the logs from elasticsearch service.  
+
+    6.3 create elasticsearch via [elasticsearch-deployment.yaml](./ELK/elasticsearch-deployment.yaml);in this deployment, I also used storageclass to provide persistent storage for elasticsearch data. 
+
+    6.4 create kibana webui via [kibana.yaml](./ELK/kibana.yaml), one thing need to take care is when creating  kibana ingress rule, we should add annotation of ```add-base-url```, the value should be same with the value of ```"KIBANA_BASE_URL"``` in elasticsearch pod env.
+      - ingress rule	
+
+      ```yaml
+      annotations:
+         ingress.kubernetes.io/add-base-url: "/api/v1/proxy/namespaces/default/services/kibana-logging"
+      ```
+      - pod definition	
+
+      ```yaml
+			env:
+      - name: "ELASTICSEARCH_URL"
+        value: "http://elasticsearch-logging:9200"
+      - name: "KIBANA_BASE_URL"
+        value: "/api/v1/proxy/namespaces/default/services/kibana-logging"
+      ````
+
+    Now we can access kibana. ![kibana](./ELK/ELK.png)

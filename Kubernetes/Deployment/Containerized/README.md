@@ -8,10 +8,10 @@ This time I deploy a tree-master and one loadbalancer k8s cluster.
 
    | hostname    | IP address     |Role |
    | ----------- | -------------- |------|
-   | kube-master | 192.168.49.150 | LB   |
-   | kube-master1 | 192.168.49.151 |Master|
-   | kube-master2 | 192.168.49.152 |Master|
-   | kube-master3 | 192.168.49.153 |Master|
+   | kube-master.example.com | 192.168.49.150 | LB   |
+   | kube-master1.example.com | 192.168.49.151 |Master|
+   | kube-master2.example.com | 192.168.49.152 |Master|
+   | kube-master3.example.com | 192.168.49.153 |Master|
      
 
 2. Etcd cluster configuration.

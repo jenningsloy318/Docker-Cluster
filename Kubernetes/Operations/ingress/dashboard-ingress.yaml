@@ -5,10 +5,10 @@ metadata:
 spec:
  tls:
  - hosts:
-   - kube-master
+   - kube-master.example.com
    secretName: kube-master-secret
  rules:
-   - host: kube-master
+   - host: kube-master.example.com
      http:
        paths:
          - path: /

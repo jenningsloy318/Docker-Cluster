@@ -12,8 +12,8 @@ My demo environment has two hosts, one is used for master and the other one is n
    
    | hostname    | IP address     |
    | ----------- | -------------- |
-   | kube-master | 192.168.49.141 |
-   | kube-node1: | 192.168.49.135 |
+   | kube-master.example.com | 192.168.49.141 |
+   | kube-node1.example.com | 192.168.49.135 |
 
 2. Software version:
    
@@ -536,7 +536,7 @@ Configure on master node
 
        ```yaml
        nodeSelector:
-            kubernetes.io/hostname: kube-master
+            kubernetes.io/hostname: kube-master.example.com
        ```
 
     - also want to use a dedicated port  and IP(added another IP on master) for dashboard servie, modify ```service```section.

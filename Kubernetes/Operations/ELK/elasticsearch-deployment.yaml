@@ -85,7 +85,7 @@ metadata:
  name: devops-k8s-elasticsearch-ingress
 spec:
  rules:
-   - host: devops-k8s-logs.mo.sap.corp
+   - host: kube-logs.example.com
      http:
        paths:
          - path: /

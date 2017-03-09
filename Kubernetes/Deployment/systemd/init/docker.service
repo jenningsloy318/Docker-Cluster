@@ -8,8 +8,8 @@
   # exists and systemd currently does not support the cgroup feature set required
   # for containers run by docker
 
-  Environment="HTTP_PROXY=http://proxy.wdf.sap.corp:8080"
-  Environment="HTTPS_PROXY=http://proxy.wdf.sap.corp:8080"
+  Environment="HTTP_PROXY=http://{proxy-host}:{proxy-poprt}"
+  Environment="HTTPS_PROXY=http://{proxy-host}:{proxy-poprt}"
 
   ExecStart=/usr/bin/dockerd  -g /data/docker
   ExecReload=/bin/kill -s HUP $MAINPID

@@ -56,7 +56,7 @@ metadata:
    ingress.kubernetes.io/add-base-url: "/api/v1/proxy/namespaces/default/services/kibana-logging"
 spec:
  rules:
-   - host: devops-k8s-kibana.mo.sap.corp
+   - host: kube-kibana.example.com
      http:
        paths:
          - path: /

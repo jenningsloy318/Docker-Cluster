@@ -18,7 +18,7 @@ spec:
       hostNetwork: true
       containers:
       - name: maven3
-        image: mo-b166c2b61.mo.sap.corp/maven/maven3-jdk8:latest
+        image: maven/maven3-jdk8:latest
         imagePullPolicy: IfNotPresent
         securityContext:
           privileged: true

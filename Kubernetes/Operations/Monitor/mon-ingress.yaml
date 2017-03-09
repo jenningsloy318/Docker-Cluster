@@ -1,0 +1,31 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ name: devops-k8s-mon-ingress
+ annotations:
+#   ingress.kubernetes.io/rewrite-target: "/index.html"
+#    ingress.kubernetes.io/add-base-url: "/api/v1/proxy/namespaces/default/services/grafana/"
+spec:
+ rules:
+   - host: kube-prometheus
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: prometheus-monitoring
+             servicePort: 9090
+   - host: kube-alertmanager
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: prometheus-monitoring
+             servicePort: 9093
+   - host: kube-grafana
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: grafana
+             servicePort: 3000

@@ -83,12 +83,12 @@ Here I listed the aspects about how to run k8s better.
              [ v3_ca ]
              subjectAltName = @alternate_names
              [alt_names]
-             DNS.1=kube-master.mo.sap.corp
+             DNS.1=kube-master.example.com
              ```
           - create the sign request,replace the valube of ```-subj ``` with your own, which must be a *FQDN* DNS name.
 
              ```sh
-             # openssl req -new -key app-key.pem -out app.csr  -subj "/CN=kube-master.mo.sap.corp" -onfig openssl.conf
+             # openssl req -new -key app-key.pem -out app.csr  -subj "/CN=kube-master.example.com" -onfig openssl.conf
              ```
 
 
@@ -112,10 +112,10 @@ Here I listed the aspects about how to run k8s better.
             spec:
              tls:
               - hosts:
-                - kube-master.mo.sap.corp
+                - kube-master.example.com
                 secretName: kube-master-secret
              rules:
-               - host: kube-master.mo.sap.corp
+               - host: kube-master.example.com
                  http:
                    paths:
                      - path: /
@@ -219,3 +219,20 @@ Here I listed the aspects about how to run k8s better.
       ````
 
     Now we can access kibana. ![kibana](./ELK/ELK.png)
+
+7. Monitor
+   We choose prometheus to monitor the whole kubernetes infrastructure, several exporters are used to gather and send metrics to prometheus. [node-exporter](https://github.com/prometheus/node_exporter) gather node hardware and OS metrics exposed by linux kernels,  [kube-state-metrics](https://github.com/kubernetes/kube-state-metrics) is a simple service that listens to the Kubernetes API server and generates metrics about the state of the objects(node/daemonset/Deployment/Pod/ResourceQuota/ReplicaSet/ReplicationController),kubelet(cadvisor) provide resource usage and performance characteristics of containers.they gather metrics and send to prometheus, prometheus stores the metrics data while alertmanager will send out alerts based on the alert rules; finally we use grafana to display the monitor graph.
+
+   - deploy [node-exporter](./Monitor/prometheus-node-exporter.yaml), this is a daemonset which will run on all nodes;
+   - deploy [kube-state-metrics](./Monitor/kube-state-metrics.yaml);
+   - begin to deploy prometheus and alertmanager service, first we will create configmaps which provide the configration for prometheus and altertmanager; then when we need to do any updates to prometheus, will just update the configmap and reload prometheus via ```curl -X POST http(s)://{prometheus-host}:{prometheus-port}/-/reload```or ```curl -X POST http(s)://{alertmanager-host}:{alertmanager-port}/-/reload```
+
+      - configmap for [prometheus.yml](./Monitor/prometheus.configmp)
+      - also we need a [alertmanager-rule](./Monitor/alertmanager-rules.configmap) when configure prometheus
+      - configmap for [alertmanager.yml](./Monitor/alertmanager.configmap), configured email as the main method, one thing need to take care is *disable stmp ssl* by setting ```smtp_require_tls: false```.
+      - deploy prometheus and alermanager in a single pod via [prometheus.yaml](./Monitor/prometheus.yaml)
+
+   - deploy grafana web ui via [grafana.yaml](./Monitor/grafana.yaml)
+   - deploy ingress rule via [mon-ingress.yaml](./Monitor/mon-ingress.yaml) to expose the services to outside.
+   - import several dashboards, first is  [Kubernetes cluster monitoring (via Prometheus)](https://grafana.net/dashboards/315) , [Docker Dashboard](https://grafana.net/dashboards/179) is another one, also this one [Docker and system monitoring](https://grafana.net/dashboards/893). after import them, we need to do some adjustments to meet our needs
+  - add new prometheus/alertmanager conf and alert-rules via configuring the  respective configmap, then re-create the configmap or update the configmap, and then reload prometheus/alertmanager as decribed in preceeding  section.

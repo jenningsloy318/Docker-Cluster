@@ -1,0 +1,6 @@
+i
+  curl -X POST http://localhost:9090/-/reload  (both work on premotheus and altermanager)
+
+    You can use the promtool command that comes with Prometheus to syntax check your configuration and rules.
+      http://blog.wercker.com/how-to-setup-alerts-on-prometheus
+

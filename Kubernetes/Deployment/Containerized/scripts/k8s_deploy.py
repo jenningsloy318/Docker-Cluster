@@ -13,7 +13,7 @@ import subprocess
 def create_etcd_cluster_conf(hostIP,name,endpoints,conf):
     etcd_conf_content=open(conf,'w')
     etcd_conf_content.write("name: '%s'\n"%name)
-    etcd_conf_content.write("data-dir: /data/etcd/")
+    etcd_conf_content.write("data-dir: /data/etcd/\n")
     etcd_conf_content.write("initial-cluster: %s\n"%','.join(endpoints))
     etcd_conf_content.write("initial-advertise-peer-urls: http://%s:2380\n"%hostIP)
     etcd_conf_content.write("initial-cluster-token: etcd-cluster\n")
@@ -37,7 +37,7 @@ def create_etcd_cluster_proxy_conf(endpoints,conf):
 def create_single_etcd_conf(hostIP,conf):
     etcd_conf_content=open(conf,'w')
     etcd_conf_content.write("name: 'default'\n")
-    etcd_conf_content.write("data-dir: /data/etcd/")
+    etcd_conf_content.write("data-dir: /data/etcd/\n")
     etcd_conf_content.write("initial-cluster: default=http://%s:2380\n"%hostIP)
     etcd_conf_content.write("initial-advertise-peer-urls: http://%s:2380\n"%hostIP)
     etcd_conf_content.write("initial-cluster-token: etcd-cluster\n")
@@ -75,6 +75,7 @@ if __name__ == '__main__':
     DOCKER_ENGINE_VER=config['main']['docker_engine_ver']
     DOCKER_ENGINE_PROXY=config['main']['docker_engine_proxy']
     CLUSTER_DNS=config['main']['cluster_dns']
+    CLUSTER_DOMAIN=config['main']['cluster_domain']
     config_content.close()
 
     
@@ -174,6 +175,7 @@ if __name__ == '__main__':
     SVC_IP=SVC_CIDR.split('/')[0].replace('0.0','0.1')
     IPs=[SVC_IP]
     DNSs=['kubernetes','kubernetes.default','kubernetes.default.svc','kubernetes.default.svc.cluster.local']
+    #DNSs=['kubernetes.default.svc.mo.sap.corp']
     for key in ALL_MASTER_ITEMS.keys():
         host_addr_re=re.compile(r'^.*_addr$')
         host_dns_re=re.compile(r'^.*dns$')
@@ -264,7 +266,7 @@ if __name__ == '__main__':
         ETCD_CLUSTER_CLIENT_ENDPOINTS=''.join(['http://',LB_NODES[0],':2379'])
     else:
         ETCD_CLUSTER_CLIENT_ENDPOINTS=etcd_cluster_client_endpoints
-    calico_dict={'ETCD_CLUSTER_CLIENT_ENDPOINTS':ETCD_CLUSTER_CLIENT_ENDPOINTS}
+    calico_dict={'ETCD_CLUSTER_CLIENT_ENDPOINTS':ETCD_CLUSTER_CLIENT_ENDPOINTS,'pod_CIDR':pod_CIDR}
     calico_template=k8s_env.get_template('calico.yaml.jinja2')
     with open(calico_pod_file,'w') as calico_yaml:
         calico_yaml.write(calico_template.render(calico_dict))
@@ -273,7 +275,7 @@ if __name__ == '__main__':
 
     print('Generating kube-dns.yaml.\n')
     kube_dns_pod_file=manifests_dir+'/kube-dns.yaml'
-    kube_dns_dict={'CLUSTER_DNS':CLUSTER_DNS}
+    kube_dns_dict={'CLUSTER_DNS':CLUSTER_DNS,'CLUSTER_DOMAIN':CLUSTER_DOMAIN}
     kube_dns_template=k8s_env.get_template('kube-dns.yaml.jinja2')
     with open(kube_dns_pod_file,'w') as kube_dns_yaml:
         kube_dns_yaml.write(kube_dns_template.render(kube_dns_dict))
@@ -291,7 +293,7 @@ if __name__ == '__main__':
     print('Generating kubelet.service.\n')
     kubelet_service_master_file=init_dir+'/kubelet.service'
     kubelet_service_worker_file=init_dir+'/kubelet-worker.service'
-    kubelet_service_dict={'CLUSTER_DNS':CLUSTER_DNS}
+    kubelet_service_dict={'CLUSTER_DNS':CLUSTER_DNS,'CLUSTER_DOMAIN':CLUSTER_DOMAIN}
     if DEPLOY_MODE =='single':
         kubelet_service_master_template=init_env.get_template('kubelet-single-master.service.jinja2')
         kubelet_service_worker_template=init_env.get_template('kubelet-worker.service.jinja2')

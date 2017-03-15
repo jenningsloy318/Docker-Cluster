@@ -71,7 +71,7 @@
              initialDelaySeconds: 3
              timeoutSeconds: 5
            args:
-           - --domain=cluster.local.
+           - --domain={{ CLUSTER_DOMAIN }}.
            - --dns-port=10053
            ports:
            - containerPort: 10053

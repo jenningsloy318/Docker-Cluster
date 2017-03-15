@@ -11,7 +11,7 @@
   Environment="HTTP_PROXY={{ DOCKER_ENGINE_PROXY }}"
   Environment="HTTPS_PROXY={{ DOCKER_ENGINE_PROXY }}"
 
-  ExecStart=/usr/bin/dockerd  -g /data/docker
+  ExecStart=/usr/bin/dockerd  -g /data/docker -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock
   ExecReload=/bin/kill -s HUP $MAINPID
   # Having non-zero Limit*s causes performance problems due to accounting overhead
   # in the kernel. We recommend using cgroups to do container-local accounting.

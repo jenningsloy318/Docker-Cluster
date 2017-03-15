@@ -31,23 +31,10 @@ spec:
         - containerPort: 30022
           hostPort: 30022
           protocol: TCP
-        volumeMounts:
-        - mountPath: /var/run/docker.sock
-          name: docker
-        - mountPath: /data/docker
-          name: datadocker
-        - mountPath: /var/lib/docker
-          name: varlib
-      volumes:
-        - hostPath:
-            path: /var/run/docker.sock
-          name: docker
-        - hostPath:
-            path: /tmp
-          name: tmp
-        - hostPath:
-            path: /data/docker
-          name: datadocker
-        - hostPath:
-            path: /var/lib/docker
-          name: varlib
+        env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: DOCKER_HOST
+          value: tcp://$(NODE_NAME):2375`

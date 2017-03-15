@@ -174,7 +174,7 @@ if __name__ == '__main__':
     openssl_conf_dict={}
     SVC_IP=SVC_CIDR.split('/')[0].replace('0.0','0.1')
     IPs=[SVC_IP]
-    DNSs=['kubernetes','kubernetes.default','kubernetes.default.svc','kubernetes.default.svc.cluster.local']
+    DNSs=['kubernetes','kubernetes.default','kubernetes.default.svc','kubernetes.default.svc.'+CLUSTER_DOMAIN]
     #DNSs=['kubernetes.default.svc.mo.sap.corp']
     for key in ALL_MASTER_ITEMS.keys():
         host_addr_re=re.compile(r'^.*_addr$')
@@ -266,7 +266,7 @@ if __name__ == '__main__':
         ETCD_CLUSTER_CLIENT_ENDPOINTS=''.join(['http://',LB_NODES[0],':2379'])
     else:
         ETCD_CLUSTER_CLIENT_ENDPOINTS=etcd_cluster_client_endpoints
-    calico_dict={'ETCD_CLUSTER_CLIENT_ENDPOINTS':ETCD_CLUSTER_CLIENT_ENDPOINTS,'pod_CIDR':pod_CIDR}
+    calico_dict={'ETCD_CLUSTER_CLIENT_ENDPOINTS':ETCD_CLUSTER_CLIENT_ENDPOINTS,'POD_CIDR':POD_CIDR}
     calico_template=k8s_env.get_template('calico.yaml.jinja2')
     with open(calico_pod_file,'w') as calico_yaml:
         calico_yaml.write(calico_template.render(calico_dict))
@@ -283,7 +283,7 @@ if __name__ == '__main__':
 
 ### modify kubelet.service and kube-proxy.service 
     print('Generating kubelet.service file in ./init/.')
-    #print('Generating kubelet.service kube-proxy.service  file in ./init/.')
+    print('Generating kubelet.service  file in ./init/.')
     init_dir='./init'
     init_path=Path(init_dir)
     if not init_path.exists():
@@ -394,7 +394,7 @@ if __name__ == '__main__':
         if not host_init_path.exists():
             host_init_path.mkdir(parents=True)
         certs_cp_command=''.join(['cp -r certs/apiserver-key.pem certs/apiserver.pem certs/apiserver-pub.pem certs/basic_auth.csv certs/ca-key.pem certs/ca.pem certs/ca-pub.pem ',host_certs_dir])
-        init_cp_command=''.join(['cp -r init/docker.service  init/kubelet.service  init/kube-proxy.service ',host_init_dir])
+        init_cp_command=''.join(['cp -r init/docker.service  init/kubelet.service ',host_init_dir])
         print(bytes.decode(subprocess.Popen(certs_cp_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0]))
         print(bytes.decode(subprocess.Popen(init_cp_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0]))
 
@@ -457,7 +457,7 @@ if __name__ == '__main__':
         certs_cp_command=''.join(['cp -r certs/ca.pem certs/apiserver.pem certs/apiserver-key.pem certs/basic_auth.csv ',host_certs_dir])
         print('Processing on %s\n'%host)
         print(bytes.decode(subprocess.Popen(certs_cp_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0]))
-        init_cp_command=''.join(['cp -r init/docker.service  init/kubelet-worker.service  init/kube-proxy.service ',host_init_dir])
+        init_cp_command=''.join(['cp -r init/docker.service  init/kubelet-worker.service ',host_init_dir])
         print(bytes.decode(subprocess.Popen(init_cp_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0]))
         templates_cp_command=''.join(['cp -r shell ',host,'/data/kubernetes'])
         print(bytes.decode(subprocess.Popen(templates_cp_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0]))
@@ -472,7 +472,7 @@ if __name__ == '__main__':
     for host in MASTER_NODES:
         print('Processing on %s\n'%host)
         print('Cleaning old conf on %s\n'%host)
-        remote_cmd1=''.join(['ssh root@',host,' "systemctl stop kubelet;systemctl stop kubelet-worker;systemctl disable kubelet-worker ;[[ \$(docker ps | grep -v \"CONTAINER\">/dev/null )  ]] && docker rm -f \$(docker ps -a -q)  >/dev/null ; rm -rf /data/{kubelet,kubernetes}"'])
+        remote_cmd1=''.join(['ssh root@',host,' "systemctl stop kubelet;systemctl stop kubelet-worker;systemctl disable kubelet-worker ;[[ \$(docker ps | grep -v \"CONTAINER\">/dev/null )  ]] && docker rm -f \$(docker ps -a -q)  >/dev/null ; rm -rf /data/{kubelet,kubernetes,etcd}"'])
         print(bytes.decode(subprocess.Popen(remote_cmd1, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0]))
         print('syncing file to %s\n'%host)
         remote_cmd2=''.join(['rsync -av ',host,'/ root@',host,':/'])
@@ -489,14 +489,14 @@ if __name__ == '__main__':
         remote_cmd6=''.join(['ssh root@',host,' "[ ! -d /data/etcd ] && mkdir /data/etcd"'])
         print(bytes.decode(subprocess.Popen(remote_cmd6, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0]))
         print('Restarting services on %s\n'%host)
-        remote_cmd7=''.join(['ssh root@',host,' "systemctl daemon-reload ;systemctl restart docker;systemctl restart kubelet;systemctl restart kube-proxy;systemctl enable docker;systemctl enable kubelet;systemctl enable kube-proxy"'])
+        remote_cmd7=''.join(['ssh root@',host,' "systemctl daemon-reload ;systemctl restart docker;systemctl restart kubelet;systemctl enable docker;systemctl enable kubelet;"'])
         print(bytes.decode(subprocess.Popen(remote_cmd7, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0]))
     
     if DEPLOY_MODE =='multiple':
         print('installing on lb nodes\n')
         for host in LB_NODES:
             print('Processing on %s\n'%host)
-            remote_cmd1=''.join(['ssh root@',host,' "systemctl stop kubelet;systemctl stop kubelet-worker;systemctl disable kubelet-worker ;[[ \$(docker ps | grep -v \"CONTAINER\">/dev/null )  ]] && docker rm -f \$(docker ps -a -q)  >/dev/null ; rm -rf /data/{kubelet,kubernetes}"'])
+            remote_cmd1=''.join(['ssh root@',host,' "systemctl stop kubelet;systemctl stop kubelet-worker;systemctl disable kubelet-worker ;[[ \$(docker ps | grep -v \"CONTAINER\">/dev/null )  ]] && docker rm -f \$(docker ps -a -q)  >/dev/null ; rm -rf /data/{kubelet,kubernetes,etcd}"'])
             print('Cleaning old conf on %s\n'%host)   
             print(bytes.decode(subprocess.Popen(remote_cmd1, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0]))
             remote_cmd2=''.join(['rsync -av ',host,'/ root@',host,':/'])
@@ -511,7 +511,7 @@ if __name__ == '__main__':
             remote_cmd5=''.join(['ssh root@',host,' "[ ! -f /usr/sbin/nginx ] && apt-get install nginx -y"'])
             print('Installing nginx if needed on %s\n'%host)
             print(bytes.decode(subprocess.Popen(remote_cmd5, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0]))
-            remote_cmd6=''.join(['ssh root@',host,' "systemctl daemon-reload ;systemctl restart docker;systemctl restart kubelet;systemctl restart kube-proxy;systemctl enable docker;systemctl enable kubelet;systemctl enable kube-proxy;systemctl restart etcd-proxy;systemctl enable etcd-proxy"'])
+            remote_cmd6=''.join(['ssh root@',host,' "systemctl daemon-reload ;systemctl restart docker;systemctl restart kubelet;systemctl enable docker;systemctl enable kubelet;systemctl restart etcd-proxy;systemctl enable etcd-proxy"'])
             print('Restarting services on %s\n'%host)
             print(bytes.decode(subprocess.Popen(remote_cmd6, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0]))
             remote_cmd7=''.join(['ssh root@',host,' "systemctl restart nginx&&systemctl enable nginx"'])
@@ -524,7 +524,7 @@ if __name__ == '__main__':
     print('installing on worker nodes\n')
     for host in WORKER_NODES:
         print('Processing on %s\n'%host)
-        remote_cmd1=''.join(['ssh root@',host,' "systemctl stop kubelet ;systemctl stop kubelet-worker;systemctl stop kubelet-worker;[[ \$(docker ps | grep -v \"CONTAINER\">/dev/null )  ]] && docker rm -f \$(docker ps -a -q)  >/dev/null ; rm -rf /data/{kubelet,kubernetes}"'])
+        remote_cmd1=''.join(['ssh root@',host,' "systemctl stop kubelet ;systemctl stop kubelet-worker;systemctl stop kubelet-worker;[[ \$(docker ps | grep -v \"CONTAINER\">/dev/null )  ]] && docker rm -f \$(docker ps -a -q)  >/dev/null ; rm -rf /data/{kubelet,kubernetes,etcd}"'])
         print('Cleaning old conf on %s\n'%host)       
         print(bytes.decode(subprocess.Popen(remote_cmd1, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0]))
         remote_cmd2=''.join(['rsync -a ',host,'/ root@',host,':/'])
@@ -536,6 +536,6 @@ if __name__ == '__main__':
         remote_cmd4=''.join(['ssh root@',host,' "/data/kubernetes/shell/k8s_install_docker_engine.sh"'])
         print('Installing docker engine if needed on %s\n'%host)
         print(bytes.decode(subprocess.Popen(remote_cmd4, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0]))
-        remote_cmd5=''.join(['ssh root@',host,' "systemctl daemon-reload ;systemctl restart docker;systemctl restart kubelet-worker;systemctl restart kube-proxy;systemctl enable docker;systemctl enable kubelet-worker;systemctl enable kube-proxy"'])
+        remote_cmd5=''.join(['ssh root@',host,' "systemctl daemon-reload ;systemctl restart docker;systemctl restart kubelet-worker;systemctl enable docker;systemctl enable kubelet-worker;"'])
         print('Restarting services on %s\n'%host)
         print(bytes.decode(subprocess.Popen(remote_cmd5, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0]))

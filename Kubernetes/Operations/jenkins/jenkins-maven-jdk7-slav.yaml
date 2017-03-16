@@ -1,24 +1,17 @@
-kind: Deployment
 apiVersion: extensions/v1beta1
+kind: DaemonSet
 metadata:
-  labels:
-    app: jslave-maven3
-  name: jslave-maven3
-  namespace: default
+  name: jenkins-slave-maven3-jdk7
 spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: jslave-maven3
   template:
     metadata:
       labels:
-        app: jslave-maven3
+        app: jenkins-slave-maven3-jdk7
     spec:
       hostNetwork: true
       containers:
-      - name: maven3
-        image: maven/maven3-jdk8:latest
+      - name: jenkins-slave-maven3-jdk7
+        image: mo-b166c2b61.mo.sap.corp/maven/maven3-jdk7:latest 
         imagePullPolicy: IfNotPresent
         securityContext:
           privileged: true
@@ -26,10 +19,11 @@ spec:
           - bash
           - -exc
           - |
-            /usr/sbin/sshd -D -p 30022
+            env|grep DOCKER_HOST | awk '{print "export "$0}' > /etc/profile.d/docker;
+            /usr/sbin/sshd -D -p 30024
         ports:
-        - containerPort: 30022
-          hostPort: 30022
+        - containerPort: 30024
+          hostPort: 30024
           protocol: TCP
         env:
         - name: NODE_NAME
@@ -37,4 +31,4 @@ spec:
             fieldRef:
               fieldPath: spec.nodeName
         - name: DOCKER_HOST
-          value: tcp://$(NODE_NAME):2375`
+          value: tcp://$(NODE_NAME):2375

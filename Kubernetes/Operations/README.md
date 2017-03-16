@@ -130,10 +130,10 @@ Here I listed the aspects about how to run k8s better.
     examples of the jenkins pod are listed in [jenkins](./jenkins). A workflow of this intregration is ![owl_deploy](./jenkins/CICD.jpg)
 
     we still have another things to do:
-      - configure host docker service, which can be running under normal users but not root user;
-      - configure host docker service , which can accept the request from tcp socket, not only unix socket;
-      - running the jenkins in non-previleged way, which is more secure;
-      - use ingress to expose the jenkins services.
+      - [ ] configure host docker service, which can be running under normal users but not root user;
+      - [x] configure host docker service , which can accept the request from tcp socket, not only unix socket; maven/nodejs pod can build images via connecting host docker service through tcp socket.
+      - [x] running the jenkins in non-previleged way, which is more secure;
+      - [ ] use ingress to expose the jenkins services.
 
 3. Persistent Volume
     

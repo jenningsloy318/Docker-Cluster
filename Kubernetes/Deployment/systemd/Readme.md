@@ -25,7 +25,7 @@ My demo environment has two hosts, one is used for master and the other one is n
    | docker     | 1.12.5         |
 
 
-Preparation before install:
+ Preparation before install:
 --
 
 
@@ -180,6 +180,9 @@ Problems during the installation
        * symtom: this happens when deploy kubedns/dashboard pods, both of them need request network info from calico, eventually need to connect to apiserver to retrieve these info, but calico is misconfigured so it can't get IP address through calico, so the pod can't be created.
 
        * solution, leave it there when it can cooperate with kubedns to resolve this IP to ```10.96.0.1``` , so after kubedns is created, this issue is gone. or change it to that ip which is the first ip of service cluster range.  the only thing to remember is to update the value ```etcd_endpoints: "http://192.168.49.141:2379"```, we may fail to deploy calico, most of the cases are  the certificate issue or the secrets are incorrect, just re-create all apiserver cert and delelete all secrets in all namespaces.
+
+   3.2  we found that calico-policy will be not working properly when we don't use the default domain ```cluster.local```, same as described [here](https://github.com/projectcalico/calicoctl/issues/1168)
+
 
 
 

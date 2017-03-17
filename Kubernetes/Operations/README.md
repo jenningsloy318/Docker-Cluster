@@ -204,7 +204,7 @@ Here I listed the aspects about how to run k8s better.
 
    6.2 create the configmap via [elasticsearch.configmap](./ELK/elasticsearch.configmap) which contains all configurations used in elastic. this configmap contains two config files ```elasticsearch.yml``` and ```log4j2.properties```; in ```elasticsearch.yml```, I added two more parameters  ```http.cors.enabled: true``` and ```http.cors.allow-origin: "*"```, thus grafana can also get the logs from elasticsearch service.  
 
-    6.3 create elasticsearch via [elasticsearch-deployment.yaml](./ELK/elasticsearch-deployment.yaml);in this deployment, I also used storageclass to provide persistent storage for elasticsearch data. 
+    6.3 create elasticsearch via [elasticsearch-deployment.yaml](./ELK/elasticsearch-deployment.yaml);in this deployment, I also used storageclass to provide persistent storage for elasticsearch data. to get indices, using ```curl -X GET 'http://{ELASTICSEARCH_HOST}:{PORT}/_cat/indices?v&pretty'```
 
     6.4 create kibana webui via [kibana.yaml](./ELK/kibana.yaml), one thing need to take care is when creating  kibana ingress rule, we should add annotation of ```add-base-url```, the value should be same with the value of ```"KIBANA_BASE_URL"``` in elasticsearch pod env.
       - ingress rule	
@@ -233,15 +233,16 @@ Here I listed the aspects about how to run k8s better.
    - deploy [kube-state-metrics](./Monitor/kube-state-metrics.yaml);
    - begin to deploy prometheus and alertmanager service, first we will create configmaps which provide the configration for prometheus and altertmanager; then when we need to do any updates to prometheus, will just update the configmap and reload prometheus via ```curl -X POST http(s)://{prometheus-host}:{prometheus-port}/-/reload```or ```curl -X POST http(s)://{alertmanager-host}:{alertmanager-port}/-/reload```
 
-      - configmap for [prometheus.yml](./Monitor/prometheus.configmp), one thing need to mention that if we use self-CA to sign the keys, should set ```insecure_skip_verify: true```.
-      - also we need a [alertmanager-rule](./Monitor/alertmanager-rules.configmap) when configure prometheus
-      - configmap for [alertmanager.yml](./Monitor/alertmanager.configmap), configured email as the main method, one thing need to take care is *disable stmp ssl* by setting ```smtp_require_tls: false```.
-      - deploy prometheus and alermanager in a single pod via [prometheus.yaml](./Monitor/prometheus.yaml)
+      - configmap for [prometheus.yml](./Monitor/prometheus.configmp), one thing need to mention that if we use self-CA to sign the keys, should set ```insecure_skip_verify: true```;
+      - also we need a [alertmanager-rule](./Monitor/alertmanager-rules.configmap) when configure prometheus;
+      - configmap for [alertmanager.yml](./Monitor/alertmanager.configmap), configured email as the main method, one thing need to take care is *disable stmp ssl* by setting ```smtp_require_tls: false```;
+      - deploy prometheus and alermanager in a single pod via [prometheus.yaml](./Monitor/prometheus.yaml);
 
-   - deploy grafana web ui via [grafana.yaml](./Monitor/grafana.yaml)
-   - deploy ingress rule via [mon-ingress.yaml](./Monitor/mon-ingress.yaml) to expose the services to outside.
-   - import several dashboards, first is  [Kubernetes cluster monitoring (via Prometheus)](https://grafana.net/dashboards/315) , [Docker Dashboard](https://grafana.net/dashboards/179) is another one, also this one [Docker and system monitoring](https://grafana.net/dashboards/893). after import them, we need to do some adjustments to meet our needs
-  - add new prometheus/alertmanager conf and alert-rules via configuring the  respective configmap, then re-create the configmap or update the configmap, and then reload prometheus/alertmanager as decribed in preceeding  section.
+   - deploy grafana web ui via [grafana.yaml](./Monitor/grafana.yaml);
+   - configure the datasource, since we have no idea how to configure it inside the conf, so here the datasource used ***proxy*** way to configure;
+   - deploy ingress rule via [mon-ingress.yaml](./Monitor/mon-ingress.yaml) to expose the services to outside;
+   - import several dashboards, first is  [Kubernetes cluster monitoring (via Prometheus)](https://grafana.net/dashboards/315) , [Docker Dashboard](https://grafana.net/dashboards/179) is another one, also this one [Docker and system monitoring](https://grafana.net/dashboards/893). after import them, we need to do some adjustments to meet our needs;
+  - add new prometheus/alertmanager conf and alert-rules via configuring the  respective configmap, then re-create the configmap or update the configmap, and then reload prometheus/alertmanager as decribed in preceeding  section;
 
 8. Software upgrade
    
@@ -249,7 +250,7 @@ Here I listed the aspects about how to run k8s better.
    - blue/green upgrading, when new version arrives, deploy a comletely same environment, when new environment is up, switch the loadbalancer to point to new environment.
    - rolling update, I have figured out this. few things need to consider. 
       
-      - configure the stratedy,make it the strategy type to RollingUpdate, and configure the parameter of RollingUpdate. maxSurge means the additional pod above the default  repica, and maxUnavailable: means the max unavailabe pods; minReadySeconds: how long a new created pod will be considered availabe,this para can be used with readinessProbe.
+      - configure the stratedy of deployment spec,make it the strategy type to RollingUpdate, and configure the parameter of RollingUpdate. maxSurge means the additional pod above the default  repica, and maxUnavailable: means the max unavailabe pods; minReadySeconds: how long a new created pod will be considered availabe,this para can be used with readinessProbe.
         
         ```yaml
 				

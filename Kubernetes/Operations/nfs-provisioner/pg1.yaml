@@ -11,27 +11,26 @@ spec:
     requests:
       storage: 10Gi
 ---
-kind: Deployment
+kind: StatefulSet
 apiVersion: extensions/v1beta1
 metadata:
   labels:
-    app: pg
-  name: pg
+    app: pgsql
+  name: pgsql
   namespace: default
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
-      app: pg
+      app: pgsql
+  serviceName: pgsql
   template:
     metadata:
       labels:
-        app: pg
+        app: pgsql
     spec:
-      nodeSelector:
-        kubernetes.io/hostname: devops-k8s-master2
       containers:
-      - name: pg
+      - name: pgsql
         image: sameersbn/postgresql:9.5-3
         env:
         - name: PG_TRUST_LOCALNET

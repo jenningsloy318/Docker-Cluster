@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgsql
+spec:
+  ports:
+    - port: 3306
+  selector:
+    app: pgsql
+  clusterIP: None
+---
+kind: StatefulSet
+apiVersion: apps/v1beta1
+metadata:
+  labels:
+    app: pgsql
+  name: pgsql
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pgsql
+  serviceName: pgsql
+  template:
+    metadata:
+      labels:
+        app: pgsql
+    spec:
+      containers:
+      - name: pgsql
+        image: sameersbn/postgresql:9.5-3
+        env:
+        - name: PG_TRUST_LOCALNET
+          value: 'true'
+        - name: PG_PASSWORD
+          value: Initial0
+        - name: DB_USER
+          value: sa
+        - name: DB_PASS
+          value: Initial0
+        - name: DB_NAME
+          value: sample
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5432
+          protocol: TCP
+        volumeMounts:
+        - name: pgsqldata
+          mountPath: /var/lib/pgsql
+  volumeClaimTemplates:
+  - metadata:
+      name: pgsqldata
+      annotations:
+          volume.beta.kubernetes.io/storage-class: "devops-k8s-nfs"
+    spec:
+      accessModes:
+          - ReadWriteMany
+      resources:
+        requests:
+          storage: 10Gi

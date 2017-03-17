@@ -141,17 +141,22 @@ Here I listed the aspects about how to run k8s better.
       - static: each PV and PVC should be created before it is used in the pod, and the restrict it one pv can only be bound to one pvc. 
       - dynamic: create storageclass to host the backend storages, then each pvc can claim its storage volumes from the storageclass; thus we only need to create the storageclass and it can be used mulitple times when multiple pvc is created. 
 
-    we still have enough flexible choices to serve the backend storages, we don't have cloud storage service, and it is also expensive to build a openstack cinder or gluster or ceph cluster which need at least 2-3 nodes. we only have one choice *NFS*. luckily I found a incubate project [nfs-provisioner](https://github.com/kubernetes-incubator/nfs-provisioner) which can meet our need. 
+    we still have enough flexible choices to serve the backend storages, we don't have cloud storage service, and it is also expensive to build a openstack cinder or gluster or ceph cluster which need at least 2-3 nodes. we only have one choice *NFS*. luckily I found a incubate project [nfs-provisioner](https://github.com/kubernetes-incubator/nfs-provisioner) which can meet our need, now it is moved to [external-storage](https://github.com/kubernetes-incubator/external-storage). 
       
     3.1 use nfs-provisioner to create nfs service, which use hostpath as its volume; then nfs-provisioner will be used as the backend of storageclass.
-				here we use StatefulSet to host the nfs service as suggested.
+				here we use StatefulSet to host the nfs service as suggested. here is the example [nfs-provisoner](./nfs-provisioner/nfs-provisoner.yaml);
 
-  	3.2 Create storageClass
-						
+  	3.2 Create storageClass;
 				
-    the  whole content of the file is [nfs-provisoner.yaml](./nfs-provisioner/nfs-provisoner.yaml)
+    3.3 we have two ways to use storagesClass.
+
+      - create pvc first, then use it inside pod, examples [mysql1](./nfs-provisioner/mysql1.yaml) and [pgsql1](./nfs-provisioner/pg1.yaml); one shortage: it is not easy to scale ; this can be used in statefulset and pod(stateless);
+      - instead of creating pvc, use volumeClaimTemplates ,exapmles [mysql2](./nfs-provisioner/mysql2.yaml) and [pgsql2](./nfs-provisioner/pg2.yaml); when scale, it will create new pod and new pvc. another advantage is when delete this statefulset, it will not delete the pvc; this only applicable in statefulset. 
+
+
+
+     ***when pv is bound to pvc, thus once pvc is deleted, pv is deleted and all data on that pv is lost.***
               
-    a example is create a [postgresql](./nfs-provisioner/pg.yaml) with this persistent volume.
 
 4. Auto-deploy option
 		

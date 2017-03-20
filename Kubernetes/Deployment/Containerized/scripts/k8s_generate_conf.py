@@ -11,7 +11,7 @@ import subprocess
 
 
 def create_etcd_cluster_conf(hostIP,name,etcd_dir_root,endpoints,conf_file):
-    etcd_datadir=etcd_dir_root+'/data'
+    etcd_datadir=etcd_dir_root+'data'
     etcd_conf_content=open(conf_file,'w')
     etcd_conf_content.write("name: '%s'\n"%name)
     etcd_conf_content.write("data-dir: %s\n"%etcd_datadir)
@@ -36,7 +36,7 @@ def create_etcd_cluster_proxy_conf(endpoints,conf):
 
 
 def create_single_etcd_conf(hostIP,etcd_dir_root,conf_file):
-    etcd_datadir=etcd_dir_root+'/data'
+    etcd_datadir=etcd_dir_root+'data'
     etcd_conf_content=open(conf_file,'w')
     etcd_conf_content.write("name: 'default'\n")
     etcd_conf_content.write("data-dir: %s\n"%etcd_datadir)
@@ -129,6 +129,9 @@ if __name__ == '__main__':
 
     TEMP_LOCAL_K8S_CONF_DIR=TEMP_LOCAT_ROOT+('/').join(K8S_CONF_DIR.split('/')[1:])
     TEMP_LOCAL_K8S_CERT_DIR=TEMP_LOCAT_ROOT+('/').join(K8S_CERT_DIR.split('/')[1:])
+    TEMP_LOCAL_K8S_CERT_MASTER_DIR=TEMP_LOCAL_K8S_CERT_DIR+'master/'
+    TEMP_LOCAL_K8S_CERT_WORKER_DIR=TEMP_LOCAL_K8S_CERT_DIR+'worker/'
+
     TEMP_LOCAL_K8S_MANIFESTS_DIR=TEMP_LOCAT_ROOT+('/').join(K8S_MANIFESTS_DIR.split('/')[1:])
     TEMP_LOCAL_K8S_SHELL_DIR=TEMP_LOCAT_ROOT+('/').join(K8S_SHELL_DIR.split('/')[1:])
 
@@ -255,7 +258,7 @@ if __name__ == '__main__':
 
         Template_dir='./templates/certs/'
         Template_file='openssl.conf.jinja2'
-        Target_dir=TEMP_LOCAL_K8S_CERT_DIR
+        Target_dir=TEMP_LOCAL_K8S_CERT_MASTER_DIR
         Target_file=OPENSSL_APISERVERS_CONF
         create_file_from_template(openssl_conf_values_dict,Template_dir,Template_file,Target_dir,Target_file)
 
@@ -266,7 +269,7 @@ if __name__ == '__main__':
 
         Template_dir='./templates/certs/'
         Template_file='openssl.conf.jinja2'
-        Target_dir=TEMP_LOCAL_K8S_CERT_DIR
+        Target_dir=TEMP_LOCAL_K8S_CERT_WORKER_DIR
         Target_file=OPENSSL_WORKERS_CONF
         create_file_from_template(openssl_conf_values_dict,Template_dir,Template_file,Target_dir,Target_file)
 
@@ -409,156 +412,182 @@ if __name__ == '__main__':
     if CREATE_SELF_CA:
         print('Begin to generate self sing CA keys .\n')
 
-
         print('Generating ssl keys in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
 
         print('Creating self CA key in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+
+
+
         CMD_CREATE_CA_KEY='openssl genrsa -out ca-key.pem 2048'
         print(bytes.decode(subprocess.Popen(CMD_CREATE_CA_KEY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
 
-        print('creating CA self-signed cert in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('creating CA self-signed cert in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
         CMD_CREATE_SELF_CA_CERT='openssl req -x509 -new -nodes -key ca-key.pem -days 10000 -out ca.pem -subj "/CN=k8s-ca"'
         print(bytes.decode(subprocess.Popen(CMD_CREATE_SELF_CA_CERT, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
 
-        print('creating apiserver priviate key in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+
+
+        print('creating apiserver priviate key in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
         CMD_CREATE_APISERVER_KEY='openssl genrsa -out apiserver-key.pem 2048'
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_APISERVER_KEY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_APISERVER_KEY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
-        print('creating apiserver sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('creating apiserver sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
         CMD_CREATE_APISERVER_SIGN_REQ='openssl req -new -key apiserver-key.pem -out apiserver.csr -subj "/CN=k8s-master" -config '+OPENSSL_APISERVERS_CONF
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_APISERVER_SIGN_REQ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_APISERVER_SIGN_REQ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
-        print('creating apiserver self-sign cert in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
-        CMD_CREATE_APISERVER_CERT='openssl x509 -req -in apiserver.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out apiserver.pem -days 365  -extfile '+OPENSSL_APISERVERS_CONF
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_APISERVER_CERT, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print('creating apiserver self-sign cert in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
+        CMD_CREATE_APISERVER_CERT='openssl x509 -req -in apiserver.csr -CA ../ca.pem -CAkey ../ca-key.pem -CAcreateserial -out apiserver.pem -days 365  -extfile '+OPENSSL_APISERVERS_CONF
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_APISERVER_CERT, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
-        print('Creating admin ssl keys in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('Creating admin ssl keys in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
 
-        print('Creating admin keys in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('Creating admin keys in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
         CMD_CREATE_ADMIN_KEY='openssl genrsa -out admin-key.pem 2048'
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_KEY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_KEY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
-        print('Creating admin sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('Creating admin sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
         CMD_CREATE_ADMIN_REQ='openssl req -new -key admin-key.pem -out admin.csr -subj "/O=system:masters/CN=admin"'
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_REQ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_REQ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
-        print('creating admin self-sign cert in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
-        CMD_CREATE_APISERVER_CERT='openssl x509 -req -in admin.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out admin.pem -days 365'
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_APISERVER_CERT, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print('creating admin self-sign cert in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
+        CMD_CREATE_APISERVER_CERT='openssl x509 -req -in admin.csr -CA ../ca.pem -CAkey ../ca-key.pem -CAcreateserial -out admin.pem -days 365'
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_APISERVER_CERT, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
 
-        print('Creating kubelet ssl keys in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('Creating kubelet ssl keys in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
 
-        print('Creating kubelet keys in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('Creating kubelet keys in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
         CMD_CREATE_ADMIN_KEY='openssl genrsa -out kubelet-key.pem 2048'
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_KEY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_KEY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
-        print('Creating kubelet sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('Creating kubelet sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
         CMD_CREATE_ADMIN_REQ='openssl req -new -key kubelet-key.pem -out kubelet.csr -subj "/CN=kubelet" -config '+OPENSSL_APISERVERS_CONF
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_REQ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_REQ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
-        print('creating kubelet self-sign cert in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
-        CMD_CREATE_APISERVER_CERT='openssl x509 -req -in kubelet.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out kubelet.pem -days 365 -extfile '+OPENSSL_APISERVERS_CONF
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_APISERVER_CERT, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print('creating kubelet self-sign cert in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
+        CMD_CREATE_APISERVER_CERT='openssl x509 -req -in kubelet.csr -CA ../ca.pem -CAkey ../ca-key.pem -CAcreateserial -out kubelet.pem -days 365 -extfile '+OPENSSL_APISERVERS_CONF
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_APISERVER_CERT, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
-        print('Creating kube-proxy ssl keys in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('Creating kube-proxy ssl keys in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
 
-        print('Creating kube-proxy keys in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('Creating kube-proxy keys in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
         CMD_CREATE_ADMIN_KEY='openssl genrsa -out kube-proxy-key.pem 2048'
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_KEY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_KEY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
-        print('Creating kube-proxy sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('Creating kube-proxy sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
         CMD_CREATE_ADMIN_REQ='openssl req -new -key kube-proxy-key.pem -out kube-proxy.csr -subj "/CN=kube-proxy" -config '+OPENSSL_APISERVERS_CONF
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_REQ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_REQ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
-        print('creating kube-proxy self-sign cert in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
-        CMD_CREATE_APISERVER_CERT='openssl x509 -req -in kube-proxy.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out kube-proxy.pem -days 365 -extfile '+OPENSSL_APISERVERS_CONF
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_APISERVER_CERT, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print('creating kube-proxy self-sign cert in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
+        CMD_CREATE_APISERVER_CERT='openssl x509 -req -in kube-proxy.csr -CA ../ca.pem -CAkey ../ca-key.pem -CAcreateserial -out kube-proxy.pem -days 365 -extfile '+OPENSSL_APISERVERS_CONF
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_APISERVER_CERT, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
-        print('creating basic auth file  in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('creating basic auth file  in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
         CMD_CREATE_BASIC_AUTH= 'echo  "kubernetes,admin,admin,system:masters" > basic_auth.csv'
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_BASIC_AUTH, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_BASIC_AUTH, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
-        print('creating token auth file  in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('creating token auth file  in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
         CMD_CREATE_TOKEN_AUTH= 'TOKEN=$(dd if=/dev/urandom bs=128 count=1 2>/dev/null | base64 | tr -d "=+/" | dd bs=32 count=1 2>/dev/null);echo  "${TOKEN},admin,admin,system:masters" > tokens.csv'
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_TOKEN_AUTH, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_TOKEN_AUTH, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
         if WORKER_NODES_ADDR or WORKER_NODES_DNS:
 
 
-            print('creating woker ssl key in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+            print('creating woker ssl key in %s.\n'%TEMP_LOCAL_K8S_CERT_WORKER_DIR)
 
-            print('creating woker priviate key in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
-            CMD_CREATE_WORKER_KEY='openssl genrsa -out worker-key.pem 2048'
-            print(bytes.decode(subprocess.Popen(CMD_CREATE_WORKER_KEY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+            print('creating woker kubelet priviate key in %s.\n'%TEMP_LOCAL_K8S_CERT_WORKER_DIR)
+            CMD_CREATE_WORKER_KEY='openssl genrsa -out kubelet-key.pem 2048'
+            print(bytes.decode(subprocess.Popen(CMD_CREATE_WORKER_KEY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_WORKER_DIR).communicate()[0]))
 
-            print('creating worker sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
-            CMD_CREATE_WORKER_SIGN_REQ='openssl req -new -key worker-key.pem -out worker.csr -subj "/CN=k8s-worker" -config '+OPENSSL_WORKERS_CONF
-            print(bytes.decode(subprocess.Popen(CMD_CREATE_WORKER_SIGN_REQ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+            print('creating worker sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_WORKER_DIR)
+            CMD_CREATE_WORKER_SIGN_REQ='openssl req -new -key kubelet-key.pem -out kubelet.csr -subj "/CN=kubelet" -config '+OPENSSL_WORKERS_CONF
+            print(bytes.decode(subprocess.Popen(CMD_CREATE_WORKER_SIGN_REQ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_WORKER_DIR).communicate()[0]))
 
-            print('creating worker self-sign cert in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
-            CMD_CREATE_WORKER_CERT='openssl x509 -req -in worker.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out worker.pem -days 365 -extensions v3_req -extfile '+OPENSSL_WORKERS_CONF
-            print(bytes.decode(subprocess.Popen(CMD_CREATE_WORKER_CERT, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+            print('creating worker self-sign cert in %s.\n'%TEMP_LOCAL_K8S_CERT_WORKER_DIR)
+            CMD_CREATE_WORKER_CERT='openssl x509 -req -in kubelet.csr -CA ../ca.pem -CAkey ../ca-key.pem -CAcreateserial -out kubelet.pem -days 365 -extensions v3_req -extfile '+OPENSSL_WORKERS_CONF
+            print(bytes.decode(subprocess.Popen(CMD_CREATE_WORKER_CERT, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_WORKER_DIR).communicate()[0]))
+
+            print('creating woker kube-proxy priviate key in %s.\n'%TEMP_LOCAL_K8S_CERT_WORKER_DIR)
+            CMD_CREATE_WORKER_KEY='openssl genrsa -out kube-proxy-key.pem 2048'
+            print(bytes.decode(subprocess.Popen(CMD_CREATE_WORKER_KEY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_WORKER_DIR).communicate()[0]))
+
+            print('creating worker sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_WORKER_DIR)
+            CMD_CREATE_WORKER_SIGN_REQ='openssl req -new -key kube-proxy-key.pem -out kube-proxy.csr -subj "/CN=kube-proxy" -config '+OPENSSL_WORKERS_CONF
+            print(bytes.decode(subprocess.Popen(CMD_CREATE_WORKER_SIGN_REQ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_WORKER_DIR).communicate()[0]))
+
+            print('creating worker self-sign cert in %s.\n'%TEMP_LOCAL_K8S_CERT_WORKER_DIR)
+            CMD_CREATE_WORKER_CERT='openssl x509 -req -in kube-proxy.csr -CA ../ca.pem -CAkey ../ca-key.pem -CAcreateserial -out kube-proxy.pem -days 365 -extensions v3_req -extfile '+OPENSSL_WORKERS_CONF
+            print(bytes.decode(subprocess.Popen(CMD_CREATE_WORKER_CERT, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_WORKER_DIR).communicate()[0]))
     else:
-
-
-        print('Will not use self-signed keys, just create all sign request now in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('Will not use self-signed keys, just create all sign request now in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
         print('Begin to generate self sing CA keys .\n')
 
-        print('creating apiserver priviate key in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('creating apiserver priviate key in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
         CMD_CREATE_APISERVER_KEY='openssl genrsa -out apiserver-key.pem 2048'
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_APISERVER_KEY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_APISERVER_KEY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
-        print('creating apiserver sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('creating apiserver sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
         CMD_CREATE_APISERVER_SIGN_REQ='openssl req -new -key apiserver-key.pem -out apiserver.csr -subj "/CN=k8s-master" -config '+OPENSSL_APISERVERS_CONF
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_APISERVER_SIGN_REQ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_APISERVER_SIGN_REQ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
 
-        print('Creating admin priviate keys in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('Creating admin priviate keys in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
         CMD_CREATE_ADMIN_KEY='openssl genrsa -out admin-key.pem 2048'
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_KEY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_KEY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
-        print('Creating admin sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('Creating admin sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
         CMD_CREATE_ADMIN_REQ='openssl req -new -key admin-key.pem -out admin.csr -subj "/O=system:masters/CN=admin"'
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_REQ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_REQ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
 
-        print('Creating kubelet priviate keys in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('Creating kubelet priviate keys in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
         CMD_CREATE_ADMIN_KEY='openssl genrsa -out kubelet-key.pem 2048'
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_KEY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_KEY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
-        print('Creating kubelet sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('Creating kubelet sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
         CMD_CREATE_ADMIN_REQ='openssl req -new -key kubelet-key.pem -out kubelet.csr -subj "/CN=kubelet" -config '+OPENSSL_APISERVERS_CONF
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_REQ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_REQ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
 
-        print('Creating kube-proxy  priviate keys in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('Creating kube-proxy  priviate keys in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
         CMD_CREATE_ADMIN_KEY='openssl genrsa -out kube-proxy-key.pem 2048'
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_KEY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_KEY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
-        print('Creating kube-proxy sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('Creating kube-proxy sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
         CMD_CREATE_ADMIN_REQ='openssl req -new -key kube-proxy-key.pem -out kube-proxy.csr -subj "/CN=kube-proxy" -config '+OPENSSL_APISERVERS_CONF
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_REQ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_REQ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
-        print('creating basic auth file  in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('creating basic auth file  in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
         CMD_CREATE_BASIC_AUTH= 'echo  "kubernetes,admin,admin,system:masters" > basic_auth.csv'
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_BASIC_AUTH, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_BASIC_AUTH, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
-        print('creating token auth file  in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+        print('creating token auth file  in %s.\n'%TEMP_LOCAL_K8S_CERT_MASTER_DIR)
         CMD_CREATE_TOKEN_AUTH= 'TOKEN=$(dd if=/dev/urandom bs=128 count=1 2>/dev/null | base64 | tr -d "=+/" | dd bs=32 count=1 2>/dev/null);echo  "${TOKEN},admin,admin,system:masters" > tokens.csv'
-        print(bytes.decode(subprocess.Popen(CMD_CREATE_TOKEN_AUTH, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+        print(bytes.decode(subprocess.Popen(CMD_CREATE_TOKEN_AUTH, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
         if WORKER_NODES_ADDR or WORKER_NODES_DNS:
-            print('creating woker ssl key and sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
+
+            print('creating woker ssl key and sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_WORKER_DIR)
 
 
-            print('creating woker priviate key in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
-            CMD_CREATE_WORKER_KEY='openssl genrsa -out worker-key.pem 2048'
-            print(bytes.decode(subprocess.Popen(CMD_CREATE_WORKER_KEY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+            print('creating woker  kubelet priviate key in %s.\n'%TEMP_LOCAL_K8S_CERT_WORKER_DIR)
+            CMD_CREATE_WORKER_KEY='openssl genrsa -out kubelet-key.pem 2048'
+            print(bytes.decode(subprocess.Popen(CMD_CREATE_WORKER_KEY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_WORKER_DIR ).communicate()[0]))
 
-            print('creating worker sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_DIR)
-            CMD_CREATE_WORKER_SIGN_REQ='openssl req -new -key worker-key.pem -out worker.csr -subj "/CN=k8s-worker" -config '+OPENSSL_WORKERS_CONF
-            print(bytes.decode(subprocess.Popen(CMD_CREATE_WORKER_SIGN_REQ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_DIR).communicate()[0]))
+            print('creating worker kubelet sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_WORKER_DIR)
+            CMD_CREATE_WORKER_SIGN_REQ='openssl req -new -key kubelet-key.pem -out kubelet.csr -subj "/CN=kubelet" -config '+OPENSSL_WORKERS_CONF
+            print(bytes.decode(subprocess.Popen(CMD_CREATE_WORKER_SIGN_REQ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_WORKER_DIR).communicate()[0]))
+
+            print('creating woker kube-proxy ssl key and sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_WORKER_DIR)
+
+
+            print('creating woker priviate key in %s.\n'%TEMP_LOCAL_K8S_CERT_WORKER_DIR)
+            CMD_CREATE_WORKER_KEY='openssl genrsa -out kube-proxy-key.pem 2048'
+            print(bytes.decode(subprocess.Popen(CMD_CREATE_WORKER_KEY, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_WORKER_DIR ).communicate()[0]))
+
+            print('creating worker sign request in %s.\n'%TEMP_LOCAL_K8S_CERT_WORKER_DIR)
+            CMD_CREATE_WORKER_SIGN_REQ='openssl req -new -key kube-proxy-key.pem -out kube-proxy.csr -subj "/CN=kube-proxy" -config '+OPENSSL_WORKERS_CONF
+            print(bytes.decode(subprocess.Popen(CMD_CREATE_WORKER_SIGN_REQ, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CERT_WORKER_DIR).communicate()[0]))
 
     print('generating various kubeconfig files in %s.\n'%TEMP_LOCAL_K8S_CONF_DIR)
 
@@ -578,7 +607,36 @@ if __name__ == '__main__':
 
 
     if DEPLOY_MODE =='multiple':
-      print('This is multiple deployment, ')
+      print('This is multiple deployment,generating kubeconfig files ')
+      if not Path(TEMP_LOCAL_K8S_CONF_DIR).exists():
+        Path(TEMP_LOCAL_K8S_CONF_DIR).mkdir(parents=True)
+      MULTIPLE_APISERVER_ENDPOINT='https://'+ALL_MASTER_ITEMS['loadbalancer_vip_addr']+':6443'
+
+      CMD_CREATE_ADMIN_KUBECONFIG_1='kubectl config set-cluster devosp-k8s --certificate-authority='+K8S_CA_CERT+' --server='+MULTIPLE_APISERVER_ENDPOINT+' --kubeconfig='+ADMIN_CONF
+      CMD_CREATE_ADMIN_KUBECONFIG_2='kubectl config set-credentials admin  --client-certificate='+K8S_ADMIN_CERT+' --client-key='+K8S_ADMIN_KEY+' --kubeconfig='+ADMIN_CONF
+      CMD_CREATE_ADMIN_KUBECONFIG_3='kubectl config set-context admin@devosp-k8s --cluster=devosp-k8s --user=admin  --kubeconfig='+ADMIN_CONF
+      CMD_CREATE_ADMIN_KUBECONFIG_4='kubectl config use-context admin@devosp-k8s  --kubeconfig='+ADMIN_CONF
+      for CMD in [CMD_CREATE_ADMIN_KUBECONFIG_1,CMD_CREATE_ADMIN_KUBECONFIG_2,CMD_CREATE_ADMIN_KUBECONFIG_3,CMD_CREATE_ADMIN_KUBECONFIG_4]:
+        print(bytes.decode(subprocess.Popen(CMD, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CONF_DIR).communicate()[0]))
+
+
+      print('Generating  kubeconfig for kubelet: kubelet.conf in %s.\n'%TEMP_LOCAL_K8S_CONF_DIR)
+      CMD_CREATE_KUBELET_KUBECONFIG_1='kubectl config set-cluster devosp-k8s --certificate-authority='+K8S_CA_CERT+' --server='+MULTIPLE_APISERVER_ENDPOINT+' --kubeconfig='+KUBELET_CONF
+      CMD_CREATE_KUBELET_KUBECONFIG_2='kubectl config set-credentials kubelet  --client-certificate='+K8S_KUBELET_CERT+' --client-key='+K8S_KUBELET_KEY+' --kubeconfig='+KUBELET_CONF
+      CMD_CREATE_KUBELET_KUBECONFIG_3='kubectl config set-context kubelet@devosp-k8s --cluster=devosp-k8s --user=kubelet  --kubeconfig='+KUBELET_CONF
+      CMD_CREATE_KUBELET_KUBECONFIG_4='kubectl config use-context kubelet@devosp-k8s  --kubeconfig='+KUBELET_CONF
+      for CMD in [CMD_CREATE_KUBELET_KUBECONFIG_1,CMD_CREATE_KUBELET_KUBECONFIG_2,CMD_CREATE_KUBELET_KUBECONFIG_3,CMD_CREATE_KUBELET_KUBECONFIG_4]:
+        print(bytes.decode(subprocess.Popen(CMD, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CONF_DIR).communicate()[0]))
+
+      print('Generating  kubeconfig for kube-proxy: kube-proxy.conf in %s.\n'%TEMP_LOCAL_K8S_CONF_DIR)
+      CMD_CREATE_KUBE_PROXY_KUBECONFIG_1='kubectl config set-cluster devosp-k8s --certificate-authority='+K8S_CA_CERT+' --server='+MULTIPLE_APISERVER_ENDPOINT+' --kubeconfig='+KUBE_PROXY_CONF
+      CMD_CREATE_KUBE_PROXY_KUBECONFIG_2='kubectl config set-credentials kube-proxy  --client-certificate='+K8S_KUBE_PROXY_CERT+' --client-key='+K8S_KUBE_PROXY_KEY+' --kubeconfig='+KUBE_PROXY_CONF
+      CMD_CREATE_KUBE_PROXY_KUBECONFIG_3='kubectl config set-context kube-proxy@devosp-k8s --cluster=devosp-k8s --user=kube-proxy  --kubeconfig='+KUBE_PROXY_CONF
+      CMD_CREATE_KUBE_PROXY_KUBECONFIG_4='kubectl config use-context kube-proxy@devosp-k8s  --kubeconfig='+KUBE_PROXY_CONF
+      for CMD in [CMD_CREATE_KUBE_PROXY_KUBECONFIG_1,CMD_CREATE_KUBE_PROXY_KUBECONFIG_2,CMD_CREATE_KUBE_PROXY_KUBECONFIG_3,CMD_CREATE_KUBE_PROXY_KUBECONFIG_4]:
+        print(bytes.decode(subprocess.Popen(CMD, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CONF_DIR).communicate()[0]))
+
+
     else:
       if not Path(TEMP_LOCAL_K8S_CONF_DIR).exists():
         Path(TEMP_LOCAL_K8S_CONF_DIR).mkdir(parents=True)
@@ -596,7 +654,7 @@ if __name__ == '__main__':
       print('Generating  kubeconfig for kubelet: kubelet.conf in %s.\n'%TEMP_LOCAL_K8S_CONF_DIR)
       CMD_CREATE_KUBELET_KUBECONFIG_1='kubectl config set-cluster devosp-k8s --certificate-authority='+K8S_CA_CERT+' --server='+SINGLE_APISERVER_ENDPOINT+' --kubeconfig='+KUBELET_CONF
       CMD_CREATE_KUBELET_KUBECONFIG_2='kubectl config set-credentials kubelet  --client-certificate='+K8S_KUBELET_CERT+' --client-key='+K8S_KUBELET_KEY+' --kubeconfig='+KUBELET_CONF
-      CMD_CREATE_KUBELET_KUBECONFIG_3='kubectl config set-context kubelet@devosp-k8s --cluster=devosp-k8s --user=admin  --kubeconfig='+KUBELET_CONF
+      CMD_CREATE_KUBELET_KUBECONFIG_3='kubectl config set-context kubelet@devosp-k8s --cluster=devosp-k8s --user=kubelet  --kubeconfig='+KUBELET_CONF
       CMD_CREATE_KUBELET_KUBECONFIG_4='kubectl config use-context kubelet@devosp-k8s  --kubeconfig='+KUBELET_CONF
       for CMD in [CMD_CREATE_KUBELET_KUBECONFIG_1,CMD_CREATE_KUBELET_KUBECONFIG_2,CMD_CREATE_KUBELET_KUBECONFIG_3,CMD_CREATE_KUBELET_KUBECONFIG_4]:
         print(bytes.decode(subprocess.Popen(CMD, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CONF_DIR).communicate()[0]))
@@ -604,7 +662,7 @@ if __name__ == '__main__':
       print('Generating  kubeconfig for kube-proxy: kube-proxy.conf in %s.\n'%TEMP_LOCAL_K8S_CONF_DIR)
       CMD_CREATE_KUBE_PROXY_KUBECONFIG_1='kubectl config set-cluster devosp-k8s --certificate-authority='+K8S_CA_CERT+' --server='+SINGLE_APISERVER_ENDPOINT+' --kubeconfig='+KUBE_PROXY_CONF
       CMD_CREATE_KUBE_PROXY_KUBECONFIG_2='kubectl config set-credentials kube-proxy  --client-certificate='+K8S_KUBE_PROXY_CERT+' --client-key='+K8S_KUBE_PROXY_KEY+' --kubeconfig='+KUBE_PROXY_CONF
-      CMD_CREATE_KUBE_PROXY_KUBECONFIG_3='kubectl config set-context kube-proxy@devosp-k8s --cluster=devosp-k8s --user=admin  --kubeconfig='+KUBE_PROXY_CONF
+      CMD_CREATE_KUBE_PROXY_KUBECONFIG_3='kubectl config set-context kube-proxy@devosp-k8s --cluster=devosp-k8s --user=kube-proxy  --kubeconfig='+KUBE_PROXY_CONF
       CMD_CREATE_KUBE_PROXY_KUBECONFIG_4='kubectl config use-context kube-proxy@devosp-k8s  --kubeconfig='+KUBE_PROXY_CONF
       for CMD in [CMD_CREATE_KUBE_PROXY_KUBECONFIG_1,CMD_CREATE_KUBE_PROXY_KUBECONFIG_2,CMD_CREATE_KUBE_PROXY_KUBECONFIG_3,CMD_CREATE_KUBE_PROXY_KUBECONFIG_4]:
         print(bytes.decode(subprocess.Popen(CMD, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,cwd=TEMP_LOCAL_K8S_CONF_DIR).communicate()[0]))

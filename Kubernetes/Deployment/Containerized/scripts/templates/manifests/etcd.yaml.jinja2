@@ -8,9 +8,9 @@ spec:
   - image: gcr.io/google_containers/etcd:{{ ETCD_VER }}
     name: etcd-container
     command:
-    - /usr/local/bin/etcd 
-    - --config-file=/data/kubernetes/conf/etcd.conf 
-    - --debug  
+    - /usr/local/bin/etcd
+    - --config-file={{ ETCDE_CONF }}
+    - --debug
     ports:
     - containerPort: 2380
       hostPort: 2380

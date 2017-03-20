@@ -12,14 +12,14 @@ KUBERNETES_DOWNLOAD_URL_PREFIX="${KUBERNETES_RELEASE_URL}/${KUBERNETES_RELEASE}"
 SERVER_PLATFORM="linux"
 SERVER_ARCH="amd64"
 
-if [[  !  -f /usr/bin/kubelet ]];then 
+if [[  !  -f /usr/bin/kubelet ]];then
      curl  -SL ${KUBERNETES_RELEASE_URL}/${KUBERNETES_RELEASE}/bin/${SERVER_PLATFORM}/${SERVER_ARCH}/kubelet -o /usr/bin/kubelet  && chmod +x /usr/bin/kubelet
 else
     echo -e "kubelet is installed \n"
     exit 0
 fi
 
-if [[  !  -f /usr/bin/kubectl ]];then 
+if [[  !  -f /usr/bin/kubectl ]];then
      curl  -SL ${KUBERNETES_RELEASE_URL}/${KUBERNETES_RELEASE}/bin/${SERVER_PLATFORM}/${SERVER_ARCH}/kubectl -o /usr/bin/kubectl  && chmod +x /usr/bin/kubectl
 else
     echo -e "kubectl is installed \n"
@@ -27,9 +27,9 @@ else
 fi
 
 
-if [[  !  -f /usr/bin/kube-proxy ]];then 
-     curl  -SL ${KUBERNETES_RELEASE_URL}/${KUBERNETES_RELEASE}/bin/${SERVER_PLATFORM}/${SERVER_ARCH}/kube-proxy -o /usr/bin/kube-proxy  && chmod +x /usr/bin/kube-proxy
-else
-    echo -e "kube-proxy is installed \n"
-    exit 0
-fi
+#if [[  !  -f /usr/bin/kube-proxy ]];then
+#     curl  -SL ${KUBERNETES_RELEASE_URL}/${KUBERNETES_RELEASE}/bin/${SERVER_PLATFORM}/${SERVER_ARCH}/kube-proxy -o /usr/bin/kube-proxy  && chmod +x /usr/bin/kube-proxy
+#else
+#    echo -e "kube-proxy is installed \n"
+#    exit 0
+#fi

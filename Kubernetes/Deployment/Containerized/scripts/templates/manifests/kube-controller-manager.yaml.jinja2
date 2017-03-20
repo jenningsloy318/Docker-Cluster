@@ -7,9 +7,8 @@ spec:
   - command:
     - /bin/sh
     - -c
-    - /usr/local/bin/kube-controller-manager --kubeconfig=/data/kubernetes/kubeconfig
-      --cluster-cidr={{ POD_CIDR }} --allocate-node-cidrs=true  --service-account-private-key-file=/data/kubernetes/certs/apiserver-key.pem 
-      --cluster-signing-cert-file=/data/kubernetes/certs/ca.pem --cluster-signing-key-file=/data/kubernetes/certs/ca-key.pem
+    - /usr/local/bin/kube-controller-manager --kubeconfig={{ KUBECONFIG }}
+      --cluster-cidr={{ POD_CIDR }} --allocate-node-cidrs=true  --service-account-private-key-file=/data/kubernetes/certs/apiserver-key.pem
       --v=5 --leader-elect=true --root-ca-file=/data/kubernetes/certs/ca.pem 1>>/data/log/kube-controller-manager.log 2>&1
     image: gcr.io/google_containers/kube-controller-manager:{{ K8S_VER }}
     imagePullPolicy: IfNotPresent

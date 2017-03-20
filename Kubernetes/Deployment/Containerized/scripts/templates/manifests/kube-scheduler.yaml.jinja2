@@ -11,7 +11,7 @@ spec:
     command:
     - /bin/sh
     - -c
-    - /usr/local/bin/kube-scheduler --kubeconfig=/data/kubernetes/kubeconfig --v=5 --leader-elect=true 1>>/data/log/kube-scheduler.log  2>&1
+    - /usr/local/bin/kube-scheduler --kubeconfig={{ KUBECONFIG }} --v=5 --leader-elect=true 1>>/data/log/kube-scheduler.log  2>&1
     livenessProbe:
       httpGet:
         path: /healthz

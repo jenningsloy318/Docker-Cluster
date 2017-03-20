@@ -19,7 +19,7 @@ spec:
         command:
         - sh
         - -c
-        - /usr/local/bin/kube-proxy --kubeconfig=/data/kubernetes/kubeconfig
+        - /usr/local/bin/kube-proxy --kubeconfig={{ KUBECONFIG }}
           --cluster-cidr={{ POD_CIDR }}
           --v=5 1>>/data/log/kube-proxy.log 2>&1
         securityContext:

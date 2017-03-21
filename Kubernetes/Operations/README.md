@@ -291,7 +291,7 @@ Here I listed the aspects about how to run k8s better.
         
         ```yaml
 
-				args:
+			args:
         - --cache-size=1000
         - --no-resolv
         - --server=127.0.0.1#10053

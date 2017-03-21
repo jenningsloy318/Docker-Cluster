@@ -275,3 +275,42 @@ Here I listed the aspects about how to run k8s better.
          ```
 
 9. [RABC](./RABC)
+
+10. KubeDNS
+    
+    each pod is created with a ```dnsPolicy``` with value ```ClusterFirst```or ```Default```, default vaule is ClusterFirst.
+      
+      - ClusterFirst: use cluster DNS fist, if we set ```--cluster-dns={{ CLUSTER_DNS }} ``` parameter in kubelet service, pod will only have this single nameserver configured. 
+
+      - Default: this  setting makes pod to use host dns setting, pod has the same copy of the host /etc/resolv.conf file.
+
+    
+    Our environment has both requirement that pod both need to resolve internal DNS and external DNS, thus we have to change dnsmsasq args.
+      
+      - prior to 1.6, we need to change the kubedns.yaml file, modify it as flowing:
+        
+        ```yaml
+
+				args:
+        - --cache-size=1000
+        - --no-resolv
+        - --server=127.0.0.1#10053
+        - --server={{ nameserver1 }}#53
+        - --server={{ nameserver2 }}#53
+        - --log-facility=-
+        ```
+     
+      -  begin with 1.6, k8s provide a component dnsmasq-nanny to manage dnsmasq value from ```kube-system:kube-dns configmap```  , according to ([#41826](https://github.com/kubernetes/kubernetes/pull/41826)),
+        
+        ```configmap
+
+        "stubDomains": {
+        "acme.local": ["1.2.3.4"]
+        },
+        ```
+
+        is a map of domain to list of nameservers for the domain, This is used to inject private DNS domains into the kube-dns namespace. In the above example, any DNS requests for *.acme.local will be served by the nameserver 1.2.3.4.
+
+
+        ```"upstreamNameservers": ["8.8.8.8", "8.8.4.4"]```: is a list of upstreamNameservers to use, overriding the configuration specified in /etc/resolv.conf.
+

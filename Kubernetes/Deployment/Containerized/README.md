@@ -68,7 +68,7 @@ This time I deploy a tree-master and one loadbalancer k8s cluster.
         - --log-facility=-
         ```
 
-      -  begin with 1.6, k8s provide a component dnsmasq-nanny to manage dnsmasq value from ```kube-system:kube-dns configmap```  , according to ([#41826](https://github.com/kubernetes/kubernetes/pull/41826)), as example[kubeDNS](./scripts/templates/addons/kubedns.yaml).
+      -  begin with 1.6, k8s provide a component dnsmasq-nanny to manage dnsmasq value from ```kube-system:kube-dns configmap```  , according to ([#41826](https://github.com/kubernetes/kubernetes/pull/41826)), as example[kubeDNS](./scripts/templates/addons/kube-dns.yaml.jinja2).
 
         ```configmap
 

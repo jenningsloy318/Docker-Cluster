@@ -13,6 +13,7 @@ This time I deploy a tree-master and one loadbalancer k8s cluster.
    | kube-master2.example.com | 192.168.49.152 |Master|
    | kube-master3.example.com | 192.168.49.153 |Master|
      
+     ![Architecture](./imgs/kuberntes-arch.png)
 
 2. Etcd cluster configuration.
 
@@ -68,7 +69,7 @@ This time I deploy a tree-master and one loadbalancer k8s cluster.
         - --log-facility=-
         ```
 
-      -  begin with 1.6, k8s provide a component dnsmasq-nanny to manage dnsmasq value from ```kube-system:kube-dns configmap```  , according to ([#41826](https://github.com/kubernetes/kubernetes/pull/41826)), as example[kubeDNS](./scripts/templates/addons/kube-dns.yaml.jinja2).
+      -  begin with 1.6, k8s provide a component dnsmasq-nanny to manage dnsmasq value from ```kube-system:kube-dns configmap```  , according to ([#41826](https://github.com/kubernetes/kubernetes/pull/41826)), as example [kubeDNS](./scripts/templates/addons/kube-dns.yaml.jinja2).
 
         ```configmap
 

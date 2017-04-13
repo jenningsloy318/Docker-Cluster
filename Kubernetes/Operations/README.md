@@ -303,7 +303,6 @@ Here I listed the aspects about how to run k8s better.
       -  begin with 1.6, k8s provide a component dnsmasq-nanny to manage dnsmasq value from ```kube-system:kube-dns configmap```  , according to ([#41826](https://github.com/kubernetes/kubernetes/pull/41826)),
         
         ```configmap
-
         "stubDomains": {
         "acme.local": ["1.2.3.4"]
         },

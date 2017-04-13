@@ -302,14 +302,14 @@ Here I listed the aspects about how to run k8s better.
      
       -  begin with 1.6, k8s provide a component dnsmasq-nanny to manage dnsmasq value from ```kube-system:kube-dns configmap```  , according to ([#41826](https://github.com/kubernetes/kubernetes/pull/41826)),
         
-        ```configmap
-        "stubDomains": {
-        "acme.local": ["1.2.3.4"]
-        },
-        ```
+         ```configmap
+         "stubDomains": {
+         "acme.local": ["1.2.3.4"]
+         },
+         ```
 
-        is a map of domain to list of nameservers for the domain, This is used to inject private DNS domains into the kube-dns namespace. In the above example, any DNS requests for *.acme.local will be served by the nameserver 1.2.3.4.
+         is a map of domain to list of nameservers for the domain, This is used to inject private DNS domains into the kube-dns namespace. In the above example, any DNS requests for *.acme.local will be served by the nameserver 1.2.3.4.
 
 
-        ```"upstreamNameservers": ["8.8.8.8", "8.8.4.4"]```: is a list of upstreamNameservers to use, overriding the configuration specified in /etc/resolv.conf.
+         ```"upstreamNameservers": ["8.8.8.8", "8.8.4.4"]```: is a list of upstreamNameservers to use, overriding the configuration specified in /etc/resolv.conf.
 

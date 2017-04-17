@@ -19,8 +19,8 @@ spec:
       hostPort: 2379
       name: clientport
     volumeMounts:
-    - mountPath: /var/etcd
-      name: varetcd
+    - mountPath: {{ ETCD_DIR_ROOT }}
+      name: etcdroot
     - mountPath: /etc/ssl
       name: etcssl
       readOnly: true
@@ -45,20 +45,15 @@ spec:
     - mountPath: /etc/pki/tls
       name: etcpkitls
       readOnly: true
-    - mountPath: /etc/kubernetes/pki
-      name: kubessl
-      readOnly: true
-    - mountPath:  /data/kubernetes/conf/
       name: etcdconf
       readOnly: true
     - mountPath: /var/log
       name: varlog
-    - mountPath: /data/etcd
-      name: dataetcd
+
   volumes:
   - hostPath:
-      path: /var/etcd/data
-    name: varetcd
+      path: {{ ETCD_DIR_ROOT }}
+    name: etcdroot
   - hostPath:
       path: /etc/ssl
     name: etcssl
@@ -84,14 +79,6 @@ spec:
       path: /etc/pki/tls
     name: etcpkitls
   - hostPath:
-      path: /etc/kubernetes/pki
-    name: kubessl
-  - hostPath:
-      path: /data/kubernetes/conf/
-    name: etcdconf
-  - hostPath:
       path: /var/log
     name: varlog
-  - hostPath:
-      path: /data/etcd
-    name: dataetcd
+

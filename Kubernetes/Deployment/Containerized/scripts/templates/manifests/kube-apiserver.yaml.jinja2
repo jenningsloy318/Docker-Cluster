@@ -14,13 +14,14 @@ spec:
     - /usr/local/bin/kube-apiserver --etcd-servers=http://127.0.0.1:2379
       --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,ResourceQuota
       --service-cluster-ip-range={{ SVC_CIDR }}
-      --service-account-key-file=/data/kubernetes/certs/apiserver-key.pem
-      --client-ca-file=/data/kubernetes/certs/ca.pem
-      --basic-auth-file=/data/kubernetes/certs/basic_auth.csv 
-      --tls-cert-file=/data/kubernetes/certs/apiserver.pem --tls-private-key-file=/data/kubernetes/certs/apiserver-key.pem
+      --service-account-key-file={{ K8S_DIR_ROOT }}/certs/apiserver-key.pem
+      --client-ca-file={{ K8S_DIR_ROOT }}/certs/ca.pem
+      --basic-auth-file={{ K8S_DIR_ROOT }}/certs/basic_auth.csv
+      --tls-cert-file={{ K8S_DIR_ROOT }}/certs/apiserver.pem --tls-private-key-file={{ K8S_DIR_ROOT }}/certs/apiserver-key.pem
       --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname --anonymous-auth=false
+      --audit-log-path=/var/log/kube-audit.log --audit-log-maxage=7 --audit-log-maxbackup=4 --audit-log-maxsize=512
       --secure-port=6443   --v=5
-      --allow-privileged=true 1>>/data/log/kube-apiserver.log 2>&1
+      --allow-privileged=true 1>>/var/log/kube-apiserver.log 2>&1
     ports:
     - containerPort: 443
       hostPort: 443
@@ -32,9 +33,9 @@ spec:
       hostPort: 8080
       name: local
     volumeMounts:
-    - mountPath: /data/log/
+    - mountPath: /var/log/
       name: logfile
-    - mountPath: /data/kubernetes/certs
+    - mountPath: {{ K8S_DIR_ROOT }}
       name: certs
       readOnly: true
     - mountPath: /usr/share/ssl
@@ -60,10 +61,10 @@ spec:
       readOnly: true
   volumes:
   - hostPath:
-      path: /data/log/
+      path: /var/log/
     name: logfile
   - hostPath:
-      path: /data/kubernetes/certs
+      path: {{ K8S_DIR_ROOT }}
     name: certs
   - hostPath:
       path: /usr/share/ssl

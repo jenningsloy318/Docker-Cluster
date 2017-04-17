@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+echo "restart services"
+
+systemctl daemon-reload
+
+for svc in kubelet docker
+  do
+  systemctl restart $svc
+done
+

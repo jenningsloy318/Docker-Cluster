@@ -21,19 +21,19 @@ spec:
         - -c
         - /usr/local/bin/kube-proxy --kubeconfig={{ KUBECONFIG }}
           --cluster-cidr={{ POD_CIDR }}
-          --v=5 1>>/data/log/kube-proxy.log 2>&1
+          --v=5 1>>/var/log/kube-proxy.log 2>&1
         securityContext:
           privileged: true
         volumeMounts:
         - name: kubeconf
-          mountPath: /data/kubernetes/kubeconfig
+          mountPath: {{ K8S_DIR_ROOT }}
           readOnly: true
-        - mountPath: /data/log/
+        - mountPath: /var/log/
           name: logfile
       volumes:
       - name: kubeconf
         hostPath:
-          path: /data/kubernetes/kubeconfig
+          path: {{ K8S_DIR_ROOT }}
       - hostPath:
-          path: /data/log/
+          path: /var/log/
         name: logfile

@@ -11,7 +11,7 @@ spec:
     command:
     - /bin/sh
     - -c
-    - /usr/local/bin/kube-scheduler --kubeconfig={{ KUBECONFIG }} --v=5 --leader-elect=true 1>>/data/log/kube-scheduler.log  2>&1
+    - /usr/local/bin/kube-scheduler --kubeconfig={{ KUBECONFIG }} --v=5 --leader-elect=true 1>>/var/log/kube-scheduler.log  2>&1
     livenessProbe:
       httpGet:
         path: /healthz
@@ -19,15 +19,15 @@ spec:
       initialDelaySeconds: 15
       timeoutSeconds: 1
     volumeMounts:
-    - mountPath: /data/log/
+    - mountPath: /var/log/
       name: logfile
-    - mountPath: /data/kubernetes
+    - mountPath: {{ K8S_DIR_ROOT }}
       name: kubeconf
       readonly: true
   volumes:
   - hostPath:
-      path: /data/log/
+      path: /var/log/
     name: logfile
   - hostPath:
-      path: /data/kubernetes
+      path: {{ K8S_DIR_ROOT }}
     name: kubeconf

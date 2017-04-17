@@ -11,8 +11,8 @@ spec:
       hostNetwork: true
       containers:
       - name: nodejs
-        image: mo-b166c2b61.mo.sap.corp/nodejs/maven3-nodejs:latest 
-        imagePullPolicy: IfNotPresent
+        image: mo-b166c2b61.mo.sap.corp/nodejs/maven3-nodejs:latest
+        imagePullPolicy: Always
         command:
           - bash
           - -exc

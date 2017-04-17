@@ -11,8 +11,8 @@ spec:
       hostNetwork: true
       containers:
       - name: jenkins-slave-maven3-jdk7
-        image: mo-b166c2b61.mo.sap.corp/maven/maven3-jdk7:latest 
-        imagePullPolicy: IfNotPresent
+        image: mo-b166c2b61.mo.sap.corp/maven/maven3-jdk7:latest
+        imagePullPolicy: Always
         securityContext:
           privileged: true
         command:

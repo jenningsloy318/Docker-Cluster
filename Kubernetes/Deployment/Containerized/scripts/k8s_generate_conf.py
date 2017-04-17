@@ -486,7 +486,7 @@ if __name__ == '__main__':
 
         print('Creating admin sign request in %s.\n' %
               TEMP_LOCAL_K8S_CERT_MASTER_DIR)
-        CMD_CREATE_ADMIN_REQ = 'openssl req -new -key admin-key.pem -out admin.csr -subj "/O=system:masters/CN=admin"'
+        CMD_CREATE_ADMIN_REQ = 'openssl req -new -key admin-key.pem -out admin.csr -subj "/O=system:masters/CN=cluster-admin"'
         print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_REQ, shell=True, stdout=subprocess.PIPE,
                                             stderr=subprocess.STDOUT, cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
@@ -564,7 +564,7 @@ if __name__ == '__main__':
 
             print('creating worker sign request in %s.\n' %
                   TEMP_LOCAL_K8S_CERT_WORKER_DIR)
-            CMD_CREATE_WORKER_SIGN_REQ = 'openssl req -new -key kubelet-key.pem -out kubelet.csr -subj "/CN=kubelet" -config ' + OPENSSL_WORKERS_CONF
+            CMD_CREATE_WORKER_SIGN_REQ = 'openssl req -new -key kubelet-key.pem -out kubelet.csr -subj "/O=system:nodes/CN=kubelet" -config ' + OPENSSL_WORKERS_CONF
             print(bytes.decode(subprocess.Popen(CMD_CREATE_WORKER_SIGN_REQ, shell=True, stdout=subprocess.PIPE,
                                                 stderr=subprocess.STDOUT, cwd=TEMP_LOCAL_K8S_CERT_WORKER_DIR).communicate()[0]))
 
@@ -582,7 +582,7 @@ if __name__ == '__main__':
 
             print('creating worker sign request in %s.\n' %
                   TEMP_LOCAL_K8S_CERT_WORKER_DIR)
-            CMD_CREATE_WORKER_SIGN_REQ = 'openssl req -new -key kube-proxy-key.pem -out kube-proxy.csr -subj "/CN=kube-proxy" -config ' + OPENSSL_WORKERS_CONF
+            CMD_CREATE_WORKER_SIGN_REQ = 'openssl req -new -key kube-proxy-key.pem -out kube-proxy.csr -subj "/CN=system:kube-proxy" -config ' + OPENSSL_WORKERS_CONF
             print(bytes.decode(subprocess.Popen(CMD_CREATE_WORKER_SIGN_REQ, shell=True, stdout=subprocess.PIPE,
                                                 stderr=subprocess.STDOUT, cwd=TEMP_LOCAL_K8S_CERT_WORKER_DIR).communicate()[0]))
 
@@ -616,7 +616,7 @@ if __name__ == '__main__':
 
         print('Creating admin sign request in %s.\n' %
               TEMP_LOCAL_K8S_CERT_MASTER_DIR)
-        CMD_CREATE_ADMIN_REQ = 'openssl req -new -key admin-key.pem -out admin.csr -subj "/O=system:masters/CN=admin"'
+        CMD_CREATE_ADMIN_REQ = 'openssl req -new -key admin-key.pem -out admin.csr -subj "/O=system:masters/CN=cluster-admin"'
         print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_REQ, shell=True, stdout=subprocess.PIPE,
                                             stderr=subprocess.STDOUT, cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
@@ -628,7 +628,7 @@ if __name__ == '__main__':
 
         print('Creating kubelet sign request in %s.\n' %
               TEMP_LOCAL_K8S_CERT_MASTER_DIR)
-        CMD_CREATE_ADMIN_REQ = 'openssl req -new -key kubelet-key.pem -out kubelet.csr -subj "/CN=kubelet" -config ' + \
+        CMD_CREATE_ADMIN_REQ = 'openssl req -new -key kubelet-key.pem -out kubelet.csr -subj "/O=system:nodes/CN=kubelet" -config ' + \
             OPENSSL_APISERVERS_CONF
         print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_REQ, shell=True, stdout=subprocess.PIPE,
                                             stderr=subprocess.STDOUT, cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
@@ -641,7 +641,7 @@ if __name__ == '__main__':
 
         print('Creating kube-proxy sign request in %s.\n' %
               TEMP_LOCAL_K8S_CERT_MASTER_DIR)
-        CMD_CREATE_ADMIN_REQ = 'openssl req -new -key kube-proxy-key.pem -out kube-proxy.csr -subj "/CN=kube-proxy" -config ' + OPENSSL_APISERVERS_CONF
+        CMD_CREATE_ADMIN_REQ = 'openssl req -new -key kube-proxy-key.pem -out kube-proxy.csr -subj "/CN=system:kube-proxy" -config ' + OPENSSL_APISERVERS_CONF
         print(bytes.decode(subprocess.Popen(CMD_CREATE_ADMIN_REQ, shell=True, stdout=subprocess.PIPE,
                                             stderr=subprocess.STDOUT, cwd=TEMP_LOCAL_K8S_CERT_MASTER_DIR).communicate()[0]))
 
@@ -670,7 +670,7 @@ if __name__ == '__main__':
 
             print('creating worker kubelet sign request in %s.\n' %
                   TEMP_LOCAL_K8S_CERT_WORKER_DIR)
-            CMD_CREATE_WORKER_SIGN_REQ = 'openssl req -new -key kubelet-key.pem -out kubelet.csr -subj "/CN=kubelet" -config ' + OPENSSL_WORKERS_CONF
+            CMD_CREATE_WORKER_SIGN_REQ = 'openssl req -new -key kubelet-key.pem -out kubelet.csr -subj "/O=system:nodes/CN=kubelet" -config ' + OPENSSL_WORKERS_CONF
             print(bytes.decode(subprocess.Popen(CMD_CREATE_WORKER_SIGN_REQ, shell=True, stdout=subprocess.PIPE,
                                                 stderr=subprocess.STDOUT, cwd=TEMP_LOCAL_K8S_CERT_WORKER_DIR).communicate()[0]))
 
@@ -685,7 +685,7 @@ if __name__ == '__main__':
 
             print('creating worker sign request in %s.\n' %
                   TEMP_LOCAL_K8S_CERT_WORKER_DIR)
-            CMD_CREATE_WORKER_SIGN_REQ = 'openssl req -new -key kube-proxy-key.pem -out kube-proxy.csr -subj "/CN=kube-proxy" -config ' + OPENSSL_WORKERS_CONF
+            CMD_CREATE_WORKER_SIGN_REQ = 'openssl req -new -key kube-proxy-key.pem -out kube-proxy.csr -subj "/CN=system:kube-proxy" -config ' + OPENSSL_WORKERS_CONF
             print(bytes.decode(subprocess.Popen(CMD_CREATE_WORKER_SIGN_REQ, shell=True, stdout=subprocess.PIPE,
                                                 stderr=subprocess.STDOUT, cwd=TEMP_LOCAL_K8S_CERT_WORKER_DIR).communicate()[0]))
 

@@ -36,5 +36,15 @@ spec:
             value: "true"
           - name: GF_AUTH_ANONYMOUS_ORG_ROLE
             value: Admin
+          - name:　GF_PATHS_DATA
+            value: /data
+        volumeMounts:
+        - name: gf-data
+          mountPath: /data
+      # Volumes and config maps
+      volumes:
+      - name: gf-data
+        persistentVolumeClaim:
+          claimName: gf-data-pvc
 #          - name: GF_SERVER_ROOT_URL
 #            value: /api/v1/proxy/namespaces/default/services/grafana/

@@ -233,12 +233,12 @@ Here I listed the aspects about how to run k8s better.
    - deploy [kube-state-metrics](./Monitor/kube-state-metrics.yaml);
    - begin to deploy prometheus and alertmanager service, first we will create configmaps which provide the configration for prometheus and altertmanager; then when we need to do any updates to prometheus, will just update the configmap and reload prometheus via ```curl -X POST http(s)://{prometheus-host}:{prometheus-port}/-/reload```or ```curl -X POST http(s)://{alertmanager-host}:{alertmanager-port}/-/reload```
 
-      - configmap for [prometheus.yml](./Monitor/prometheus.configmp), one thing need to mention that if we use self-CA to sign the keys, should set ```insecure_skip_verify: true```;
+      - configmap for [prometheus-conf](./Monitor/prometheus-config.configmp), one thing need to mention that if we use self-CA to sign the keys, should set ```insecure_skip_verify: true```;
       - also we need a [alertmanager-rule](./Monitor/alertmanager-rules.configmap) when configure prometheus;
-      - configmap for [alertmanager.yml](./Monitor/alertmanager.configmap), configured email as the main method, one thing need to take care is *disable stmp ssl* by setting ```smtp_require_tls: false```;
-      - deploy prometheus and alermanager in a single pod via [prometheus.yaml](./Monitor/prometheus.yaml);
+      - configmap for [alertmanager-conf](./Monitor/alertmanager-config.configmap), configured email as the main method, one thing need to take care is *disable stmp ssl* by setting ```smtp_require_tls: false```;
+      - deploy prometheus and alermanager in a single pod via [prometheus-altermanager-deployment.yaml](./Monitor/prometheus-altermanager-deployment.yaml) and its storage pvc [prometheus-pvc.yaml](./Monitor/prometheus-pvc.yaml);
 
-   - deploy grafana web ui via [grafana.yaml](./Monitor/grafana.yaml);
+   - deploy grafana web ui via [grafana.yaml](./Monitor/grafana.yaml) and its storage pvc [grafana-pvc.yaml](./Monitor/grafana-pvc.yaml), with a env GF_PATHS_DATA to overwride the default data paht, details refer to [grafana Configuration](http://docs.grafana.org/installation/configuration), we can also set other parameters this way;
    - configure the datasource, since we have no idea how to configure it inside the conf, so here the datasource used ***proxy*** way to configure;
    - deploy ingress rule via [mon-ingress.yaml](./Monitor/mon-ingress.yaml) to expose the services to outside;
    - import several dashboards, first is  [Kubernetes cluster monitoring (via Prometheus)](https://grafana.net/dashboards/315) , [Docker Dashboard](https://grafana.net/dashboards/179) is another one, also this one [Docker and system monitoring](https://grafana.net/dashboards/893). after import them, we need to do some adjustments to meet our needs;

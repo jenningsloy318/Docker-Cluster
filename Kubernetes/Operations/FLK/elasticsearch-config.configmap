@@ -7,7 +7,9 @@ data:
     http.cors.enabled: true
     http.cors.allow-origin: "*"
     http.host: 0.0.0.0
-    
+    path.data: ${ES_DATA_PATH}
+
+
     # Uncomment the following lines for a production cluster deployment
     #transport.host: 0.0.0.0
     #discovery.zen.minimum_master_nodes: 1

@@ -46,5 +46,3 @@ spec:
       - name: gf-data
         persistentVolumeClaim:
           claimName: gf-data-pvc
-#          - name: GF_SERVER_ROOT_URL
-#            value: /api/v1/proxy/namespaces/default/services/grafana/

@@ -34,9 +34,6 @@ spec:
         - name: containerlog
           mountPath: /var/lib/docker/containers
           readOnly: true
-        - name: dockerdir
-          mountPath: /data/docker
-          readOnly: true
       terminationGracePeriodSeconds: 30
       volumes:
       - name: varlog
@@ -45,6 +42,4 @@ spec:
       - name: containerlog
         hostPath:
           path: /var/lib/docker/containers
-      - name: dockerdir
-        hostPath:
-          path: /data/docker/
+

@@ -1,0 +1,12 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: k8s-elasticseach-pvc
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "devops-k8s-nfs"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 20Gi

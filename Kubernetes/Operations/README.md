@@ -196,17 +196,17 @@ Here I listed the aspects about how to run k8s better.
 	  stdout_logfile=/dev/stdout
 
     ```
-6. ELK
+6. FLK
    
-   We usually use ELK suite to analyze the logs, here we deploy it to view and summarize the docker container logs
+   We usually use FLK suite to analyze the logs, here we deploy it to view and summarize the docker container logs
 
-   6.1 first to deploy fluentd agent via [fluentd.yaml](./ELK/fluentd.yaml) on each node to fetch all logs and send to elasticsearch server/cluster, so we use daemonset to run this agent.
+   6.1 first to deploy fluentd agent via [fluentd.yaml](./FLK/fluentd.yaml) on each node to fetch all logs and send to elasticsearch server/cluster, so we use daemonset to run this agent.
 
-   6.2 create the configmap via [elasticsearch.configmap](./ELK/elasticsearch.configmap) which contains all configurations used in elastic. this configmap contains two config files ```elasticsearch.yml``` and ```log4j2.properties```; in ```elasticsearch.yml```, I added two more parameters  ```http.cors.enabled: true``` and ```http.cors.allow-origin: "*"```, thus grafana can also get the logs from elasticsearch service.  
+   6.2 create the configmap via [elasticsearch-config.configmap](./FLK/elasticsearch-config.configmap) which contains all configurations used in elastic. this configmap contains two config files ```elasticsearch.yml``` and ```log4j2.properties```; in ```elasticsearch.yml```, I added two more parameters  ```http.cors.enabled: true``` and ```http.cors.allow-origin: "*"```, thus grafana can also get the logs from elasticsearch service.  
 
-    6.3 create elasticsearch via [elasticsearch-deployment.yaml](./ELK/elasticsearch-deployment.yaml);in this deployment, I also used storageclass to provide persistent storage for elasticsearch data. to get indices, using ```curl -X GET 'http://{ELASTICSEARCH_HOST}:{PORT}/_cat/indices?v&pretty'```
+    6.3 create elasticsearch via [elasticsearch-deployment.yaml](./FLK/elasticsearch-deployment.yaml);in this deployment, I also used storageclass pvc [elasticsearch-pvc.yaml](./FLK/elasticsearch-pvc.yaml) to provide persistent storage for elasticsearch data. to get indices, using ```curl -X GET 'http://{ELASTICSEARCH_HOST}:{PORT}/_cat/indices?v&pretty'```
 
-    6.4 create kibana webui via [kibana.yaml](./ELK/kibana.yaml), one thing need to take care is when creating  kibana ingress rule, we should add annotation of ```add-base-url```, the value should be same with the value of ```"KIBANA_BASE_URL"``` in elasticsearch pod env.
+    6.4 create kibana webui via [kibana.yaml](./FLK/kibana.yaml), one thing need to take care is when creating  kibana ingress rule, we should add annotation of ```add-base-url```, the value should be same with the value of ```"KIBANA_BASE_URL"``` in kibana.yaml deployment env. Also we can use a configmap [kibana-config.configmap](./FLK/kibana-config.configmap) to store its configurations. details config refer to [config kibaba in docker](https://www.elastic.co/guide/en/kibana/5.3/_configuring_kibana_on_docker.html#docker-bind-mount-config).
       - ingress rule	
 
       ```yaml
@@ -223,7 +223,7 @@ Here I listed the aspects about how to run k8s better.
         value: "/api/v1/proxy/namespaces/default/services/kibana-logging"
       ````
 
-    Now we can access kibana. ![kibana](./ELK/ELK.png)
+    Now we can access kibana. ![kibana](./FLK/FLK.png)
 
 7. Monitor
 

@@ -51,7 +51,7 @@ data:
         SUMMARY = "{{$labels.instance}}: Swap usage detected",
         DESCRIPTION = "{{$labels.instance}}: Swap usage usage is above 75% (current value is: {{ $value }})"
       }
-    
+
     ALERT NodeMemoryUsage
       IF (((node_memory_MemTotal-node_memory_MemFree-node_memory_Cached)/(node_memory_MemTotal)*100)) > 75
       FOR 2m
@@ -72,7 +72,7 @@ data:
         SUMMARY = "{{$labels.instance}}: Low root disk space",
         DESCRIPTION = "{{$labels.instance}}: Root disk usage is above 75% (current value is: {{ $value }})"
       }
-    
+
     ALERT NodeLowDataDisk
       IF ((node_filesystem_size{mountpoint="/data-disk"} - node_filesystem_free{mountpoint="/data-disk"} ) / node_filesystem_size{mountpoint="/data-disk"} * 100) > 75
       FOR 2m
@@ -83,4 +83,109 @@ data:
         SUMMARY = "{{$labels.instance}}: Low data disk space",
         DESCRIPTION = "{{$labels.instance}}: Data disk usage is above 75% (current value is: {{ $value }})"
       }
-    
+    ALERT InstanceDown
+      IF up == 0
+      FOR 5m
+      LABELS {
+        severity="page"
+      }
+      ANNOTATIONS {
+        summary = "Instance {{$labels.instance}} down",
+        description = "{{$labels.instance}} of job {{$labels.job}} has been down for more than 5 minutes.",
+      }
+
+    ALERT fs_at_80_percent
+      IF hrStorageUsed{hrStorageDescr=~"/.+"} / hrStorageSize >= 0.8
+      FOR 15m
+      ANNOTATIONS {
+        summary = "File system {{$labels.hrStorageDescr}} is at 80%",
+        description = "{{$labels.hrStorageDescr}} has been at 80% for more than 15 Minutes.",
+        severity = "warning"
+      }
+
+    ALERT fs_at_90_percent
+      IF hrStorageUsed{hrStorageDescr=~"/.+"} / hrStorageSize >= 0.9
+      FOR 15m
+      ANNOTATIONS {
+        summary = "File system {{$labels.hrStorageDescr}} is at 90%",
+        description = "{{$labels.hrStorageDescr}} has been at 90% for more than 15 Minutes.",
+        severity = "average"
+      }
+
+    ALERT disk_load_mostly_random_reads
+      IF rate(diskIOReads{diskIODevice=~"sd[a-z]+"}[5m]) > 20 AND
+         rate(diskIONReadX{diskIODevice=~"sd[a-z]+"}[5m]) / rate(diskIOReads{diskIODevice=~"sd[a-z]+"}[5m]) < 10000
+      FOR 15m
+      ANNOTATIONS {
+        summary = "Disk {{$labels.diskIODevice}} reads are mostly random.",
+        description = "{{$labels.diskIODevice}} reads have been mostly random for the past 15 Minutes.",
+        severity = "info"
+      }
+
+    ALERT disk_load_mostly_random_writes
+      IF rate(diskIOWrites{diskIODevice=~"sd[a-z]+"}[5m]) > 20 AND
+         rate(diskIONWrittenX{diskIODevice=~"sd[a-z]+"}[5m]) / rate(diskIOWrites{diskIODevice=~"sd[a-z]+"}[5m]) < 10000
+      FOR 15m
+      ANNOTATIONS {
+        summary = "Disk {{$labels.diskIODevice}} writes are mostly random.",
+        description = "{{$labels.diskIODevice}} writes have been mostly random for the past 15 Minutes.",
+        severity = "info"
+      }
+
+    ALERT disk_load_high
+      IF diskIOLA1{diskIODevice=~"s|vd[a-z]+"} > 30
+      FOR 15m
+      ANNOTATIONS {
+        summary = "Disk {{$labels.diskIODevice}} is at 30%",
+        description = "{{$labels.diskIODevice}} Load has exceeded 30% over the past 15 Minutes.",
+        severity = "warning"
+      }
+
+    ALERT cpu_load_high
+      IF ssCpuIdle < 70
+      FOR 15m
+      ANNOTATIONS {
+        summary = "CPU is at 30%",
+        description = "CPU Load has constantly exceeded 30% over the past 15 Minutes.",
+        severity = "warning"
+      }
+
+    ALERT linux_load_high
+      IF laLoad1 > 50
+      FOR 15m
+      ANNOTATIONS {
+        summary = "Linux Load is at 40",
+        description = "Linux Load has constantly exceeded 40 over the past 15 Minutes.",
+        severity = "average"
+      }
+
+    ALERT if_operstatus_changed
+      IF delta(ifOperStatus[15m]) != 0
+      ANNOTATIONS {
+        summary = "Port {{$labels.ifDescr}} changed status",
+        description = "Port {{$labels.ifDescr}} went up or down in the past 15 Minutes",
+        severity = "info"
+      }
+
+    ALERT if_traffic_at_30_percent
+      IF ifSpeed > 10000000 AND
+         ifOperStatus == 1 AND
+         rate(ifInOctets[5m]) > ifSpeed * 0.3
+      FOR 15m
+      ANNOTATIONS {
+        summary = "Port {{$labels.ifDescr}} is at 30%",
+        description = "Port {{$labels.ifDescr}} has had at least 30% traffic over the past 15 Minutes.",
+        severity = "warning"
+      }
+
+    ALERT if_traffic_at_70_percent
+      IF ifSpeed > 10000000 AND
+         ifOperStatus == 1 AND
+         rate(ifInOctets[5m]) > ifSpeed * 0.7
+      FOR 15m
+      ANNOTATIONS {
+        summary = "Port {{$labels.ifDescr}} is at 70%",
+        description = "Port {{$labels.ifDescr}} has had at least 70% traffic over the past 15 Minutes.",
+        severity = "average"
+      }
+

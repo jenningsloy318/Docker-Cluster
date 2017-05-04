@@ -39,9 +39,19 @@ data:
 
       # All the above attributes are inherited by all child routes and can
       # overwritten on each.
-
+      # All alerts with job=ems
+      # are dispatched to the email-receiver2 pager.
+      routes:
+      - receiver: 'email-receiver2'
+        match:
+           job: ems
     receivers:
     - name: 'email-receiver'
+      email_configs:
+      - send_resolved: true
+        to:  'user@example.com'
+    receivers:
+    - name: 'email-receiver2'
       email_configs:
       - send_resolved: true
         to:  'user@example.com'

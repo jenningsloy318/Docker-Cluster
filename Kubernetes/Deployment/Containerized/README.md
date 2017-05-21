@@ -34,10 +34,20 @@ This time I deploy a tree-master and one loadbalancer k8s cluster.
      
      This time we should change the value to ```new``` since  maybe the cluster info is lost, we can re-bootstrap it again.
 
-3. Setup a loadbalancer reverse-proxy 3 apiservers, expose only one apiserver endpoint to all cluster, other component(kubelet service) can talk to this loadbalancer eventually communitating to actual apiserver. and also setup a etcd-proxy to connect to etcd cluster also exposing one etcd endpoint, which used in calico to store all network info. 
-   apiserver proxy is setup with tcp stream proxy, and etcd-proxy is stup with etcd software with ```proxy: 'on'```, don't forget the single quotation(```'```). I encontered failed without it.
-    
-     
+3. since we have set up 3 more api servers and one multi-node etcd cluster. but some services on the worker nodes still need to communitcate to the apiserver and etcd cluster, yes we can create  a standalone loadbalancer, but this also introduced a SPOF(single point of failure), but how to prevent it? 
+   solutions is run etcd-proxy and apiserver-proxy on each worker node. both of them can run as a static pod; 
+
+   for etcd-proxy pod, same manifest file created as previously, with a different configuration, this will listen on localhost:2379 
+
+   ```conf
+   proxy: 'on'
+   listen-client-urls: http://127.0.0.1:2379
+   initial-cluster: etcd0=http://{server0}:2380,etcd1=http://{server1}:2380,etcd2=http://{server2}:2380
+   advertise-client-urls:  http://127.0.0.1:2379
+   ```
+   for apiserver-proxy, we can use a haproxy or nginx  to create this static pod. with nginx, enable tcp passthrough when working with apiserver.
+   [nginx conf sample](./HA/apiserver-proxy-nginx.conf) and [HAproxy conf sample](./HA/apiserver-proxy-haproxy.conf)
+
 4. for kublet.service, sometimes when add ```--hostname-override=```  to a readable name is very useful to distinguish each sever when we are running k8s in a cloud, inside the cloud the hostname of each VM is not easy to remember. 
 
 

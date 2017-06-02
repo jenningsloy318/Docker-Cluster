@@ -100,45 +100,10 @@ Docker-engine
    $mv docker/* /usr/bin/
    ```
 
-2. modify the docker service file, add ```-g /data/docker```and proxy if necessary. ```Environment="HTTP_PROXY=http://proxy:8080/"```, then restart docker service.
+2. modify the docker service file, example is [docker.service](./init/docker.service), one thing need to consider  is using cgroup to limit resource consuming by docker service and all containers.
+3. we can place all docker configure in /etc/docker/daemon.json, example is [daemon.json](./conf/daemon.json). according to[https://docs.docker.com/engine/reference/commandline/dockerd/#options](https://docs.docker.com/engine/reference/commandline/dockerd/#options)
 
-   ```shell
 
-   $ cat docker.service
-
-   [Unit]
-   Description=Docker Application Container Engine
-   Documentation=https://docs.docker.com
-
-   [Service]
-   Type=notify
-   $ the default is not to use systemd for cgroups because the delegate issues still
-   $ exists and systemd currently does not support the cgroup feature set required
-   $ for containers run by docker
-
-   Environment="HTTP_PROXY=http://proxy:8080/"
-   ExecStart=/usr/bin/dockerd  -g /data/docker
-   ExecReload=/bin/kill -s HUP $MAINPID
-   $ Having non-zero Limit*s causes performance problems due to accounting overhead
-   $ in the kernel. We recommend using cgroups to do container-local accounting.
-   LimitNOFILE=infinity
-   LimitNPROC=infinity
-   LimitCORE=infinity
-   $ Uncomment TasksMax if your systemd version supports it.
-   $ Only systemd 226 and above support this version.
-   TasksMax=infinity
-   TimeoutStartSec=0
-   $ set delegate yes so that systemd does not reset the cgroups of docker containers
-   Delegate=yes
-   $ kill only the docker process, not all processes in the cgroup
-   KillMode=process
-
-   [Install]
-   WantedBy=multi-user.target
-
-   $ systemctl daemon-reload
-   $ systemctl restart docker
-   ```
 
 
 

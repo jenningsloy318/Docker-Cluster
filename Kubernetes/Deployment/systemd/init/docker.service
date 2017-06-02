@@ -11,7 +11,7 @@
   Environment="HTTP_PROXY=http://{proxy-host}:{proxy-poprt}"
   Environment="HTTPS_PROXY=http://{proxy-host}:{proxy-poprt}"
 
-  ExecStart=/usr/bin/dockerd  -g /data/docker
+  ExecStart=/usr/bin/dockerd
   ExecReload=/bin/kill -s HUP $MAINPID
   # Having non-zero Limit*s causes performance problems due to accounting overhead
   # in the kernel. We recommend using cgroups to do container-local accounting.
@@ -21,6 +21,10 @@
   # Uncomment TasksMax if your systemd version supports it.
   # Only systemd 226 and above support this version.
   TasksMax=infinity
+
+  ## Use cgroup to limit the memory
+  MemoryLimit=700M
+
   TimeoutStartSec=0
   # set delegate yes so that systemd does not reset the cgroups of docker containers
   Delegate=yes

@@ -313,3 +313,9 @@ Here I listed the aspects about how to run k8s better.
 
          ```"upstreamNameservers": ["8.8.8.8", "8.8.4.4"]```: is a list of upstreamNameservers to use, overriding the configuration specified in /etc/resolv.conf.
 
+11. for a continuous operation, a pod must configured with several parameters
+    * [limited resource](https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-ram-container/)
+    * [init containers](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-initialization/)
+    * [liveness/readiness probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/)
+    * [lifecycle(postStart/preStop)](https://kubernetes.io/docs/tasks/configure-pod-container/attach-handler-lifecycle-event/)
+

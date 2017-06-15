@@ -1,0 +1,5 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1beta1
+metadata:
+    name: devops-k8s-nfs
+    provisioner: devops-k8s/nfs

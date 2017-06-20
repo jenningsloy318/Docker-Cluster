@@ -136,15 +136,14 @@ Problems during the installation
 
    3.1  Failed to setup network for pod "kube-dns-v20-swgmq_kube-system(ff5766a0-d3ce-11e6-b0ed-000c29394d5c)" using network plugins "cni": pods "kube-dns-v20-swgmq" not found; Skipping pod 
        
-       * cause is : the incorrect configuration of following valube in the calico calico,yaml when deploy the cni network by excute ```kubectl apply -f calico.yaml```;
+    * cause is : the incorrect configuration of following valube in the calico calico,yaml when deploy the cni network by excute kubectl apply -f calico.yaml;
         
-          ```conf
           - name: K8S_API
-          value: "https://kubernetes.default:443"
-          ````
-       * symtom: this happens when deploy kubedns/dashboard pods, both of them need request network info from calico, eventually need to connect to apiserver to retrieve these info, but calico is misconfigured so it can't get IP address through calico, so the pod can't be created.
+            value: "https://kubernetes.default:443"
 
-       * solution, leave it there when it can cooperate with kubedns to resolve this IP to ```10.96.0.1``` , so after kubedns is created, this issue is gone. or change it to that ip which is the first ip of service cluster range.  the only thing to remember is to update the value ```etcd_endpoints: "http://192.168.49.141:2379"```, we may fail to deploy calico, most of the cases are  the certificate issue or the secrets are incorrect, just re-create all apiserver cert and delelete all secrets in all namespaces.
+    * symtom: this happens when deploy kubedns/dashboard pods, both of them need request network info from calico, eventually need to connect to apiserver to retrieve these info, but calico is misconfigured so it can't get IP address through calico, so the pod can't be created.
+
+    * solution, leave it there when it can cooperate with kubedns to resolve this IP to ```10.96.0.1``` , so after kubedns is created, this issue is gone. or change it to that ip which is the first ip of service cluster range.  the only thing to remember is to update the value ```etcd_endpoints: "http://192.168.49.141:2379"```, we may fail to deploy calico, most of the cases are  the certificate issue or the secrets are incorrect, just re-create all apiserver cert and delelete all secrets in all namespaces.
 
    3.2  we found that calico-policy will be not working properly when we don't use the default domain ```cluster.local```, same as described [here](https://github.com/projectcalico/calicoctl/issues/1168)
 
@@ -188,10 +187,10 @@ Configure on master node
 
    - get etcd binary
          
-         ```shell
+        ```shell
           $ wget https://github.com/coreos/etcd/releases/download/v3.0.15/etcd-v3.0.15-linux-amd64.tar.gz
           $ tar xf etcd-v3.0.15-linux-amd64.tar.gz
-         ```
+        ```
 
 
 2. Start etcd on master.
@@ -215,23 +214,23 @@ Configure on master node
 
 
     - create CA key pair.
-          - Create CA priviate key
+        - Create CA priviate key
                
-              ```shell
+            ```shell
               $ openssl genrsa -out ca-key.pem 2048
-              ```
+            ```
 
-          -  Extract the public key
+        -  Extract the public key
             
-              ```shell
+            ```shell
               $ openssl rsa -in ca-key.pem -pubout -out ca-pub.pem
-              ```
+            ```
 
-          - create CA  self  signed cert
+        - create CA  self  signed cert
             
-              ```shell
+            ```shell
               $ openssl req -x509 -new -nodes -key ca-key.pem -days 10000 -out ca.pem -subj "/CN=192.168.49.141"
-              ```
+            ```
 
 
     - Create apiserver key pair signed by preceding created CA.
@@ -250,7 +249,7 @@ Configure on master node
         
         - Edit openssl.cnf to feed the needs,modify the DNS.n and IP.n, the DNSs is the internal service cluster DNS domain, and IP.1 is the first ```IP``` in the ```SERVICE_IP_RANGE```, and IP.2 is the master IP address. refter to [Cluster TLS using OpenSSL](https://coreos.com/kubernetes/docs/latest/openssl.html)
 
-              ```shell
+            ```shell
               $ cat openssl.cnf
               [req]
               req_extensions = v3_req
@@ -267,19 +266,19 @@ Configure on master node
               DNS.4 = kubernetes.default.svc.cluster.local
               IP.1 = 10.96.0.1
               IP.2 = 192.168.49.141
-              ```
+            ```
 
         - Create sign request for apiserver key
                 
-              ```shell
+            ```shell
               $ openssl req -new -key apiserver-key.pem -out apiserver.csr -subj "/CN=192.168.49.141" -config openssl.cnf
-              ```
+            ```
 
         - Sign apiserver key
 
-              ```
+            ```
               $openssl x509 -req -in apiserver.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out apiserver.pem -days 365 -extensions v3_req -extfile openssl.cnf
-              ```
+            ```
     - if we want to create other service account key, repeat step 2. 
 
     - All of these key and cert are stored in /etc/kubernetes/pki. 
@@ -361,17 +360,17 @@ Configure on master node
 
     - command and parameters used to start scheduler service
 
-        ```shell
-        $/usr/bin/hyperkube scheduler \
-        --master=http://localhost:8080 \
-        --leader-elect=true \
-        --v=2 
-        ```
+    ```shell
+    $/usr/bin/hyperkube scheduler \
+    --master=http://localhost:8080 \
+    --leader-elect=true \
+    --v=2 
+    ```
 
-        explanation
+    explanation
 
         
-          - ```--master=http://localhost:8080```: is the address of apiserver endpoint
+    - ```--master=http://localhost:8080```: is the address of apiserver endpoint
     
     
     - now we can start scheduler service via [scheduler service file] (./init/kube-scheduler.service)
@@ -387,21 +386,21 @@ Configure on master node
 
         - setup the cluster info
    
-              ```shell
+            ```shell
               $kubectl config set-cluster kubernetes --certificate-authority=/etc/kubernetes/pki/ca.pem --embed-certs=true --server=https://192.168.49.141:6443 --kubeconfig=/etc/kubernetes/kubelet.conf
-              ```
+            ```
         - set kubelet user and context
 
-              ```shell
+            ```shell
               $ kubectl config set-credentials kubelet --client-certificate=/etc/kubernetes/pki/apiserver.pem --client-key=/etc/kubernetes/pki/apiserver-key.pem --embed-certs=true      --kubeconfig=/etc/kubernetes/kubelet.conf
               $ kubectl config set-context kubelet@kubernetes --cluster=kubernetes --user=kubelet  --kubeconfig=/etc/kubernetes/kubelet.conf
-              ```
+            ```
 
         - set current context
 
-              ```shell
+            ```shell
               $ kubectl config  use-context kubelet@kubernetes  --kubeconfig=/etc/kubernetes/kubelet.conf
-              ```
+            ```
     - command and parameters to start kubelet service. 
 
         ```shell
@@ -412,9 +411,9 @@ Configure on master node
 
         explanation
 
-          - ``` --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin```: we should use third-party plugins to provide the network function, later we will deploy calico plugin with pod.
+        - ``` --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin```: we should use third-party plugins to provide the network function, later we will deploy calico plugin with pod.
    
-          - ``` --cluster-dns=10.96.0.10 --cluster-domain=cluster.local```: this setting is related with the cluster internal DNS setting, we will deploy the DNS pod after calico is deployed. 
+        - ``` --cluster-dns=10.96.0.10 --cluster-domain=cluster.local```: this setting is related with the cluster internal DNS setting, we will deploy the DNS pod after calico is deployed. 
    
     - now we can use [kubelet.service](./init/kubelet.service) to start kubelet 
    
@@ -474,26 +473,26 @@ Configure on master node
 
     -  we can create it with 
 
-           ```shell
+        ```shell
            kubectl create -f dns-addon.yml
-           ```
+        ```
 
     - check the pod 
 
 
-          ```shell
+        ```shell
           $ kubectl get pod -n kube-system  -o wide
           NAME                                        READY     STATUS    RESTARTS   AGE       IP               NODE
           kube-dns-v20-hvbbz                          3/3       Running   3          1d        192.168.9.77     kube-node1
-          ```
+        ```
 
     - check the service 
 
-          ```shell
+        ```shell
           $kubectl get svc -n kube-system  -o wide
           NAME                   CLUSTER-IP       EXTERNAL-IP   PORT(S)         AGE       SELECTOR
           kube-dns               10.96.0.10       <none>        53/UDP,53/TCP   1d        k8s-app=kube-dns
-          ```
+        ```
 
 
 11. Install dashboard.
@@ -559,9 +558,9 @@ Configure on master node
 
         explanation
 
-          * ``` --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin```: we should use third-party plugins to provide the network function, later we will deploy calico plugin with pod.
+        * ``` --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin```: we should use third-party plugins to provide the network function, later we will deploy calico plugin with pod.
 
-          * ``` --cluster-dns=10.96.0.10 --cluster-domain=cluster.local```: this setting is related with the cluster internal DNS setting, we will deploy the DNS pod after calico is deployed. 
+        * ``` --cluster-dns=10.96.0.10 --cluster-domain=cluster.local```: this setting is related with the cluster internal DNS setting, we will deploy the DNS pod after calico is deployed. 
 
 
     - now we can use [kubelet-node.service](./init/kubelet-node.service) to start kubelet 

@@ -136,14 +136,14 @@ Problems during the installation
 
    3.1  Failed to setup network for pod "kube-dns-v20-swgmq_kube-system(ff5766a0-d3ce-11e6-b0ed-000c29394d5c)" using network plugins "cni": pods "kube-dns-v20-swgmq" not found; Skipping pod 
        
-    * cause is : the incorrect configuration of following valube in the calico calico,yaml when deploy the cni network by excute kubectl apply -f calico.yaml;
-        
-          - name: K8S_API
-            value: "https://kubernetes.default:443"
+    - cause is : the incorrect configuration of following valube in the calico calico,yaml when deploy the cni network by excute kubectl apply -f calico.yaml;
+       ```
+        - name: K8S_API
+          value: "https://kubernetes.default:443"
+       ```    
+    - symtom: this happens when deploy kubedns/dashboard pods, both of them need request network info from calico, eventually need to connect to apiserver to retrieve these info, but calico is misconfigured so it can't get IP address through calico, so the pod can't be created.
 
-    * symtom: this happens when deploy kubedns/dashboard pods, both of them need request network info from calico, eventually need to connect to apiserver to retrieve these info, but calico is misconfigured so it can't get IP address through calico, so the pod can't be created.
-
-    * solution, leave it there when it can cooperate with kubedns to resolve this IP to ```10.96.0.1``` , so after kubedns is created, this issue is gone. or change it to that ip which is the first ip of service cluster range.  the only thing to remember is to update the value ```etcd_endpoints: "http://192.168.49.141:2379"```, we may fail to deploy calico, most of the cases are  the certificate issue or the secrets are incorrect, just re-create all apiserver cert and delelete all secrets in all namespaces.
+    - solution, leave it there when it can cooperate with kubedns to resolve this IP to ```10.96.0.1``` , so after kubedns is created, this issue is gone. or change it to that ip which is the first ip of service cluster range.  the only thing to remember is to update the value ```etcd_endpoints: "http://192.168.49.141:2379"```, we may fail to deploy calico, most of the cases are  the certificate issue or the secrets are incorrect, just re-create all apiserver cert and delelete all secrets in all namespaces.
 
    3.2  we found that calico-policy will be not working properly when we don't use the default domain ```cluster.local```, same as described [here](https://github.com/projectcalico/calicoctl/issues/1168)
 
@@ -161,7 +161,7 @@ Configure on master node
      
    - get kubernetes binary. 
 
-        ```sh
+     ```sh
         $ wget https://github.com/kubernetes/kubernetes/releases/download/v1.5.0/kubernetes.tar.gz
         $ untar kubernetes.tar.gz 
         $ cd kubernetes
@@ -182,15 +182,15 @@ Configure on master node
         
         $ tar xf kubernetes/server/kubernetes-server-linux-amd64.tar.gz 
         $ tar xf kubernetes/client/kubernetes-client-linux-amd64.tar.gz 
-        ```
+     ```
                      
 
    - get etcd binary
          
-        ```shell
-          $ wget https://github.com/coreos/etcd/releases/download/v3.0.15/etcd-v3.0.15-linux-amd64.tar.gz
-          $ tar xf etcd-v3.0.15-linux-amd64.tar.gz
-        ```
+     ```shell
+     $ wget https://github.com/coreos/etcd/releases/download/v3.0.15/etcd-v3.0.15-linux-amd64.tar.gz
+     $ tar xf etcd-v3.0.15-linux-amd64.tar.gz
+     ```
 
 
 2. Start etcd on master.
@@ -216,21 +216,21 @@ Configure on master node
     - create CA key pair.
         - Create CA priviate key
                
-            ```shell
+          ```shell
               $ openssl genrsa -out ca-key.pem 2048
-            ```
+          ```
 
         -  Extract the public key
             
-            ```shell
+           ```shell
               $ openssl rsa -in ca-key.pem -pubout -out ca-pub.pem
-            ```
+           ```
 
         - create CA  self  signed cert
             
-            ```shell
+          ```shell
               $ openssl req -x509 -new -nodes -key ca-key.pem -days 10000 -out ca.pem -subj "/CN=192.168.49.141"
-            ```
+          ```
 
 
     - Create apiserver key pair signed by preceding created CA.
@@ -249,7 +249,7 @@ Configure on master node
         
         - Edit openssl.cnf to feed the needs,modify the DNS.n and IP.n, the DNSs is the internal service cluster DNS domain, and IP.1 is the first ```IP``` in the ```SERVICE_IP_RANGE```, and IP.2 is the master IP address. refter to [Cluster TLS using OpenSSL](https://coreos.com/kubernetes/docs/latest/openssl.html)
 
-            ```shell
+          ```shell
               $ cat openssl.cnf
               [req]
               req_extensions = v3_req
@@ -266,19 +266,19 @@ Configure on master node
               DNS.4 = kubernetes.default.svc.cluster.local
               IP.1 = 10.96.0.1
               IP.2 = 192.168.49.141
-            ```
+          ```
 
         - Create sign request for apiserver key
                 
-            ```shell
+          ```shell
               $ openssl req -new -key apiserver-key.pem -out apiserver.csr -subj "/CN=192.168.49.141" -config openssl.cnf
-            ```
+          ```
 
         - Sign apiserver key
 
-            ```
+          ```
               $openssl x509 -req -in apiserver.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out apiserver.pem -days 365 -extensions v3_req -extfile openssl.cnf
-            ```
+          ```
     - if we want to create other service account key, repeat step 2. 
 
     - All of these key and cert are stored in /etc/kubernetes/pki. 

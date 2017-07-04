@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-customization
+  namespace: kube-system
+data:
+  enable-vts-status: "true"
+  proxy-connect-timeout: "10"
+  proxy-read-timeout: "120"
+  proxy-send-timeout: "120"

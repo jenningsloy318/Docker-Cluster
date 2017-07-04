@@ -122,6 +122,7 @@ Here I listed the aspects about how to run k8s better.
                        backend:
                          serviceName: kubernetes-dashboard
                          servicePort: 80
+    Links: https://github.com/kubernetes/ingress, details under ingress/controllers/nginx/
                                           
 2. CI/CD integration
 

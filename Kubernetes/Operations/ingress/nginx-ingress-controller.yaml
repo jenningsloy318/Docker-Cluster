@@ -41,6 +41,8 @@ spec:
           hostPort: 8080
         - containerPort: 443
           hostPort: 443
+        - containerPort: 18080
+          hostPort: 18080
         env:
           - name: POD_NAME
             valueFrom:
@@ -53,6 +55,8 @@ spec:
         args:
         - /nginx-ingress-controller
         - --default-backend-service=$(POD_NAMESPACE)/default-http-backend
+        - --configmap=$(POD_NAMESPACE)/nginx-customization
+        - --tcp-services-configmap=$(POD_NAMESPACE)/tcp-configmap-example
         volumeMounts:
           - mountPath: /etc/nginx/template
             name: nginx-template-volume

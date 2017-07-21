@@ -41,9 +41,10 @@
       - add HTTP_PROXY / HTTPS_PROXY Environment, 
       - since we have moved all docker conf to `/etc/docker/daemon.json`, then modify `ExecStart` to `ExecStart=/usr/bin/dockerd`
 
-    2.4 configure docker via [daemon.json](./conf/daemon.json).serveral things need to mention.
+    2.4 configure docker via [daemon.json](./Docker/daemon.json).serveral things need to mention.
         
-      - `cgroup-parent: /container.slice/docker` which means that all container will under `/container.slice/docker/` 
+      - `cgroup-parent: container.slice` which means that all container will under  `/container.slice/` 
+      - `cgroup driver`: systemd
         ```
         #systemd-cgls
         Control group /:

@@ -35,3 +35,7 @@
     - #3 query statment : `label_values(kubernetes_io_hostname)`; prometheus use label, so we use `label_vaules` to get the label value.
     - $4 choose `Include All option`  check box;
     - $5 will preview the result if the variable is correctly created. 
+2. install via grafana 
+  2.1 create configmap
+  ```
+  kubectl create configmap grafana-dashboard --from-file=

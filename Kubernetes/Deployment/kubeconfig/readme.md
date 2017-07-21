@@ -40,8 +40,8 @@ kubectl config  use-context kube-proxy@kubernetes  --kubeconfig=/srv/kubernetes/
 
 ## cluster-admin.kubeconfig
 ```
-kubectl config set-cluster kubernetes --certificate-authority=/srv/kubernetes/ca.pem --embed-certs=true --server=https://10.58.137.243:6443 --kubeconfig=/srv/kubernetes/cluster-admin.kubeconfig
+kubectl config set-cluster kubernetes --certificate-authority=/srv/kubernetes/ca.pem --embed-certs=true --server=https://10.58.137.243:6443  --insecure-skip-tls-verify=true --kubeconfig=/srv/kubernetes/cluster-admin.kubeconfig 
 kubectl config set-credentials cluster-admin --client-certificate=/srv/kubernetes/cluster-admin.pem --client-key=/srv/kubernetes/cluster-admin-key.pem --embed-certs=true       --kubeconfig=/srv/kubernetes/cluster-admin.kubeconfig
 kubectl config set-context cluster-admin@kubernetes --cluster=kubernetes --user=cluster-admin  --kubeconfig=/srv/kubernetes/cluster-admin.kubeconfig
-kubectl config  use-context kube-proxy@kubernetes  --kubeconfig=/srv/kubernetes/cluster-admin.kubeconfig
+kubectl config  use-context cluster-admin@kubernetes  --kubeconfig=/srv/kubernetes/cluster-admin.kubeconfig
 ```

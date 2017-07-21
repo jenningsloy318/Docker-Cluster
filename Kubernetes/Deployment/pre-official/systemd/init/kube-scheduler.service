@@ -1,0 +1,13 @@
+[Unit]
+Description=kube scheduler service
+After=kube-apiserver.service
+
+[Service]
+ExecStart=/usr/bin/hyperkube scheduler --master=http://localhost:8080 --v=2 --leader-elect=true 
+Restart=always
+RestartSec=10s
+LimitNOFILE=40000
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kube-apiserver
+spec:
+  hostNetwork: true
+  containers:
+  - name: kube-apiserver
+    image: gcr.io/google_containers/kube-apiserver:v1.7.0
+    imagePullPolicy: Always
+    command:
+    - /bin/sh
+    - -c
+    - /usr/local/bin/kube-apiserver 
+      --etcd-servers=https://10.58.137.243:2379 
+      --etcd-cafile=/srv/kubernetes/ca.pem 
+      --etcd-certfile=/srv/kubernetes/etcdclient.pem --etcd-keyfile=etcdclient-key.pem
+      --authorization-mode=RBAC,Node
+      --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,ResourceQuota,NodeRestriction
+      --service-cluster-ip-range=192.168.0.0/16
+      --service-account-key-file=/srv/kubernetes/apiserver-key.pem
+      --client-ca-file=/srv/kubernetes/ca.pem
+      --tls-cert-file=/srv/kubernetes/apiserver.pem --tls-private-key-file=/srv/kubernetes/apiserver-key.pem
+      --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname --anonymous-auth=false
+      --secure-port=6443   --v=5
+      --allow-privileged=true 
+    ports:
+    - containerPort: 6443
+      hostPort: 6443
+      name: https
+    - containerPort: 8080
+      hostPort: 8080
+      name: local
+    volumeMounts:
+    - mountPath: /var/log/
+      name: logfile
+    - mountPath: /srv/kubernetes/
+      name: certs
+      readOnly: true
+    - mountPath: /usr/share/ssl
+      name: usrsharessl
+      readOnly: true
+    - mountPath: /var/ssl
+      name: varssl
+      readOnly: true
+    - mountPath: /usr/ssl
+      name: usrssl
+      readOnly: true
+    - mountPath: /usr/lib/ssl
+      name: usrlibssl
+      readOnly: true
+    - mountPath: /usr/local/openssl
+      name: usrlocalopenssl
+      readOnly: true
+    - mountPath: /etc/openssl
+      name: etcopenssl
+      readOnly: true
+    - mountPath: /etc/pki/tls
+      name: etcpkitls
+      readOnly: true
+  volumes:
+  - hostPath:
+      path: /var/log/
+    name: logfile
+  - hostPath:
+      path: /srv/kubernetes/
+    name: certs
+  - hostPath:
+      path: /usr/share/ssl
+    name: usrsharessl
+  - hostPath:
+      path: /var/ssl
+    name: varssl
+  - hostPath:
+      path: /usr/ssl
+    name: usrssl
+  - hostPath:
+      path: /usr/lib/ssl
+    name: usrlibssl
+  - hostPath:
+      path: /usr/local/openssl
+    name: usrlocalopenssl
+  - hostPath:
+      path: /etc/openssl
+    name: etcopenssl
+  - hostPath:
+      path: /etc/pki/tls
+    name: etcpkitls

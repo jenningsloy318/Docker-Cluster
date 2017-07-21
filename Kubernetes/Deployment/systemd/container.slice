@@ -1,0 +1,7 @@
+[Unit]
+Description=Limited resources Slice
+DefaultDependencies=no
+Before=slices.target
+
+[Slice]
+MemoryLimit=48G

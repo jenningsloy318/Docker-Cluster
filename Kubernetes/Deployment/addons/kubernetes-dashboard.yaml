@@ -1,0 +1,76 @@
+
+---
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+    kubernetes.io/cluster-service: "true"
+  name: kubernetes-dashboard
+  namespace: kube-system
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      k8s-app: kubernetes-dashboard
+  template:
+    metadata:
+      labels:
+        k8s-app: kubernetes-dashboard
+    spec:
+      containers:
+      - name: kubernetes-dashboard
+        image: gcr.io/google_containers/kubernetes-dashboard-amd64:v1.6.1
+        ports:
+        - containerPort: 9090
+          protocol: TCP
+        args:
+          # Uncomment the following line to manually specify Kubernetes API server Host
+          # If not specified, Dashboard will attempt to auto discover the API server and connect
+          # to it. Uncomment only if the default does not work.
+          # - --apiserver-host=http://my-address:port
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 9090
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+        resources:
+          limits:
+            memory: "1024Mi"
+      serviceAccountName: kubernetes-dashboard
+      # Comment the following tolerations if Dashboard must not be deployed on master
+---
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+    kubernetes.io/cluster-service: "true"
+  name: kubernetes-dashboard
+  namespace: kube-system
+spec:
+  ports:
+  - port: 80
+    targetPort: 9090
+  selector:
+    k8s-app: kubernetes-dashboard
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ name: kubernetes-dashboard-ingress
+spec:
+ tls:
+ - hosts:
+   - kube-master.example.com
+   secretName: kube-master-secret
+ rules:
+   - host: kube-master.example.com
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: kubernetes-dashboard
+             servicePort: 80

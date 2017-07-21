@@ -1,0 +1,91 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: prometheus-monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus-monitoring
+  template:
+    metadata:
+      name: prometheus-monitoring
+      labels:
+        app: prometheus-monitoring
+    spec:
+      containers:
+      # Prometheus server
+      - name: prometheus
+        image: prom/prometheus:v1.5.2
+        args:
+          - '-storage.local.retention=72h'
+          - '-storage.local.path=/data'
+          - '-storage.local.memory-chunks=500000'
+          - '-config.file=/etc/prometheus/prometheus.yml'
+          - '-alertmanager.url=http://localhost:9093'
+        ports:
+        - containerPort: 9090
+          protocol: TCP
+        volumeMounts:
+        - name: config-volume-prometheus
+          mountPath: /etc/prometheus
+        - name: config-volume-alert-rules
+          mountPath: /etc/prometheus-rules
+        - name: prometheus-data
+          mountPath: /data
+        resources:
+          limits:
+            cpu: 1200m
+            memory: 1000Mi
+          requests:
+            cpu: 4000m
+            memory: 4000Mi
+      #Alert manager
+      - name: alertmanager
+        image: prom/alertmanager
+        args:
+          - -config.file=/etc/prometheus/alertmanager.yml
+        ports:
+        - containerPort: 9093
+          protocol: TCP
+        volumeMounts:
+        - name: config-volume-alertmanager
+          mountPath: /etc/prometheus
+      # Volumes and config maps
+      volumes:
+      - name: config-volume-prometheus
+        configMap:
+          name: prometheus
+      - name: config-volume-alertmanager
+        configMap:
+          name: prometheus-alertmanager
+      - name: config-volume-alert-rules
+        configMap:
+          name: prometheus-alert-rules
+      - name: prometheus-data
+        persistentVolumeClaim:
+          claimName: prometheus-data-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-monitoring
+  labels:
+    app: prometheus-monitoring
+  annotations:
+    prometheus.io/scrape: 'true'
+spec:
+  type: NodePort
+  ports:
+    - port: 9090
+      name: prometheus
+      protocol: TCP
+      targetPort: 9090
+    - port: 9093
+      name: alertmanager
+      protocol: TCP
+      targetPort: 9093
+  selector:
+    app: prometheus-monitoring
+

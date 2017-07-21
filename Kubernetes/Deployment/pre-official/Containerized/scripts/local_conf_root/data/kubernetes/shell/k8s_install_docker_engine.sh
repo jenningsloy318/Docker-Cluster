@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+####Install docker-engine
+DOCKER_RELEASE=1.13.0
+DOCKER_TAR=docker-${DOCKER_RELEASE}.tgz
+DOCKER_DOWNLOAD_URL_PREFIX="${DOCKER_RELEASE_URL:-https://get.docker.com/builds/Linux/x86_64}"
+DOCKER_DOWNLOAD_URL="${DOCKER_DOWNLOAD_URL_PREFIX}/${DOCKER_TAR}"
+
+
+install_docker_engine() {
+        echo "Downloading docker binary"
+        curl -SL ${DOCKER_DOWNLOAD_URL} -o ${KUBE_ROOT}/${DOCKER_TAR}
+        echo "uncomressing the tar package to /usr/bin"
+        tar xvf ${KUBE_ROOT}/${DOCKER_TAR} --exclude="*completion*"   --strip-components 1 -C /usr/bin
+        echo "Creating systemd service file"
+        if [ -d /data/docker ] ; then
+            mkdir -p /data/docker
+        fi
+}
+
+####check docker  installation
+
+if  which docker >/dev/null  ; then
+        echo -e "docker is installed.\n"
+else
+        install_docker_engine
+fi

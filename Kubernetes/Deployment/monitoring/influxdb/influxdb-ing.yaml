@@ -1,0 +1,23 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ name: devops-k8s-influxdb
+ namespace: monitoring
+ annotations:
+spec:
+ rules:
+   - host: devops-k8s-influxdb.mo.sap.corp
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: monitoring-influxdb
+             servicePort: 8083
+   - host: devops-k8s-influxdb-api.mo.sap.corp
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: monitoring-influxdb
+             servicePort: 8086

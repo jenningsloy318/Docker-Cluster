@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: monitoring
+spec:
+  ports:
+  - port: 3000
+    targetPort: 3000
+  selector:
+    app: grafana
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: grafana
+  name: grafana
+  namespace: monitoring
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - image: grafana/grafana
+        name: grafana
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        env:
+          - name: GF_AUTH_BASIC_ENABLED
+            value: "false"
+          - name: GF_AUTH_ANONYMOUS_ENABLED
+            value: "true"
+          - name: GF_AUTH_ANONYMOUS_ORG_ROLE
+            value: Admin
+          - name: GF_DASHBOARDS.JSON_ENABLED
+            value: true
+          - name: GF_DASHBOARDS.JSON_PATH
+            value: /dashboards
+          - name:　GF_PATHS_DATA
+            value: /data
+        volumeMounts:
+        - name: gf-data
+          mountPath: /data
+        - name: gf-dashboards
+          mountPath: /dashboards
+      # Volumes and config maps
+      volumes:
+      - name: gf-data
+        persistentVolumeClaim:
+          claimName: gf-data-pvc
+      - name: gf-dashboards
+        persistentVolumeClaim:
+          claimName: gf-data-pvc

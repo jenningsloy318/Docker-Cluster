@@ -1,0 +1,14 @@
+{
+    "debug": true,
+    "cgroup-parent": "/container.slice/docker",
+    "hosts": ["tcp://0.0.0.0:2376","unix:///var/run/docker.sock"],
+    "ip": "0.0.0.0",
+    "live-restore": true,
+    "log-driver": "journald",
+    "log-opts":  {"tag":"docker_{{.Name}}_{{.ID}}"},
+    "tlsverify" : true,
+    "tlscacert": "/etc/docker/ssl/ca.pem",
+    "tlscert": "/etc/docker/ssl/docker.pem",
+    "tlskey": "/etc/docker/ssl/docker-key.pem"
+
+}

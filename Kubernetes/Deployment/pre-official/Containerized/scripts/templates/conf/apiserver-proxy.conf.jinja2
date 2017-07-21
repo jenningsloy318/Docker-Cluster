@@ -1,0 +1,12 @@
+server {
+    listen 6443;
+    proxy_pass apiservers;
+}
+
+upstream apiservers {
+    
+    {% for host  in MASTER_HOSTS %}
+    server {{ host }}:6443;
+    {% endfor %}
+
+}

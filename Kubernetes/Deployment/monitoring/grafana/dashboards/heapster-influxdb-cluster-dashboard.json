@@ -2428,7 +2428,7 @@
           "name": "nodename",
           "options": [],
           "query": "SHOW TAG VALUES FROM \"uptime\" WITH KEY = \"nodename\"   ",
-          "refresh": 0,
+          "refresh": 1,
           "regex": "",
           "sort": 0,
           "tagValuesQuery": "",

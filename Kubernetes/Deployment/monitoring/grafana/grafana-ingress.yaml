@@ -1,0 +1,16 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ name: monitoring-grafana
+ namespace: monitoring
+ annotations:
+spec:
+ rules:
+   - host: grafana.gcsc.sap.corp
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: grafana
+             servicePort: 3000

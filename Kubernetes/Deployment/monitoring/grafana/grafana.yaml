@@ -31,6 +31,7 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
+          name: ui
         env:
           - name: GF_AUTH_BASIC_ENABLED
             value: "false"
@@ -38,11 +39,11 @@ spec:
             value: "true"
           - name: GF_AUTH_ANONYMOUS_ORG_ROLE
             value: Admin
-          - name: GF_DASHBOARDS.JSON_ENABLED
-            value: true
-          - name: GF_DASHBOARDS.JSON_PATH
+          - name: GF_DASHBOARDS_JSON_ENABLED
+            value: "true"
+          - name: GF_DASHBOARDS_JSON_PATH
             value: /dashboards
-          - name:　GF_PATHS_DATA
+          - name: GF_PATHS_DATA
             value: /data
         volumeMounts:
         - name: gf-data
@@ -55,5 +56,5 @@ spec:
         persistentVolumeClaim:
           claimName: gf-data-pvc
       - name: gf-dashboards
-        persistentVolumeClaim:
-          claimName: gf-data-pvc
+        configMap:
+          name: grafana-dashboard

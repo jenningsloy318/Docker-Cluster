@@ -38,4 +38,5 @@
 2. install via grafana 
   2.1 create configmap
   ```
-  kubectl create configmap grafana-dashboard --from-file=
+  kubectl create configmap grafana-dashboard --from-file=dashboards -n monitoring
+  ```

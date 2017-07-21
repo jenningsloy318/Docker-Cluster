@@ -39,10 +39,10 @@ spec:
             value: "true"
           - name: GF_AUTH_ANONYMOUS_ORG_ROLE
             value: Admin
-          - name: GF_DASHBOARDS_JSON_ENABLED
-            value: "true"
-          - name: GF_DASHBOARDS_JSON_PATH
-            value: /dashboards
+#          - name: GF_DASHBOARDS_JSON_ENABLED
+#            value: "true"
+#          - name: GF_DASHBOARDS_JSON_PATH
+#            value: /dashboards
           - name: GF_PATHS_DATA
             value: /data
         volumeMounts:

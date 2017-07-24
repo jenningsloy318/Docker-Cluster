@@ -1,0 +1,49 @@
+FROM gcr.io/google-containers/debian-base-amd64:0.1
+MAINTAINER Eduardo Silva <eduardo@treasure-data.com>
+LABEL Description="Fluent Bit docker image" Vendor="Fluent Organization" Version="1.1"
+
+# Fluent Bit version
+ENV FLB_MAJOR 0
+ENV FLB_MINOR 12
+ENV FLB_PATCH 0
+ENV FLB_VERSION 0.12.0
+
+ENV FLB_TARBALL http://github.com/fluent/fluent-bit/archive/master.zip
+
+RUN mkdir -p /fluent-bit/bin /fluent-bit/etc /fluent-bit/log
+
+RUN apt-get -qq update \
+    && apt-get install -y -qq \
+       ca-certificates \
+       build-essential \
+       cmake \
+       make \
+       sudo \
+       wget \
+       unzip \
+       libsystemd-dev \
+       procps\
+       curl \
+       bash\
+    && apt-get install -y -qq --reinstall lsb-base lsb-release \
+    && wget -O "/tmp/fluent-bit-master.zip" ${FLB_TARBALL} \
+    && cd /tmp && unzip "fluent-bit-master.zip" \
+    && cd "fluent-bit-master"/build/ \
+    && cmake -DFLB_DEBUG=On -DFLB_TRACE=On -DFLB_JEMALLOC=On -DFLB_BUFFERING=On ../ \
+    && make \
+    && install bin/fluent-bit /fluent-bit/bin/ \
+    && apt-get remove --purge --auto-remove -y -qq \
+       build-essential \
+       cmake \
+       make \
+       wget \
+       unzip \
+    && rm -rf /tmp/*
+
+# Configuration files
+COPY fluent-bit.conf /fluent-bit/etc/
+COPY parsers.conf /fluent-bit/etc/
+
+
+# Entry point
+CMD ["/fluent-bit/bin/fluent-bit", "-c", "/fluent-bit/etc/fluent-bit.conf","--verbose"]

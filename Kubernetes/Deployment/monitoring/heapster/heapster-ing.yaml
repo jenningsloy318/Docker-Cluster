@@ -1,0 +1,16 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ name: heapster
+ namespace: kube-system
+ annotations:
+spec:
+ rules:
+   - host: heapster.gcsc.mo.sap.corp
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: heapster
+             servicePort: 80

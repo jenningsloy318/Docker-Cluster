@@ -2,7 +2,7 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
- name: heapster
+ name: monitoring-heapster
  namespace: kube-system
  annotations:
 spec:

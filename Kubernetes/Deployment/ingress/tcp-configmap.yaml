@@ -5,3 +5,4 @@ metadata:
   namespace: kube-system
 data:
   8083: "monitoring/monitoring-influxdb:8083"
+  8086: "monitoring/monitoring-influxdb:8086"

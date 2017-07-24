@@ -200,7 +200,7 @@
 
     14.2 customizde ingress by [ingress-customization.yaml](./ingress/ingress-customization.yaml), especially enable vts `enable-vts-status: "true"`
 
-    14.3 enable tcp by [tcp-configmap.yaml](./ingress/tcp-configmap.yaml), right now seems not working via tcp, need to further investigation.
+    14.3 enable tcp by [tcp-configmap.yaml](./ingress/tcp-configmap.yaml), try to expose influxdb endpoints, it is working. 
 
     14.4 modify the parameter via [./ingress/nginx-ingress-controller.yaml]
 

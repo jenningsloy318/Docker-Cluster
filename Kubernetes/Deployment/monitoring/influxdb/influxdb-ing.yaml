@@ -2,7 +2,7 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
- name: devops-k8s-influxdb
+ name: monitoring-influxdb
  namespace: monitoring
  annotations:
 spec:

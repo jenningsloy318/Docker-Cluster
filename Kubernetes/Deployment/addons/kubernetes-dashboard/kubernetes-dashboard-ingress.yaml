@@ -2,9 +2,10 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
  name: kubernetes-dashboard-ingress
+ namespace: kube-system
 spec:
  rules:
-   - host: cnpvgl56588417.pvg.global.corp.sap
+   - host: dashboard.gcsc.corp.sap
      http:
        paths:
          - path: /

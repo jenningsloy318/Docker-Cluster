@@ -12,7 +12,7 @@ ENV FLB_TARBALL http://github.com/fluent/fluent-bit/archive/master.zip
 
 RUN mkdir -p /fluent-bit/bin /fluent-bit/etc /fluent-bit/log
 
-RUN apt-get -qq update \
+RUN apt-get  update \
     && apt-get install -y -qq \
        ca-certificates \
        build-essential \
@@ -25,7 +25,7 @@ RUN apt-get -qq update \
        procps\
        curl \
        bash\
-    && apt-get install -y -qq --reinstall lsb-base lsb-release \
+    && apt-get install -y --reinstall lsb-base lsb-release \
     && wget -O "/tmp/fluent-bit-master.zip" ${FLB_TARBALL} \
     && cd /tmp && unzip "fluent-bit-master.zip" \
     && cd "fluent-bit-master"/build/ \
@@ -42,7 +42,7 @@ RUN apt-get -qq update \
 
 # Configuration files
 COPY fluent-bit.conf /fluent-bit/etc/
-COPY parsers.conf /fluent-bit/etc/
+COPY fluentbit-parser.conf /fluent-bit/etc/
 
 
 # Entry point

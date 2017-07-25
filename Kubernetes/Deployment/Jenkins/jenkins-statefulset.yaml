@@ -1,0 +1,109 @@
+---
+apiVersion: "v1"
+kind: "Namespace"
+metadata: 
+  name: "jenkins"
+  labels: 
+    name: "jenkins"
+
+# jenkins
+
+---
+apiVersion: "apps/v1beta1"
+kind: "StatefulSet"
+metadata: 
+  name: "jenkins"
+  namespace: "jenkins"
+  labels: 
+    name: "jenkins"
+spec:
+  serviceName: "jenkins"
+  serviceAccountName: jenkins
+  replicas: 1
+  template: 
+    metadata: 
+      name: "jenkins"
+      labels: 
+        name: "jenkins"
+    spec: 
+      terminationGracePeriodSeconds: 10
+      containers: 
+        - name: "jenkins"
+          image: "jenkinsci/jenkins:2.60.1"
+          ports: 
+            - containerPort: 8080
+            - containerPort: 50000
+          resources:
+            limits:
+              cpu: 1
+              memory: 1Gi
+            requests:
+              cpu: 0.5
+              memory: 500Mi
+          env:
+            - name: JAVA_OPTS
+              value: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=1 -Dhudson.slaves.NodeProvisioner.MARGIN=50 -Dhudson.slaves.NodeProvisioner.MARGIN0=0.85"
+          volumeMounts: 
+            - name: "jenkins-home"
+              mountPath: "/var/jenkins_home"
+          livenessProbe:
+            httpGet:
+              path: /login
+              port: 8080
+            initialDelaySeconds: 60
+            timeoutSeconds: 5
+      securityContext:
+        fsGroup: 1000
+  volumeClaimTemplates:
+  - metadata:
+      name: jenkins-home
+      # annotations:
+      #   volume.beta.kubernetes.io/storage-class: anything
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+
+---
+apiVersion: "v1"
+kind: "Service"
+metadata: 
+  name: "jenkins"
+  namespace: "jenkins"
+  annotations:
+spec: 
+  type: LoadBalancer
+  selector: 
+    name: "jenkins"
+  ports: 
+    - 
+      name: "http"
+      port: 80
+      targetPort: 8080
+      protocol: "TCP"
+    - 
+      name: "slave"
+      port: 50000
+      protocol: "TCP"
+
+ ---
+ apiVersion: extensions/v1beta1
+ kind: Ingress
+ metadata:
+   name: "jenkins"
+   namespace: "jenkins"
+   annotations:
+     kubernetes.io/ingress.class: "nginx"
+     ingress.kubernetes.io/ssl-redirect: "true"
+ spec:
+   rules:
+   - host: jenkins.gke.csanchez.org
+     http:
+       paths:
+       - path: /
+         backend:
+           serviceName: jenkins
+           servicePort: 80
+
+

@@ -56,21 +56,3 @@ spec:
     targetPort: 9090
   selector:
     k8s-app: kubernetes-dashboard
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
- name: kubernetes-dashboard-ingress
-spec:
- tls:
- - hosts:
-   - kube-master.example.com
-   secretName: kube-master-secret
- rules:
-   - host: kube-master.example.com
-     http:
-       paths:
-         - path: /
-           backend:
-             serviceName: kubernetes-dashboard
-             servicePort: 80

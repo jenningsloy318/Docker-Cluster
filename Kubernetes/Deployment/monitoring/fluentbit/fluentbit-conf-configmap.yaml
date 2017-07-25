@@ -21,6 +21,7 @@ data:
         Kube_CA_File  /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
         Kube_Token_File /var/run/secrets/kubernetes.io/serviceaccount/token
         Match       *
+        use_journal  On
     [OUTPUT]
         Name          influxdb
         Match         *

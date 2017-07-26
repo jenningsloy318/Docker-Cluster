@@ -27,8 +27,11 @@ spec:
         volumeMounts:
         - name: varlog
           mountPath: /var/log
-        - name: jounald
+        - name: journald-socket1
           mountPath: /run/systemd/journal/
+          readOnly: true
+        - name: journald-socket2
+          mountPath: /var/run/systemd/journal
           readOnly: true
         - name: fluentbit-conf
           mountPath: /fluent-bit/etc/
@@ -38,9 +41,12 @@ spec:
       - name: varlog
         hostPath:
           path: /var/log
-      - name: jounald
+      - name: journald-socket1
         hostPath:
           path:  /run/systemd/journal/
+      - name: journald-socket2
+        hostPath:
+          path:  /var/run/systemd/journal
       - name: fluentbit-conf
         configMap:
           name: fluentbit-conf

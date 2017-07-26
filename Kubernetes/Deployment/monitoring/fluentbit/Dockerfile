@@ -1,4 +1,4 @@
-FROM gcr.io/google-containers/debian-base-amd64:0.1
+FROM ubuntu:16.04
 MAINTAINER Eduardo Silva <eduardo@treasure-data.com>
 LABEL Description="Fluent Bit docker image" Vendor="Fluent Organization" Version="1.1"
 

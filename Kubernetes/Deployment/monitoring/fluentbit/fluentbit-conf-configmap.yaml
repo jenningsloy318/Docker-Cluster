@@ -8,12 +8,13 @@ data:
     [SERVICE]
         Flush        1
         Daemon       Off
-        Log_Level    info
+        Log_Level    trace
         Parsers_File fluentbit-parser.conf
     [INPUT]
         Name           systemd
         Tag             *
         Systemd_Filter  _SYSTEMD_UNIT=docker.service
+        Systemd_Filter  _TRANSPORT=journal
         Parser        docker
     [FILTER]
         Name          kubernetes
@@ -33,6 +34,6 @@ data:
     [PARSER]
         Name        docker
         Format      json
-        Time_Key    time
-        Time_Format %Y-%m-%dT%H:%M:%S.%L
+        Time_Key    _SOURCE_REALTIME_TIMESTAMP
+        Time_Format %s
         Time_Keep   On

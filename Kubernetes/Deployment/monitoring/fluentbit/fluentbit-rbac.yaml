@@ -28,4 +28,4 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: fluentbit
-  namespace: logging
+  namespace: monitoring

@@ -1,0 +1,63 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: alertmanager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alertmanager
+  template:
+    metadata:
+      name: alertmanager
+      labels:
+        app: alertmanager
+    spec:
+      containers:
+      #Alert manager
+      - name: alertmanager
+        image: prom/alertmanager
+        args:
+          - -config.file=/etc/prometheus/alertmanager.yml
+          - -storage.path=/alertmanager
+        ports:
+        - containerPort: 9093
+          protocol: TCP
+        volumeMounts:
+        - name: config-volume-alertmanager
+          mountPath: /etc/prometheus
+        - name: alertmanager-templates
+          mountPath: /etc/alertmanager-templates
+        - name: alertmanager-data
+          mountPath: /alertmanager
+
+      # Volumes and config maps
+      volumes:
+      - name: config-volume-alertmanager
+        configMap:
+          name: alertmanager
+      - name: alertmanager-templates
+        configMap:
+          name: alertmanager-template
+      - name: alertmanager-data
+        persistentVolumeClaim:
+          claimName: alertmanager-data-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager
+  labels:
+    app: alertmanager
+  annotations:
+    prometheus.io/scrape: 'true'
+spec:
+  ports:
+    - port: 9093
+      name: alertmanager
+      protocol: TCP
+      targetPort: 9093
+  selector:
+    app: alertmanager
+

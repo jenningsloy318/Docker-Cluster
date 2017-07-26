@@ -1,17 +1,17 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: prometheus-monitoring
+  name: prometheus
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: prometheus-monitoring
+      app: prometheus
   template:
     metadata:
-      name: prometheus-monitoring
+      name: prometheus
       labels:
-        app: prometheus-monitoring
+        app: prometheus
     spec:
       containers:
       # Prometheus server
@@ -22,7 +22,7 @@ spec:
           - '-storage.local.path=/data'
           - '-storage.local.memory-chunks=500000'
           - '-config.file=/etc/prometheus/prometheus.yml'
-          - '-alertmanager.url=http://localhost:9093'
+          - '-alertmanager.url=http://alertmanager:9093'
         ports:
         - containerPort: 9090
           protocol: TCP
@@ -40,25 +40,11 @@ spec:
           requests:
             cpu: 4000m
             memory: 4000Mi
-      #Alert manager
-      - name: alertmanager
-        image: prom/alertmanager
-        args:
-          - -config.file=/etc/prometheus/alertmanager.yml
-        ports:
-        - containerPort: 9093
-          protocol: TCP
-        volumeMounts:
-        - name: config-volume-alertmanager
-          mountPath: /etc/prometheus
       # Volumes and config maps
       volumes:
       - name: config-volume-prometheus
         configMap:
           name: prometheus
-      - name: config-volume-alertmanager
-        configMap:
-          name: prometheus-alertmanager
       - name: config-volume-alert-rules
         configMap:
           name: prometheus-alert-rules
@@ -70,22 +56,17 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: prometheus-monitoring
+  name: prometheus
   labels:
-    app: prometheus-monitoring
+    app: prometheus
   annotations:
     prometheus.io/scrape: 'true'
 spec:
-  type: NodePort
   ports:
     - port: 9090
       name: prometheus
       protocol: TCP
       targetPort: 9090
-    - port: 9093
-      name: alertmanager
-      protocol: TCP
-      targetPort: 9093
   selector:
-    app: prometheus-monitoring
+    app: prometheus
 

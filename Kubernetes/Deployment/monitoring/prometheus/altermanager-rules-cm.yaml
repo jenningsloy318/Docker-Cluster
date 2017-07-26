@@ -10,8 +10,7 @@ data:
     # CPU Alerts
     #
     ALERT HighCPU
-      IF ((sum(node_cpu{mode=~"user|nice|system|irq|softirq|steal|idle|iowait"}) by (instance, job)) - ( sum(node_cpu{mode=~"idle|iowait"}) by (instance,job) )   )   /  (su
-m(node_cpu{mode=~"user|nice|system|irq|softirq|steal|idle|iowait"}) by (instance, job)) * 100 > 95
+      IF ((sum(node_cpu{mode=~"user|nice|system|irq|softirq|steal|idle|iowait"}) by (instance, job)) - ( sum(node_cpu{mode=~"idle|iowait"}) by (instance,job) )   )   /  (sum(node_cpu{mode=~"user|nice|system|irq|softirq|steal|idle|iowait"}) by (instance, job)) * 100 > 95
       FOR 10m
       LABELS { severity="page" }
       ANNOTATIONS {
@@ -64,8 +63,7 @@ m(node_cpu{mode=~"user|nice|system|irq|softirq|steal|idle|iowait"}) by (instance
         DESCRIPTION = "{{$labels.instance}}: Memory usage is above 75% (current value is: {{ $value }})"
       }
     ALERT NodeLowDataDisk
-      IF ((node_filesystem_size{mountpoint="/node_datafs",app="prometheus-node-exporter"} - node_filesystem_free{mountpoint="/node_datafs",app="prometheus-node-exporter"} )
- / node_filesystem_size{mountpoint="/node_datafs",app="prometheus-node-exporter"} * 100) > 75
+      IF ((node_filesystem_size{mountpoint="/node_datafs",app="prometheus-node-exporter"} - node_filesystem_free{mountpoint="/node_datafs",app="prometheus-node-exporter"} ) / node_filesystem_size{mountpoint="/node_datafs",app="prometheus-node-exporter"} * 100) > 75
       FOR 1m
       LABELS {
         severity="page"
@@ -76,8 +74,7 @@ m(node_cpu{mode=~"user|nice|system|irq|softirq|steal|idle|iowait"}) by (instance
       }
 
     ALERT NodeLowRootDisk
-      IF ((node_filesystem_size{mountpoint="/node_rootfs",app="prometheus-node-exporter"} - node_filesystem_free{mountpoint="/node_rootfs",app="prometheus-node-exporter"} )
- / node_filesystem_size{mountpoint="/node_rootfs",app="prometheus-node-exporter"} * 100) > 75
+      IF ((node_filesystem_size{mountpoint="/node_rootfs",app="prometheus-node-exporter"} - node_filesystem_free{mountpoint="/node_rootfs",app="prometheus-node-exporter"} ) / node_filesystem_size{mountpoint="/node_rootfs",app="prometheus-node-exporter"} * 100) > 75
       FOR 1m
       LABELS {
         severity="page"
@@ -87,8 +84,7 @@ m(node_cpu{mode=~"user|nice|system|irq|softirq|steal|idle|iowait"}) by (instance
         DESCRIPTION = "{{$labels.instance}}: root disk usage is above 75% (current value is: {{ $value }})"
       }
     ALERT DeploymentGenerationMismatch
-      IF          kube_deployment_status_observed_generation{job="kubernetes-service-endpoints"} != kube_deployment_status_observed_generation{job="kubernetes-service-endpo
-ints"}
+      IF          kube_deployment_status_observed_generation{job="kubernetes-service-endpoints"} != kube_deployment_status_observed_generation{job="kubernetes-service-endpoints"}
       FOR         5m
       LABELS      { severity="page" }
       ANNOTATIONS {
@@ -97,8 +93,7 @@ ints"}
      }
 
      ALERT DeploymentReplicasMismatch
-      IF          (kube_deployment_spec_replicas{job="kubernetes-service-endpoints"} != kube_deployment_status_replicas_available{job="kubernetes-service-endpoints"}) or (k
-ube_deployment_spec_replicas{job="kubernetes-service-endpoints"} unless kube_deployment_status_replicas_available{job="kubernetes-service-endpoints"})
+      IF          (kube_deployment_spec_replicas{job="kubernetes-service-endpoints"} != kube_deployment_status_replicas_available{job="kubernetes-service-endpoints"}) or (kube_deployment_spec_replicas{job="kubernetes-service-endpoints"} unless kube_deployment_status_replicas_available{job="kubernetes-service-endpoints"})
       FOR         5m
       LABELS      { severity="page" }
       ANNOTATIONS {
@@ -166,24 +161,3 @@ ube_deployment_spec_replicas{job="kubernetes-service-endpoints"} unless kube_dep
         summary = "etcd-container in pod {{$labels.pod}} is down",
         description = "etcd-container in pod {{$labels.pod}} is down.",
       }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

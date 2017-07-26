@@ -8,12 +8,14 @@ rules:
   resources:
   - '*'
   verbs:
-    - get
-    - watch
-    - list
+  - get
+  - watch
+  - list
+  - proxy
 - nonResourceURLs:
   - '*'
   verbs:
-    - get
-    - watch
-    - list
+  - get
+  - watch
+  - list
+  - proxy

@@ -15,7 +15,6 @@ metadata:
     name: "jenkins"
 spec:
   serviceName: "jenkins"
-  serviceAccountName: jenkins
   replicas: 1
   template: 
     metadata: 
@@ -24,10 +23,10 @@ spec:
         name: "jenkins"
     spec: 
       terminationGracePeriodSeconds: 10
+      serviceAccountName: jenkins
       containers: 
         - name: jenkins
           image: jenkins/jenkins:lts
-
           ports: 
             - containerPort: 8080
             - containerPort: 50000
@@ -75,15 +74,11 @@ spec:
   selector: 
     name: "jenkins"
   ports: 
-    - 
-      name: "http"
+    - name: "http"
       port: 80
       targetPort: 8080
       protocol: "TCP"
-    - 
-      name: "slave"
-      port: 50000
-      protocol: "TCP"
+
 
  ---
  apiVersion: extensions/v1beta1
@@ -96,7 +91,7 @@ spec:
      ingress.kubernetes.io/ssl-redirect: "true"
  spec:
    rules:
-   - host: jenkins.gke.csanchez.org
+   - host: jenkins.gcsc.sap.corp
      http:
        paths:
        - path: /

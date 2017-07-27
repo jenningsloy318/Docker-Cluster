@@ -5,9 +5,6 @@ metadata:
   name: "jenkins"
   labels: 
     name: "jenkins"
-
-# jenkins
-
 ---
 apiVersion: "apps/v1beta1"
 kind: "StatefulSet"
@@ -28,8 +25,9 @@ spec:
     spec: 
       terminationGracePeriodSeconds: 10
       containers: 
-        - name: "jenkins"
-          image: "jenkinsci/jenkins:2.60.1"
+        - name: jenkins
+          image: jenkins/jenkins:lts
+
           ports: 
             - containerPort: 8080
             - containerPort: 50000

@@ -15,7 +15,7 @@ spec:
       --etcd-servers=https://10.58.137.243:2379 
       --etcd-cafile=/srv/kubernetes/ca.pem 
       --etcd-certfile=/srv/kubernetes/etcdclient.pem --etcd-keyfile=etcdclient-key.pem
-      --authorization-mode=RBAC,Node
+      --authorization-mode=Node,RBAC
       --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,ResourceQuota,NodeRestriction
       --service-cluster-ip-range=192.168.0.0/16
       --service-account-key-file=/srv/kubernetes/apiserver-key.pem

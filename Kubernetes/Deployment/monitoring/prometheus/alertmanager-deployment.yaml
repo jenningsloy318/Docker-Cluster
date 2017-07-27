@@ -15,6 +15,7 @@ spec:
       labels:
         app: alertmanager
     spec:
+      serviceAccountName: prometheus
       containers:
       #Alert manager
       - name: alertmanager

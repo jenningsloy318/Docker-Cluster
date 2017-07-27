@@ -9,13 +9,12 @@ data:
         Flush        1
         Daemon       Off
         Log_Level    trace
-        Parsers_File fluentbit-parser.conf
     [INPUT]
         Name           systemd
         Tag             *
         Systemd_Filter  _SYSTEMD_UNIT=docker.service
         Systemd_Filter  _TRANSPORT=journal
-        DB              /fluent-bit/db/journald.db
+        DB              /fluent-bit/journald.db
     [FILTER]
         Name          kubernetes
         Kube_URL      https://kubernetes.default.svc:443
@@ -30,7 +29,3 @@ data:
         Port          8086
         Database      k8slog
         Sequence_Tag  _seq
-  fluentbit-parser.conf: |-
-    [PARSER]
-        Name        docker
-        Format      json

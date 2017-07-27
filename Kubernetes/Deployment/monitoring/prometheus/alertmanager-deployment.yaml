@@ -40,7 +40,7 @@ spec:
           name: alertmanager
       - name: alertmanager-templates
         configMap:
-          name: alertmanager-template
+          name: alertmanager-templates
       - name: alertmanager-data
         persistentVolumeClaim:
           claimName: alertmanager-data-pvc

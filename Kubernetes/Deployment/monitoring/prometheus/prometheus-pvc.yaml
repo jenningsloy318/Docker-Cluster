@@ -2,6 +2,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: prometheus-data-pvc
+  namespace: monitoring
   annotations:
 #    volume.beta.kubernetes.io/storage-class: "devops-k8s-nfs"
 spec:

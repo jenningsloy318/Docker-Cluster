@@ -1,0 +1,23 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ name: monitoring-prometheus
+ namespace: monitoring
+ annotations:
+spec:
+ rules:
+   - host: prometheus.gcsc.sap.corp
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: prometheus
+             servicePort: 9090
+   - host: altermanager.gcsc.sap.corp
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: alertmanager
+             servicePort: 9093

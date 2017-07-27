@@ -18,10 +18,9 @@ spec:
       containers:
       # Prometheus server
       - name: prometheus
-        image: prom/prometheus:v1.5.2
+        image: prom/prometheus:master
         args:
           - '-storage.local.retention=72h'
-          - '-storage.local.path=/data'
           - '-storage.local.memory-chunks=500000'
           - '-config.file=/etc/prometheus/prometheus.yml'
           - '-alertmanager.url=http://alertmanager:9093'
@@ -31,8 +30,6 @@ spec:
         volumeMounts:
         - name: config-volume-prometheus
           mountPath: /etc/prometheus
-        - name: prometheus-data
-          mountPath: /data
         resources:
           limits:
             cpu: 1200m
@@ -40,14 +37,16 @@ spec:
           requests:
             cpu: 400m
             memory: 400Mi
-      # Volumes and config maps
+      - name: remote_storage_adapter
+        image: apsm/remote_storage_adapter
+        args: 
+        - '-influxdb-url=http://monitoring-influxdb.monitoring.svc:8086'
+        - '-influxdb.database=prometheus'
+        - '-influxdb.retention-policy=autogen'
       volumes:
       - name: config-volume-prometheus
-        configMap:
+        configMap:		
           name: prometheus
-      - name: prometheus-data
-        persistentVolumeClaim:
-          claimName: prometheus-data-pvc
 
 ---
 apiVersion: v1

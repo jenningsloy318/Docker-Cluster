@@ -4,7 +4,7 @@
 # prequisistes #
 
   1. check the docker and other componenet requirements before deploying the cluster, visit the [Kubernetes CHANGELOG](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG.md), and find the section `External Dependency Version Information`.
-   1. build docker images with `docker build --rm  --no-cache --tag XXX . `
+   1. build docker images with `docker build --rm --force-rm  --no-cache --tag XXX . `
 
 # Deployment #
 1. create cgroup slice to accommodate docker containers and pods, here created a slice nemed [container.slice](./systemd/container.slice) 

@@ -21,6 +21,10 @@ spec:
       port: 80
       targetPort: 8080
       protocol: TCP
+    - name: slave-port
+      port: 50000
+      targetPort: 50000
+      protocol: TCP      
 ---
 apiVersion: apps/v1beta1
 kind: StatefulSet
@@ -55,6 +59,8 @@ spec:
         env:
           - name: JAVA_OPTS
             value: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=1 -Dhudson.slaves.NodeProvisioner.MARGIN=50 -Dhudson.slaves.NodeProvisioner.MARGIN0=0.85"
+          - name: JENKINS_OPTS
+            value: "-hudson.model.UpdateCenter.never=true -Djenkins.install.runSetupWizard=false"
         volumeMounts: 
           - name: jenkins-home
             mountPath: /var/jenkins_home

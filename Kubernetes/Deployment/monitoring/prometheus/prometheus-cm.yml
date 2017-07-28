@@ -259,9 +259,9 @@ data:
         action: replace
         target_label: kubernetes_pod_name
     remote_write:
-      - url: "http://localhost:9201/write"
+      - url: "http://remote-storage-adapter:9201/write"
     remote_read:
-      - url: "http://localhost:9201/read"
+      - url: "http://remote-storage-adapter:9201/read"
   alert.rules: |-
     ## alert.rules ##
 

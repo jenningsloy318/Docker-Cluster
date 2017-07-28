@@ -1,0 +1,60 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: remote-storage-adapter
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: remote-storage-adapter
+  template:
+    metadata:
+      name: remote-storage-adapter
+      labels:
+        app: remote-storage-adapter
+    spec:
+      serviceAccountName: prometheus
+      containers:
+      - name: remote-storage-adapter
+        image: apsm/remote_storage_adapter
+        args:
+        - /bin/sh
+        - -c
+        - /usr/bin/remote_storage_adapter
+          '-influxdb-url=http://monitoring-influxdb:8086'
+          '-influxdb.database=prometheus'
+          '-influxdb.retention-policy=autogen'
+        volumeMounts: 
+        - name: localtime
+          mountPath: /etc/localtime
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+        ports:
+        - containerPort: 9201
+          protocol: TCP
+      volumes:
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: remote-storage-adapter
+  namespace: monitoring
+  labels:
+    app: remote-storage-adapter
+  annotations:
+    prometheus.io/scrape: 'true'
+spec:
+  ports:
+    - port: 9201
+      protocol: TCP
+      targetPort: 9201
+  selector:
+    app: remote-storage-adapter
+

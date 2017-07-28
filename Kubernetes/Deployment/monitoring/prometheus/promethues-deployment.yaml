@@ -29,6 +29,8 @@ spec:
         volumeMounts:
         - name: config-volume-prometheus
           mountPath: /etc/prometheus
+        - name: localtime
+          mountPath: /etc/localtime
         resources:
           limits:
             cpu: 1200m
@@ -36,19 +38,13 @@ spec:
           requests:
             cpu: 400m
             memory: 400Mi
-      - name: remote-storage-adapter
-        image: apsm/remote_storage_adapter
-        args:
-        - /bin/sh
-        - -c
-        - /usr/bin/remote_storage_adapter
-          '-influxdb-url=http://monitoring-influxdb.monitoring.svc:8086'
-          '-influxdb.database=prometheus'
-          '-influxdb.retention-policy=autogen'
       volumes:
       - name: config-volume-prometheus
         configMap:		
           name: prometheus
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
 
 ---
 apiVersion: v1
@@ -63,7 +59,6 @@ metadata:
 spec:
   ports:
     - port: 9090
-      name: prometheus
       protocol: TCP
       targetPort: 9090
   selector:

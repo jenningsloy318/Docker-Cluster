@@ -15,7 +15,7 @@ data:
         Path           /var/log/journal
         Systemd_Filter  _SYSTEMD_UNIT=docker.service
         Systemd_Filter  _TRANSPORT=journal
-        DB              /fluent-bit/db/journald.db
+        DB              /fluent-bit/journald.db
     [FILTER]
         Name          kubernetes
         Kube_URL      https://kubernetes.default.svc:443

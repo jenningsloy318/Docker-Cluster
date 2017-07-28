@@ -149,6 +149,8 @@ spec:
               readOnly: false
             - mountPath: /calico-secrets
               name: etcd-certs
+            - name: localtime
+              mountPath: /etc/localtime              
         # This container installs the Calico CNI binaries
         # and CNI network config file on each node.
         - name: install-cni
@@ -174,6 +176,8 @@ spec:
               name: cni-net-dir
             - mountPath: /calico-secrets
               name: etcd-certs
+            - name: localtime
+              mountPath: /etc/localtime                    
       volumes:
         # Used by calico/node.
         - name: lib-modules
@@ -193,6 +197,9 @@ spec:
         - name: etcd-certs
           secret:
             secretName: calico-etcd-secrets
+        - name: localtime
+          hostPath:
+            path: /etc/localtime            
 
 ---
 

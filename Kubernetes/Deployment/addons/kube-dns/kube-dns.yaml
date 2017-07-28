@@ -44,6 +44,9 @@ spec:
       - name: kube-dns-config
         configMap:
           name: kube-dns
+      - name: localtime
+        hostPath:
+          path: /etc/localtime  
 #          optional: true
       containers:
       - name: kubedns
@@ -88,6 +91,8 @@ spec:
         volumeMounts:
         - name: kube-dns-config
           mountPath: /kube-dns-config
+        - name: localtime
+          mountPath: /etc/localtime              
       - name: dnsmasq
         image: gcr.io/google_containers/k8s-dns-dnsmasq-nanny-amd64:1.14.4
         livenessProbe:
@@ -126,6 +131,8 @@ spec:
         volumeMounts:
         - name: kube-dns-config
           mountPath: /etc/k8s/dns/dnsmasq-nanny
+        - name: localtime
+          mountPath: /etc/localtime             
       - name: sidecar
         image: gcr.io/google_containers/k8s-dns-sidecar-amd64:1.14.4
         livenessProbe:
@@ -146,6 +153,9 @@ spec:
         - containerPort: 10054
           name: metrics
           protocol: TCP
+        volumeMounts:
+        - name: localtime
+          mountPath: /etc/localtime               
         resources:
           limits:
             memory: 200Mi

@@ -50,6 +50,8 @@ spec:
           mountPath: /data
         - name: gf-dashboards
           mountPath: /dashboards
+        - name: localtime
+          mountPath: /etc/localtime          
       # Volumes and config maps
       volumes:
       - name: gf-data
@@ -58,3 +60,7 @@ spec:
       - name: gf-dashboards
         configMap:
           name: grafana-dashboard
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+          

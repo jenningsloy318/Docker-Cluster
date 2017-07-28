@@ -36,6 +36,8 @@ spec:
         - name: fluentbit-conf
           mountPath: /fluent-bit/etc/
           readOnly: true
+        - name: localtime
+          mountPath: /etc/localtime          
       terminationGracePeriodSeconds: 10
       volumes:
       - name: varlog
@@ -50,3 +52,6 @@ spec:
       - name: fluentbit-conf
         configMap:
           name: fluentbit-conf
+      - name: localtime
+        hostPath:
+          path: /etc/localtime          

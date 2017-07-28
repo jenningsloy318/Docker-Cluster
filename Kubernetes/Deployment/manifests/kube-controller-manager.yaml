@@ -52,6 +52,8 @@ spec:
     - mountPath: /etc/pki/tls
       name: etcpkitls
       readOnly: true
+    - name: localtime
+      mountPath: /etc/localtime         
   hostNetwork: true
   volumes:
   - hostPath:
@@ -84,3 +86,6 @@ spec:
   - hostPath:
       path: /etc/pki/tls
     name: etcpkitls
+  - name: localtime
+    hostPath:
+      path: /etc/localtime  

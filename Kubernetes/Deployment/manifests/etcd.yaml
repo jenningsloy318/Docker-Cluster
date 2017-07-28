@@ -64,6 +64,8 @@ spec:
       name: varlog
     - mountPath: /srv/kubernetes
       name: etcdcert
+    - name: localtime
+      mountPath: /etc/localtime         
   volumes:
   - hostPath:
       path: /var/lib/etcd
@@ -98,3 +100,6 @@ spec:
   - hostPath:
       path: /srv/kubernetes
     name: etcdcert
+  - name: localtime
+    hostPath:
+      path: /etc/localtime   

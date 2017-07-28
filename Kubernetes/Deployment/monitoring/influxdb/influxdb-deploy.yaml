@@ -25,6 +25,8 @@ spec:
           name: influxdb-storage
         - mountPath: /etc/influxdb
           name: influxdb-conf
+        - name: localtime
+          mountPath: /etc/localtime          
       volumes:
       - name: influxdb-storage
         persistentVolumeClaim:
@@ -32,6 +34,9 @@ spec:
       - name: influxdb-conf
         configMap:
            name:  influxdb-conf
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
 ---
 apiVersion: v1
 kind: Service

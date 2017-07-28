@@ -25,6 +25,8 @@ spec:
     - mountPath: /srv/kubernetes/
       name: certs
       readonly: true
+    - name: localtime
+      mountPath: /etc/localtime         
   volumes:
   - hostPath:
       path: /var/log/
@@ -32,3 +34,6 @@ spec:
   - hostPath:
       path: /srv/kubernetes/
     name: certs
+  - name: localtime
+    hostPath:
+      path: /etc/localtime  

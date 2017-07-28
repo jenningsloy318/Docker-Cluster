@@ -33,7 +33,8 @@ spec:
           mountPath: /etc/alertmanager-templates
         - name: alertmanager-data
           mountPath: /alertmanager
-
+        - name: localtime
+          mountPath: /etc/localtime
       # Volumes and config maps
       volumes:
       - name: config-volume-alertmanager
@@ -45,6 +46,9 @@ spec:
       - name: alertmanager-data
         persistentVolumeClaim:
           claimName: alertmanager-data-pvc
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
 
 ---
 apiVersion: v1

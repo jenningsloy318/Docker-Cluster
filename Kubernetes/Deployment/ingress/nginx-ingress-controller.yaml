@@ -66,7 +66,12 @@ spec:
           - mountPath: /etc/nginx/template
             name: nginx-template-volume
             readOnly: true
+          - name: localtime
+            mountPath: /etc/localtime            
       volumes:
         - name: nginx-template-volume
           configMap:
             name: nginx-tmpl
+        - name: localtime
+          hostPath:
+            path: /etc/localtime            

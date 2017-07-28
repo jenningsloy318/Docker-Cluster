@@ -40,6 +40,14 @@ spec:
         - /heapster
         - --source=kubernetes:https://kubernetes.default
         - --sink=influxdb:http://monitoring-influxdb.monitoring.svc:8086
+        volumeMounts: 
+        - name: localtime
+          mountPath: /etc/localtime  
+      volumes:
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+                
 ---
 apiVersion: v1
 kind: Service

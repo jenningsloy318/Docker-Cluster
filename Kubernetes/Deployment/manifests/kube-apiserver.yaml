@@ -58,6 +58,8 @@ spec:
     - mountPath: /etc/pki/tls
       name: etcpkitls
       readOnly: true
+    - name: localtime
+      mountPath: /etc/localtime            
   volumes:
   - hostPath:
       path: /var/log/
@@ -86,3 +88,6 @@ spec:
   - hostPath:
       path: /etc/pki/tls
     name: etcpkitls
+  - name: localtime
+    hostPath:
+      path: /etc/localtime  

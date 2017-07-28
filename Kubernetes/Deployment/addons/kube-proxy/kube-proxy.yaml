@@ -28,7 +28,12 @@ spec:
         - name: kubeconf
           mountPath: /srv/kubernetes
           readOnly: true
+        - name: localtime
+          mountPath: /etc/localtime               
       volumes:
       - name: kubeconf
         configMap:
           name: kube-proxy.kubeconfig
+      - name: localtime
+        hostPath:
+          path: /etc/localtime

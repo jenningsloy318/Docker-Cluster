@@ -2,7 +2,7 @@
 ```
 kubectl create secret tls foo-secret --key /tmp/tls.key --cert /tmp/tls.crt
 ```
-2. create configmap
+2. create configmap for nginx tmplate
 ```
 kubectl create configmap nginx-tmpl --from-file=nginx.tmpl=nginx.tmpl -n kube-system
 ```
@@ -11,6 +11,7 @@ kubectl create configmap nginx-tmpl --from-file=nginx.tmpl=nginx.tmpl -n kube-sy
 
 vts port is 18080, the ingress nginx controller use https://github.com/vozlt/nginx-module-vts to achive this function.
 
+4. enable TCP loadbalancing by creating [tcp configmap](./tcp-configmap.yaml) and pass the parameter `--tcp-services-configmap=$(POD_NAMESPACE)/tcp-configmap` to ingress controller. official [example](https://github.com/kubernetes/ingress/tree/master/examples/tcp/nginx).
 
 Note:
 

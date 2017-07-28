@@ -58,6 +58,8 @@ spec:
           volumeMounts: 
             - name: jenkins-home
               mountPath: /var/jenkins_home
+            - name: localtime
+              mountPath: /etc/localtime
           livenessProbe:
             httpGet:
               path: /login
@@ -66,6 +68,11 @@ spec:
             timeoutSeconds: 5
       securityContext:
         fsGroup: 1000
+      volumes: 
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+    
   volumeClaimTemplates:
   - metadata:
       name: jenkins-home

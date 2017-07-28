@@ -10,9 +10,9 @@ ENV FLB_VERSION 0.12.0
 
 ENV FLB_TARBALL http://github.com/fluent/fluent-bit/archive/master.zip
 
-RUN mkdir -p /fluent-bit/bin /fluent-bit/etc /fluent-bit/log
+RUN mkdir -p /fluent-bit/bin /fluent-bit/etc /fluent-bit/log /fluent-bit/db
 
-RUN apt-get  update \
+RUN apt-get  update  -qq \
     && apt-get install -y -qq \
        ca-certificates \
        build-essential \
@@ -25,8 +25,8 @@ RUN apt-get  update \
        procps\
        curl \
        bash\
-    && apt-get install -y --reinstall lsb-base lsb-release \
-    && wget -O "/tmp/fluent-bit-master.zip" ${FLB_TARBALL} \
+    && apt-get install -y  -qq --reinstall lsb-base lsb-release \
+    && curl -SL -o "/tmp/fluent-bit-master.zip" ${FLB_TARBALL} \
     && cd /tmp && unzip "fluent-bit-master.zip" \
     && cd "fluent-bit-master"/build/ \
     && cmake -DFLB_DEBUG=On -DFLB_TRACE=On -DFLB_JEMALLOC=On -DFLB_BUFFERING=On ../ \
@@ -42,7 +42,6 @@ RUN apt-get  update \
 
 # Configuration files
 COPY fluent-bit.conf /fluent-bit/etc/
-COPY fluentbit-parser.conf /fluent-bit/etc/
 
 
 # Entry point

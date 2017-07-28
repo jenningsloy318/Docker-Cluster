@@ -4,8 +4,15 @@ metadata:
   name: quota
 spec:
   hard:
-    cpu: "20"
-    memory: 1Gi
-    pods: "10"
-    deployments: "20"
-    services: "5"
+    pods: "2"
+    requests.cpu: "1"
+    requests.memory: 20Mi
+    limits.cpu: "2"
+    limits.memory: 2Gi
+    configmaps: "10"
+    persistentvolumeclaims: "4"
+    replicationcontrollers: "20"
+    depoyments: "10"
+    secrets: "10"
+    services: "10"
+    services.loadbalancers: "2"

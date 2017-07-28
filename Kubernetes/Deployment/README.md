@@ -4,6 +4,7 @@
 # prequisistes #
 
   1. check the docker and other componenet requirements before deploying the cluster, visit the [Kubernetes CHANGELOG](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG.md), and find the section `External Dependency Version Information`.
+   1. build docker images with `docker build --rm  --no-cache --tag XXX . `
 
 # Deployment #
 1. create cgroup slice to accommodate docker containers and pods, here created a slice nemed [container.slice](./systemd/container.slice) 
@@ -130,6 +131,7 @@
 
     - Storage=auto：“auto”: The storage mode is like persistent — data will be written to disk under /var/log/journal/
     - SystemMaxuse: This parameter controls the maximum disk space the journal can consume when it’s persistent
+    - **make sure the dir /var/log/journal exists**
 
 
 4. create SSL keys for etcd, docker and kubernetes, details in [SSL](./SSL); here etcd and docker certs can share same certs, so create once and used in both etcd and docker. for k8s, for enabled RBAC, thus for each kubelet cert with its individual cert. 
@@ -213,7 +215,7 @@
 
     depoly multiple controllers, so I use daemonset to running multple instances.
 
-15. create resource limits and quota, exampes refer to [ResourceLimitQuota](./ResourceLimitQuota)
+15. create resource limits and quota, exampes refer to [ResourceLimitQuota](./ResourceLimitQuota), these limits and quotas are based on namespace scope.
 
 16. Install kubernetes-dashboard.
 
@@ -224,3 +226,21 @@
     16.3 install [kubernetes-dashboard](./addons/kubernetes-dashboard/kubernetes-dashboard.yaml).
 
     16.4 create [dashboard ingress](./addons/kubernetes-dashboard/kubernetes-dashboard-ingress).
+
+17. Install [Monitoring and Logging](./monitoring)
+
+    17.1 Totally we use influxdb as the overall storage backend, save logs from fluentbit, save prometheus metrics and heapster data.
+
+    17.2 as for fluentbit, it reads logs from systemd-journald, as we have configured journald as the docker log-driver, hence install fluentbit as daemonset, read journal logs from shared directory /var/log/journal, after processing, finally save it to influxd.
+
+    17.3 heapster inherently support to external storage influxdb 
+
+    17.4 prometheus has alpha support to save data to remote storage via  remote_storage_adapter, now create prometheus alongside with a remote-storage-adapter container in a single pod. also use alertmanager to send out alerts. 
+
+    17.5 we can reload prometheus via `curl -X POST http(s)://{prometheus-host}:{prometheus-port}/-/reloador` and reload altermanager via `curl -X POST http(s)://{alertmanager-host}:{alertmanager-port}/-/reload`.
+
+    17.6 we can customize prometheus by creating different prometheus.yaml and alter-rules via [prometheus-cm.yaml](./monitoring/prometheus/prometheus-cm.yml) 
+
+    17.7 customize alertmanager by creating [alertmanager-cm.yaml](./monitoring/prometheus/alertmanager-cm.yml) and [template](./monitoring/prometheus/default.tmpl)
+
+    17.8 visulization via [grafana](./monitoring/grafana), we still need to customizing the dashboards

@@ -21,6 +21,7 @@ spec:
       --service-account-key-file=/srv/kubernetes/apiserver-key.pem
       --client-ca-file=/srv/kubernetes/ca.pem
       --tls-cert-file=/srv/kubernetes/apiserver.pem --tls-private-key-file=/srv/kubernetes/apiserver-key.pem
+      --token-auth-file=/srv/kubernetes/token.csv  --basic-auth-file=/srv/kubernetes/basic.csv
       --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname --anonymous-auth=false
       --secure-port=6443   --v=5
       --allow-privileged=true 

@@ -45,3 +45,13 @@ kubectl config set-credentials cluster-admin --client-certificate=/srv/kubernete
 kubectl config set-context cluster-admin@kubernetes --cluster=kubernetes --user=cluster-admin  --kubeconfig=/srv/kubernetes/cluster-admin.kubeconfig
 kubectl config  use-context cluster-admin@kubernetes  --kubeconfig=/srv/kubernetes/cluster-admin.kubeconfig
 ```
+
+
+## create basic and token auth 
+```
+TOKEN=$(dd if=/dev/urandom bs=128 count=1 2>/dev/null | base64 | tr -d "=+/" | dd bs=32 count=1 2>/dev/null)
+
+echo "$TOKEN,clusteradm,clusteradm,\"system:masters\"" > /srv/kubernetes/token.csv
+
+echo "Q9wgrHJQscILd4,clusteradm,clusteradm,\"system:masters\"" > /srv/kubernetes/basic.csv
+```

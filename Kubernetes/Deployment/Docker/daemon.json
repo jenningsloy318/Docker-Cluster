@@ -1,9 +1,8 @@
 {
     "debug": true,
-    "cgroup-parent": "/container.slice/docker",
+    "cgroup-parent": "/container.slice/",
     "hosts": ["tcp://0.0.0.0:2376","unix:///var/run/docker.sock"],
     "ip": "0.0.0.0",
-    "live-restore": true,
     "log-driver": "journald",
     "log-opts":  {"tag":"docker_{{.Name}}_{{.ID}}"},
     "tlsverify" : true,

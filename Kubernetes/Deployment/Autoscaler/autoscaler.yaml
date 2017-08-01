@@ -1,0 +1,13 @@
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: autoscaler
+  namespace: kube-system
+spec:
+  maxReplicas: 3
+  minReplicas: 1
+  targetCPUUtilizationPercentage: 90
+  scaleTargetRef:
+    apiVersion: v1
+    kind: Deployment
+    name: kube-dns

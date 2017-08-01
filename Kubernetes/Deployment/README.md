@@ -44,22 +44,46 @@
 
     2.4 configure docker via [daemon.json](./Docker/daemon.json).serveral things need to mention.
         
-      - `cgroup-parent: container.slice` which means that all container will under  `/container.slice/` 
-      - `cgroup driver`: systemd
+      - `cgroup-parent: /container.slice/` which means that all container will under  `/container.slice/` 
         ```
         #systemd-cgls
         Control group /:
         -.slice
+        ├─user.slice
+        │ └─user-0.slice
+        │   ├─user@0.service
+        │   │ └─init.scope
+        │   │   ├─2231 /lib/systemd/systemd --user
+        │   │   └─2237 (sd-pam)
+        │   └─session-1.scope
+        │     ├─2229 sshd: root@pts/0
+        │     ├─2279 -bash
+        │     └─3509 systemd-cgls
         ├─container.slice
-        │ ├─docker
-        │ │ └─5748929de54c59338de0f75dcedb736e5635edc42979fd3ff4e2da2de7fc1c2a
-        │ │   ├─3560 nginx: master process nginx -g daemon off
-        │ │   └─3583 nginx: worker proces
-        │ └─docker.service
-        │   ├─3357 /usr/bin/dockerd
-        │   ├─3371 docker-containerd -l unix:///var/run/docker/libcontainerd/docker-containerd.sock --shim docker-containerd-shim --metrics-interval=0 --start-timeout 2m --state-di
-        │   ├─3524 /usr/bin/docker-proxy -proto tcp -host-ip 0.0.0.0 -host-port 8080 -container-ip 172.17.0.2 -container-port 80
-        │   └─3540 docker-containerd-shim 5748929de54c59338de0f75dcedb736e5635edc42979fd3ff4e2da2de7fc1c2a /var/run/docker/libcontainerd/5748929de54c59338de0f75dcedb736e5635edc4297
+        │ ├─docker.service
+        │ │ ├─  372 docker-containerd-shim f89a4edfd306962007b06f0c2f570f5ca35c596997...
+        │ │ ├─20017 /usr/bin/dockerd
+        │ │ ├─20041 docker-containerd -l unix:///var/run/docker/libcontainerd/docker-...
+        │ │ ├─20165 docker-containerd-shim 169f72e5e35e072f5dc105afc3d19a322cd94db4a7...
+        │ │ ├─20166 docker-containerd-shim 332d8273dd8b146c81f31a5dcf52f945ac7e43fd5c...
+        │ │ ├─20226 docker-containerd-shim e15fb8e6a2e75e744f5b2c2b87a1602de23972283e...
+        │ │ ├─20329 docker-containerd-shim 30e7f7c6964f0303d67ee5299a79862f08f309a897...
+        │ │ ├─25313 docker-containerd-shim bcfd15acca0a2e5ffd60b915adbcdb2c6bc2103b94...
+        │ │ ├─kubepods-besteffort-pod14fe43a305055176089fe3b2cac4f54b.slice
+        │ │ │ └─30e7f7c6964f0303d67ee5299a79862f08f309a897e10e5c3eb22fc30e94666e
+        │ │ │   └─20345 /pause
+        │ │ ├─kubepods-besteffort-pod7fcc959e8f7eba8bbc086c150649966a.slice
+        │ │ │ └─332d8273dd8b146c81f31a5dcf52f945ac7e43fd5c105c64bb32f1954a9d3e47
+        │ │ │   └─20200 /pause
+        │ │ ├─kubepods-besteffort-pod2c9b83837ac6042e7a2f50a365a0e7d1.slice
+        │ │ │ └─169f72e5e35e072f5dc105afc3d19a322cd94db4a7267045daa8d4c6ef77a65b
+        │ │ │   └─20198 /pause
+        │ │ └─kubepods-besteffort-pod25ed2b09dadfee5f5ffc39bb68b4baa3.slice
+        │ │   └─e15fb8e6a2e75e744f5b2c2b87a1602de23972283e093c6fa78d76c8ca747b6f
+        │ │     └─20249 /pause
+        │ └─kubelet.service
+        │   ├─21639 /usr/bin/kubelet --api-servers=https://10.58.137.243:6443 --kubec...
+        │   └─21701 journalctl -k -f
         ```
       - `hosts: ["tcp://0.0.0.0:2375","unix:///var/run/docker.sock"]`, which makes it not only listen to unix socket, but also listen on tcp socket.
 

@@ -1,11 +1,3 @@
----
-apiVersion: v1
-kind: Namespace
-metadata: 
-  name: jenkins
-  labels: 
-    name: jenkins
----
 apiVersion: v1
 kind: Service
 metadata: 
@@ -58,24 +50,45 @@ spec:
             memory: 500Mi
         env:
           - name: JAVA_OPTS
-            value: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=1 -Dhudson.slaves.NodeProvisioner.MARGIN=50 -Dhudson.slaves.NodeProvisioner.MARGIN0=0.85 -Djenkins.install.runSetupWizard=false  -Dhudson.model.UpdateCenter.never=true"
+            value: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=1 -Dhudson.slaves.NodeProvisioner.MARGIN=50 -Dhudson.slaves.NodeProvisioner.MARGIN0=0.85 -Djenkins.install.runSetupWizard=false"
         volumeMounts: 
           - name: jenkins-home
             mountPath: /var/jenkins_home
           - name: localtime
             mountPath: /etc/localtime
+          - name: jenkins-adm-secret
+            mountPath: /run/secrets    
+          - name: jenkins-init-scripts
+            mountPath: /var/jenkins_home/init.groovy.d     
         livenessProbe:
           httpGet:
             path: /login
             port: 8080
+          periodSeconds: 10
+          timeoutSeconds: 5            
+        readinessProbe:
+          httpGet:
+            path: /login
+            port: 8080            
           initialDelaySeconds: 60
           timeoutSeconds: 5
+        lifecycle:
+          postStart:
+            exec:
+              command:
+                - /usr/local/bin/install-ci-connect.sh        
       securityContext:
         fsGroup: 1000
       volumes: 
       - name: localtime
         hostPath:
           path: /etc/localtime
+      - name: jenkins-adm-secret
+        secret:
+          secretName: jenkins-adm-secret   
+      - name: jenkins-init-scripts
+        configMap:
+          name: jenkins-init-scripts                 
   volumeClaimTemplates:
   - metadata:
       name: jenkins-home
@@ -87,10 +100,6 @@ spec:
       resources:
         requests:
           storage: 1Gi
-
-
-
-
 ---
  apiVersion: extensions/v1beta1
  kind: Ingress
@@ -109,5 +118,3 @@ spec:
          backend:
            serviceName: jenkins
            servicePort: 80
-
-

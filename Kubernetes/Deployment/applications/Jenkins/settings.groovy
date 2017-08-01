@@ -157,3 +157,174 @@ Thread.start {
     // Save the state
     instance.save()
 }
+
+
+
+/*config sonar*/
+// Configure global sonar
+def sonar = { instance, sonar_host, sonar_addr, sonar_db, sonar_user, sonar_password ->
+  assert instance : "Must pass a valid jenkins instance. E.g: Jenkins.getInstance()"
+  assert sonar_host : "Must pass a valid sonar host. E.g: localhost"
+  assert sonar_addr : "Must pass a valid sonar address. E.g: http://${sonar_host}:9000"
+  assert sonar_db : "Must pass a valid sonar db connection. E.g: jdbc:mysql://${sonar_host}:3306/sonar?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true&useConfigs=maxPerformance&autoReconnect=true"
+  assert sonar_user : "Must pass a valid sonar user"
+  assert sonar_password : "Must pass a valid sonar password"
+
+  def descriptor = instance.getDescriptor("hudson.plugins.sonar.SonarGlobalConfiguration")
+  def sonar = new hudson.plugins.sonar.SonarInstallation(
+    sonar_host,
+    sonar_addr,
+    "5.1",
+    "",
+    sonar_db,
+    sonar_user,
+    sonar_password,
+    "",
+    "-Dsonar.sourceEncoding=\"UTF-8\"",
+    new hudson.plugins.sonar.model.TriggersConfig(),
+    sonar_user,
+    sonar_password,
+    ""
+  )
+  descriptor.setInstallations(sonar)
+  descriptor.save()
+  println "Setting up global Sonar installation"
+}
+
+
+/*configure mvn*/
+import jenkins.model.*
+def instance = Jenkins.getInstance()
+
+// Tell jenkins where maven is
+def mavenTask = Jenkins.instance.getExtensionList(
+  hudson.tasks.Maven.DescriptorImpl.class
+)[0]
+mavenTask.setInstallations(
+  new hudson.tasks.Maven.MavenInstallation(
+    "Maven", "$M2_HOME", []
+  )
+)
+mavenTask.save()
+
+// Configure global maven options
+def maven = Jenkins.instance.getExtensionList(
+  hudson.maven.MavenModuleSet.DescriptorImpl.class
+)[0]
+maven.setGlobalMavenOpts("-Dmaven.test.failure.ignore=false")
+maven.save()
+
+
+/*set global email*/
+Global email settings
+
+import jenkins.model.*
+def instance = Jenkins.getInstance()
+
+// set email
+def location_config = JenkinsLocationConfiguration.get()
+location_config.setAdminAddress("jenkins@azsb.skybet.net")
+
+
+/*set proxy*/
+pc = new hudson.ProxyConfiguration(name, port, userName, password, noProxyHost);
+jenkins.model.Jenkins.instance.proxy = pc;"
+println "Jenkins-Proxy settings updated!
+
+
+
+/*auto-installing  jdk */
+import jenkins.model.*
+import hudson.model.*
+import hudson.tools.*
+
+def inst = Jenkins.getInstance()
+
+def desc = inst.getDescriptor("hudson.model.JDK")
+
+def versions = [
+  "jdk8": "jdk-8u102-oth-JPR"
+]
+def installations = [];
+
+for (v in versions) {
+  def installer = new JDKInstaller(v.value, true)
+  def installerProps = new InstallSourceProperty([installer])
+  def installation = new JDK(v.key, "", [installerProps])
+  installations.push(installation)
+}
+
+desc.setInstallations(installations.toArray(new JDK[0]))
+
+desc.save()  
+// Required: enter credentials at http://l:8080/descriptorByName/hudson.tools.JDKInstaller/enterCredential
+
+
+/*set jdk*/
+
+#!groovy
+// On GUI, this is on Configure Tools page, "JDK" section
+// In config.xml, this is under <jdks>
+
+import jenkins.model.*
+import hudson.model.*
+import groovy.io.FileType
+
+def jdkDir = "/usr/java"
+def inst = Jenkins.getInstance()
+def desc = inst.getDescriptor("hudson.model.JDK")
+
+def dirs = []
+def currentDir = new File(jdkDir)
+currentDir.eachFile FileType.DIRECTORIES, {
+    dirs << it.name
+}
+
+def installations = []
+for (dir in dirs) {
+  def installation = new JDK(dir, jdkDir + "/" + dir)
+  installations.push(installation)
+}
+
+desc.setInstallations(installations.toArray(new JDK[0]))
+
+desc.save()
+inst.save()
+
+
+/*mail-ext*/
+import jenkins.model.*
+
+def inst = Jenkins.getInstance()
+
+def desc = inst.getDescriptor('hudson.tasks.Mailer')
+
+desc.setSmtpHost("#{node['cvent-jenkins']['email-ext-plugin']['host']}")
+desc.setDefaultSuffix("#{node['cvent-jenkins']['email-ext-plugin']['defaultSuffix']}")
+desc.setReplyToAddress("#{node['cvent-jenkins']['email-ext-plugin']['replyTo']}")
+    
+desc.save()
+
+
+
+/*set admin at boot, password saved in k8s secrets */
+
+ 
+import jenkins.model.*
+import hudson.security.*
+import jenkins.security.s2m.AdminWhitelistRule
+ 
+def instance = Jenkins.getInstance()
+ 
+def user = new File("/run/secrets/jenkins-user").text.trim()
+def pass = new File("/run/secrets/jenkins-pass").text.trim()
+ 
+def hudsonRealm = new HudsonPrivateSecurityRealm(false)
+hudsonRealm.createAccount(user, pass)
+instance.setSecurityRealm(hudsonRealm)
+ 
+def strategy = new FullControlOnceLoggedInAuthorizationStrategy()
+instance.setAuthorizationStrategy(strategy)
+instance.save()
+ 
+Jenkins.instance.getInjector().getInstance(AdminWhitelistRule.class).setMasterKillSwitch(false)

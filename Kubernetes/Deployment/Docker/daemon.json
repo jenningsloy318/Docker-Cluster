@@ -1,6 +1,7 @@
 {
     "debug": true,
-    "cgroup-parent": "/container.slice/",
+    "exec-opts": ["native.cgroupdriver=cgroupfs"],
+    "cgroup-parent": "/container.slice",
     "hosts": ["tcp://0.0.0.0:2376","unix:///var/run/docker.sock"],
     "ip": "0.0.0.0",
     "log-driver": "journald",

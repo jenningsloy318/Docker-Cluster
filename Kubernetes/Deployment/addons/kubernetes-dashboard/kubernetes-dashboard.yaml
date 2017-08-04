@@ -39,6 +39,8 @@ spec:
         resources:
           limits:
             memory: "1024Mi"
+          requests:
+            memory: "256Mi"
         volumeMounts:
         - name: localtime
           mountPath: /etc/localtime               

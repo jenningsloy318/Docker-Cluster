@@ -5,7 +5,7 @@ metadata:
  namespace: kube-system
 spec:
  rules:
-   - host: dashboard.gcsc.corp.sap
+   - host: k8s.gcsc.sap.corp
      http:
        paths:
          - path: /

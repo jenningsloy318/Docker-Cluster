@@ -4,5 +4,5 @@ metadata:
   name: tcp-configmap
   namespace: kube-system
 data:
-  8083: "monitoring/monitoring-influxdb:8083"
-  8086: "monitoring/monitoring-influxdb:8086"
+  8083: "monitoring/influxdb:8083"
+  8086: "monitoring/influxdb:8086"

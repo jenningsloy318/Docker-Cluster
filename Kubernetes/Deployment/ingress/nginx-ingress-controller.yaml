@@ -36,6 +36,13 @@ spec:
           hostPort: 18080
         - name: metrics
           containerPort: 10254
+        resources:
+          limits:
+            memory: "2048Mi"
+            cpu: 1024m
+          requests:
+            memory: "256Mi"    
+            cpu: 200m      
         readinessProbe:
           httpGet:
             path: /healthz

@@ -21,3 +21,7 @@ k8s
 k8slog
 prometheus
 ```
+
+
+- CREATE DATABASE <database_name> [WITH [DURATION <duration>] [REPLICATION <n>]   [SHARD DURATION <duration>] [NAME <retention-policy-name>]]
+- CREATE DATABASE mydb WITH DURATION 14d

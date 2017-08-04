@@ -2,7 +2,7 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
- name: monitoring-influxdb
+ name: influxdb
  namespace: monitoring
  annotations:
 spec:
@@ -12,12 +12,12 @@ spec:
        paths:
          - path: /
            backend:
-             serviceName: monitoring-influxdb
+             serviceName: influxdb
              servicePort: 8083
    - host: influxdb-api.gcsc.sap.corp
      http:
        paths:
          - path: /
            backend:
-             serviceName: monitoring-influxdb
+             serviceName: influxdb
              servicePort: 8086

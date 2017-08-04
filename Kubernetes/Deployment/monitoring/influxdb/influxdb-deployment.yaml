@@ -1,15 +1,15 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: monitoring-influxdb
+  name: influxdb
   namespace: monitoring
 spec:
   replicas: 1
   template:
     metadata:
+      name: influxdb
       labels:
-        task: monitoring
-        k8s-app: influxdb
+        app: influxdb        
     spec:
       containers:
       - name: influxdb
@@ -20,6 +20,13 @@ spec:
           containerPort: 8083
         - name: data
           containerPort: 8086
+        resources:
+          limits:
+            memory: 2048Mi
+            cpu: 2048m
+          requests:
+            memory: 1024Mi  
+            cpu: 512m                   
         volumeMounts:
         - mountPath: /data
           name: influxdb-storage
@@ -41,14 +48,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  labels:
-    task: monitoring
-    # For use as a Cluster add-on (https://github.com/kubernetes/kubernetes/tree/master/cluster/addons)
-    # If you are NOT using this as an addon, you should comment out this line.
-    kubernetes.io/cluster-service: 'true'
-    kubernetes.io/name: monitoring-influxdb
-  name: monitoring-influxdb
+  name: influxdb
   namespace: monitoring
+  labels:
+    app: influxdb  
 spec:
   ports:
   - name: data
@@ -58,4 +61,4 @@ spec:
     port: 8083
     targetPort: 8083
   selector:
-    k8s-app: influxdb
+    app: influxdb    

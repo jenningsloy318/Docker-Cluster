@@ -35,6 +35,11 @@ spec:
           mountPath: /alertmanager
         - name: localtime
           mountPath: /etc/localtime
+        resources:
+          limits:
+            memory: 256Mi
+          requests:
+            memory: 10Mi            
       # Volumes and config maps
       volumes:
       - name: config-volume-alertmanager

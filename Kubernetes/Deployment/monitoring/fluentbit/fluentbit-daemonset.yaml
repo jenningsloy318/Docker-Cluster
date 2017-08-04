@@ -23,7 +23,9 @@ spec:
         env:
         resources:
           limits:
-            memory: 100Mi
+            memory: 256Mi
+          requests:
+            memory: 100Mi  
         volumeMounts:
         - name: varlog
           mountPath: /var/log

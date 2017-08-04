@@ -14,7 +14,7 @@ spec:
            backend:
              serviceName: prometheus
              servicePort: 9090
-   - host: altermanager.gcsc.sap.corp
+   - host: alertmanager.gcsc.sap.corp
      http:
        paths:
          - path: /

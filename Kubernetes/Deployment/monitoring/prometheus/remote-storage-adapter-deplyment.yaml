@@ -22,7 +22,7 @@ spec:
         - /bin/sh
         - -c
         - /usr/bin/remote_storage_adapter
-          '-influxdb-url=http://monitoring-influxdb:8086'
+          '-influxdb-url=http://influxdb:8086'
           '-influxdb.database=prometheus'
           '-influxdb.retention-policy=autogen'
         volumeMounts: 
@@ -32,6 +32,8 @@ spec:
           limits:
             cpu: 200m
             memory: 256Mi
+          requests:
+            memory: 10Mi              
         ports:
         - containerPort: 9201
           protocol: TCP

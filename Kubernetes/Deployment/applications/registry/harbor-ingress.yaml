@@ -3,6 +3,8 @@ kind: Ingress
 metadata:
  name: kubernetes-dashboard-ingress
  namespace: registry
+ annotations:
+  ingress.kubernetes.io/proxy-body-size: 1024m
 spec:
  tls:
  - hosts:
@@ -16,3 +18,7 @@ spec:
            backend:
              serviceName: ui
              servicePort: 80
+         - path: /v2
+           backend:
+             serviceName: registry
+             servicePort: 5000  

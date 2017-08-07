@@ -11,7 +11,7 @@ data:
   REGISTRY_URL: http://registry:5000
   CONFIG_PATH: /etc/ui/app.conf
   HARBOR_REG_URL: "registry.gcsc.sap.corp"
-  HARBOR_ADMIN_PASSWORD: "DevOps2017"
+  HARBOR_ADMIN_PASSWORD: "DevOPS2017"
   HARBOR_URL: http://ui
   AUTH_MODE: "db_auth"
   LDAP_URL: "ldaps://ldap.mydomain.com"
@@ -29,7 +29,7 @@ data:
   TOKEN_URL: http://ui
   SELF_REGISTRATION: "on"
   USE_COMPRESSED_JS: ""
-  VERIFY_REMOTE_CERT: "on"
+  VERIFY_REMOTE_CERT: "off"
   TOKEN_EXPIRATION: "30"
   EXT_REG_URL: "registry.gcsc.sap.corp"
   config: |

@@ -1,0 +1,18 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ name: kubernetes-dashboard-ingress
+ namespace: registry
+spec:
+ tls:
+ - hosts:
+   - registry.gcsc.sap.corp
+   secretName: registry-secret
+ rules:
+   - host: registry.gcsc.sap.corp
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: ui
+             servicePort: 80

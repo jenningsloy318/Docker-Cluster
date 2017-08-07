@@ -1,0 +1,246 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: harbor-nginx-config
+  namespace: registry
+data:
+  config: |
+    worker_processes auto;
+
+    events {
+        worker_connections 1024;
+        use epoll;
+        multi_accept on;
+    }
+
+    http {
+        tcp_nodelay on;
+
+        # this is necessary for us to be able to disable request buffering in all cases
+        proxy_http_version 1.1;
+
+
+        upstream registry {
+            server registry:5000;
+        }
+
+        upstream ui {
+            server ui:80;
+        }
+
+
+        server {
+            listen 443 ssl;
+            server_name registry.gcsc.sap.corp;
+
+            # SSL
+            ssl_certificate /etc/nginx/https.crt;
+            ssl_certificate_key /etc/nginx/https.key;
+
+            # Recommendations from https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
+            ssl_protocols TLSv1.1 TLSv1.2;
+            ssl_ciphers 'EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH';
+            ssl_prefer_server_ciphers on;
+            ssl_session_cache shared:SSL:10m;
+
+            # disable any limits to avoid HTTP 413 for large image uploads
+            client_max_body_size 0;
+
+            # required to avoid HTTP 411: see Issue #1486 (https://github.com/docker/docker/issues/1486)
+            chunked_transfer_encoding on;
+
+            location / {
+                proxy_pass http://ui/;
+                proxy_set_header Host $http_host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+                # When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.
+                proxy_set_header X-Forwarded-Proto $scheme;
+            
+                proxy_buffering off;
+                proxy_request_buffering off;
+            }
+
+            location /v1/ {
+                return 404;
+            }
+
+            location /v2/ {
+                proxy_pass http://registry/v2/;
+                proxy_set_header Host $http_host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+                # When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.
+                proxy_set_header X-Forwarded-Proto $scheme;
+
+                proxy_buffering off;
+                proxy_request_buffering off;
+
+            }
+
+            location /service/ {
+                proxy_pass http://ui/service/;
+                proxy_set_header Host $http_host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            
+                # When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.
+                proxy_set_header X-Forwarded-Proto $scheme;
+            
+                proxy_buffering off;
+                proxy_request_buffering off;
+            }
+        }
+        server {
+            listen 80;
+            server_name registry.gcsc.sap.corp;
+
+            # disable any limits to avoid HTTP 413 for large image uploads
+            client_max_body_size 0;
+
+            # required to avoid HTTP 411: see Issue #1486 (https://github.com/docker/docker/issues/1486)
+            chunked_transfer_encoding on;
+
+            # rewrite ^/(.*) https://$server_name:443/$1 permanent;
+
+            location / {
+                proxy_pass http://ui/;
+                proxy_set_header Host $http_host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+                # When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.
+                proxy_set_header X-Forwarded-Proto $scheme;
+            
+                proxy_buffering off;
+                proxy_request_buffering off;
+            }
+
+            location /v1/ {
+                return 404;
+            }
+
+            location /v2/ {
+                proxy_pass http://registry/v2/;
+                proxy_set_header Host $http_host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+                # When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.
+                proxy_set_header X-Forwarded-Proto $scheme;
+
+                proxy_buffering off;
+                proxy_request_buffering off;
+
+            }
+
+            location /service/ {
+                proxy_pass http://ui/service/;
+                proxy_set_header Host $http_host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            
+                # When setting up Harbor behind other proxy, such as an Nginx instance, remove the below line if the proxy already has similar settings.
+                proxy_set_header X-Forwarded-Proto $scheme;
+            
+                proxy_buffering off;
+                proxy_request_buffering off;
+            }
+        }
+    }
+  pkey: |
+    -----BEGIN RSA PRIVATE KEY-----
+    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
+    -----END RSA PRIVATE KEY-----
+
+    
+  cert: |
+    -----BEGIN CERTIFICATE-----
+    MIIG3zCCBMegAwIBAgIDAVk/MA0GCSqGSIb3DQEBCwUAMEQxCzAJBgNVBAYTAkRF
+    MREwDwYDVQQHDAhXYWxsZG9yZjEMMAoGA1UECgwDU0FQMRQwEgYDVQQDDAtTQVBO
+    ZXRDQV9HMjAeFw0xNzA4MDcwMjM2MDZaFw0xOTA4MDcwMjM2MDZaMDwxCzAJBgNV
+    BAYTAkRFMQwwCgYDVQQKEwNTQVAxHzAdBgNVBAMTFnJlZ2lzdHJ5Lmdjc2Muc2Fw
+    LmNvcnAwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDlVF26CjWlyCuU
+    WgZBoxND2ukP5hy8pt5+ScDdT2TLqRuFSrur6Xeh8JNHrmmdX4IGjJcSvhHuM6D+
+    RLpCHQDMXvg0sWwpIi6qTgsLQ6mOky6gmiAFybfUKFi56iNJMXLckJKZJ5Kzjt4b
+    0bqicmki1Bmg+SE/HfbWZ0nEWLQ+INjsH6KDevP37XVANs4+YzlhYh4l5xNJdqhE
+    dflBMAJqxKCvTm6/eRipZFVTjsBw6/ZpsoeYvl3GTI/6M4U5woI9PEKuQ+tbedvH
+    Owo2h1/wkyw7l8PLC5/OABVzjBeEc4dboULqi/FFJvFpWTqFhDb77+1AEKPDNZDN
+    s4g3o9vBv7+TggQhAhQIL/kl9TZlYpv/W2lsUkJB5+otBCn0D6GXoW6Mvxd6eWDM
+    jp6eytm3f8ByWTgheRRynNP8OSdreG0E9uSno2L+diBCeRYRFB/TRZjrz5oUVpsV
+    P5S0jyE4ZY13yKwKcAegZikm2oAI7FRg+W0QrIu/PFJbSpon0EKWeYdO/bh50X35
+    fd6PkUd50JiEc+AwqT4Y9vhp9c895Ngovt6HML3Rj02ylqeWSBcDcw2/aAPZJ+PE
+    qvm6Vhuq+z1TJCGb5TULj+PQ5k1HZmioNGjKws1mEGiRUNTE2kJI8cG0UNyhuQr3
+    xymnLbIdSTv1dOgj9ndt7Hz2c+a3VQIDAQABo4IB4DCCAdwwHQYDVR0lBBYwFAYI
+    KwYBBQUHAwEGCCsGAQUFBwMCMB8GA1UdIwQYMBaAFDgkr411Evw4PzeDEK+QPPwb
+    IVr/MEkGCCsGAQUFBwEBBD0wOzA5BggrBgEFBQcwAoYtaHR0cDovL2FpYS5wa2ku
+    Y28uc2FwLmNvbS9haWEvU0FQTmV0Q0FfRzIuY3J0MIHfBgNVHR8EgdcwgdQwgdGg
+    gc6ggcuGLWh0dHA6Ly9jZHAucGtpLmNvLnNhcC5jb20vY2RwL1NBUE5ldENBX0cy
+    LmNybIaBmWxkYXA6Ly8vQ049U0FQTkVUQ0FHMiwgQ049U0FQTkVUQ0FHMiwgQ049
+    Q0RQLCBDTj1QdWJsaWMgS2V5IFNlcnZpY2VzLCBDTj1TZXJ2aWNlcywgQ049Q29u
+    ZmlndXJhdGlvbiwgREM9Z2xvYmFsLCBEQz1jb3JwLCBEQz1zYXA/Y2VydGlmaWNh
+    dGVyZXZvY2F0aW9ubGlzdDARBgNVHQ4ECgQIQQa47oum2sIwDgYDVR0PAQH/BAQD
+    AgXgMDwGA1UdEQQ1MDOCFnJlZ2lzdHJ5Lmdjc2Muc2FwLmNvcnCBGUkzMzY1ODlA
+    ZXhjaGFuZ2Uuc2FwLmNvcnAwDAYDVR0TAQH/BAIwADANBgkqhkiG9w0BAQsFAAOC
+    AgEAYy2jxhC5TkBO+dmqcM1qUCp0rOWVYXxLbVCITx5CGoSvkd6gSHmh0iS7t2i5
+    +Bzc0rJNZz8j+3vEYODfxUAOsiUQSNNjmICiutAgNrvChvKD+nfcgI2QaMh2v0oq
+    UZFEwld4dSYteuf9vGzuJ6Ag1UcumEUqQ4GbvAteFgAqB0nlEvUxCIixBL8oC1YO
+    MJyQLDc5E0wJwuGWm7kOps+rmYHWAMMZt1T+ciILk0Vq4WxD2X0KakR64HWyzKGo
+    0JI6Aj4WTC/9Th5IFO/+gYkkPFeOYksUc4nUspb6M2cZ1wORj6gEhePxU1fRsKak
+    NffGTNT2gwZ4aOHDnVlue+1HMy1edgp1v3EuCXxPq2Q1EXz/Bpgv6q3geezRv7Sb
+    oSordY/IbtiS00DVZRyCET6oVwOHP4Q+dboVmJdC4Ad13dgD/HclqRTcc+O1mWAl
+    hqj6ZixsSTYmoej/S5ZI/alhVzKgCsJguKSOCSpVbdILhLUxvNY4xiNcs3LBZtEK
+    cpD+kfBetG5McPVbGESYUwjV36KvMOP2K8hF6gt90qbeuQ0b2cLJU7r2r1EL+FS/
+    4ukaYyKCy2UhEUjG4RfbZp5msrLPIliPkpFGyRPIB8NKmyN/R74xA8hadIBEnbrc
+    bFI3+icVC9KACqpnY0Vk+QDL9ehOWInt0X8BTL1mrdsnC5A=
+    -----END CERTIFICATE-----

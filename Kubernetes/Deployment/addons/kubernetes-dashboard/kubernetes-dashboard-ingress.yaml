@@ -4,6 +4,10 @@ metadata:
  name: kubernetes-dashboard-ingress
  namespace: kube-system
 spec:
+ tls:
+ - hosts:
+   - k8s.gcsc.sap.corp
+   secretName: dashboard-secret
  rules:
    - host: k8s.gcsc.sap.corp
      http:

@@ -1,0 +1,75 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: maven-jdk7
+  namespace: jenkins
+spec:
+  template:
+    metadata:
+      labels:
+        app: maven-jdk7
+      name: maven-jdk7
+    spec:
+      containers:
+      - name: maven-jdk7
+        image: registry.gcsc.sap.corp/maven/maven3-jdk7:latest
+        imagePullPolicy: Always
+        args:
+        lifecycle:
+          postStart:
+            exec:
+              command:
+                - /bin/bash
+                - -c
+                - env |grep -E "DOCKER_HOST|DOCKER_TLS_VERIFY"| awk '{print "export "$0}' >>/etc/profile;
+        ports:
+        - name: ssh-port
+          containerPort: 22
+          protocol: TCP          
+        env:
+        - name: HOSTIP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: DOCKER_HOST
+          value: tcp://$(HOSTIP):2376
+        - name: DOCKER_TLS_VERIFY
+          value: "1"          
+        volumeMounts: 
+          - name: jenkins-home
+            mountPath: /home/jenkins
+          - name: localtime
+            mountPath: /etc/localtime
+          - name: kubeconfig
+            mountPath: /home/jenkins/.kube/
+          - name: kubeconfig
+            mountPath: /root/.kube/            
+          - name: dockerconfig
+            mountPath: /home/jenkins/.docker/
+          - name: dockerconfig
+            mountPath: /root/.docker/   
+        securityContext:
+          privileged: true            
+      volumes: 
+      - name: localtime
+        hostPath:
+          path: /etc/localtime 
+      - name: kubeconfig
+        configMap:
+          name: maven-jdk7-conf-devops
+          items:
+          - key: kubeconfig
+            path: config          
+      - name: dockerconfig
+        configMap:
+          name: maven-jdk7-conf-devops
+          items:
+          - key: docker_client_key
+            path: key.pem          
+          - key: docker_client_cert
+            path: cert.pem   
+          - key: docker_ca_cert
+            path: ca.pem         
+      - name: jenkins-home
+        persistentVolumeClaim:
+          claimName: maven-jdk7-pvc-devops

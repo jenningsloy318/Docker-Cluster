@@ -1,0 +1,123 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata: 
+  name: jenkins-master
+  namespace: jenkins
+  labels: 
+    name: jenkins-master
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: jenkins-master
+  template: 
+    metadata: 
+      name: jenkins-master
+      labels: 
+        name: jenkins-master
+    spec: 
+      terminationGracePeriodSeconds: 10
+      containers: 
+      - name: jenkins-master
+        image: registry.gcsc.sap.corp/jenkins/jenkins_2.60.2:v1.0
+        imagePullPolicy: Always
+        args:
+#        - -c 
+#        - /etc/supervisord.conf
+        ports: 
+          - name: http-port 
+            containerPort: 8080
+          - name: slave-port
+            containerPort: 50000
+          - name: ssh-port
+            containerPort: 22
+            protocol: TCP
+        resources:
+          limits:
+            cpu: 1
+            memory: 2Gi
+          requests:
+            cpu: 0.5
+            memory: 500Mi
+        env:
+          - name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=1 -Dhudson.slaves.NodeProvisioner.MARGIN=50 -Dhudson.slaves.NodeProvisioner.MARGIN0=0.85 -Djenkins.install.runSetupWizard=false"
+          - name: HOSTIP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
+          - name: DOCKER_HOST
+            value: tcp://$(HOSTIP):2376
+          - name: DOCKER_TLS_VERIFY
+            value: "1"
+        volumeMounts: 
+          - name: jenkins-home
+            mountPath: /var/jenkins_home
+          - name: localtime
+            mountPath: /etc/localtime
+          - name: jenkins-adm-secret
+            mountPath: /run/secrets/
+          - name: jenkins-init-scripts
+            mountPath: /var/jenkins_home/init.groovy.d/
+          - name: kubeconfig
+            mountPath: /var/jenkins_home/.kube/
+          - name: kubeconfig
+            mountPath: /root/.kube/            
+          - name: dockerconfig
+            mountPath: /var/jenkins_home/.docker/
+          - name: dockerconfig
+            mountPath: /root/.docker/            
+          - name: supervisior-conf
+            mountPath: /etc/supervisord.conf
+            subPath: supervisord.conf            
+        securityContext:
+          privileged: true
+        readinessProbe:
+          tcpSocket:
+            port: 22
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+        lifecycle:
+          postStart:
+            exec:
+              command:
+                - /bin/bash
+                - -c 
+                - env |grep -E "DOCKER_HOST|JENKINS_HOME|DOCKER_TLS_VERIFY"| awk '{print "export "$0}' >>/etc/profile;
+      volumes: 
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+      - name: jenkins-adm-secret
+        secret:
+          secretName: jenkins-adm-secret   
+      - name: jenkins-init-scripts
+        configMap:
+          name: jenkins-init-scripts   
+      - name: kubeconfig
+        configMap:
+          name: jenkins-conf
+          items:
+          - key: kubeconfig
+            path: config          
+      - name: dockerconfig
+        configMap:
+          name: jenkins-conf
+          items:
+          - key: docker_client_key
+            path: key.pem          
+          - key: docker_client_cert
+            path: cert.pem   
+          - key: docker_ca_cert
+            path: ca.pem       
+      - name: supervisior-conf
+        configMap:
+          name: jenkins-conf
+          items:     
+          - key: supervisord.conf
+            path: supervisord.conf    
+      - name: jenkins-home
+        persistentVolumeClaim:
+          claimName: jenkins-home-pvc                                                     
+---
+

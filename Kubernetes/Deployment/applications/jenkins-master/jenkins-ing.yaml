@@ -1,0 +1,16 @@
+ apiVersion: extensions/v1beta1
+ kind: Ingress
+ metadata:
+   name: jenkins-master-ing-devops
+   namespace: jenkins
+   annotations:
+     kubernetes.io/ingress.class: nginx
+ spec:
+   rules:
+   - host: jenkins.gcsc.sap.corp
+     http:
+       paths:
+       - path: /
+         backend:
+           serviceName: jenkins-master-svc-devops
+           servicePort: 80

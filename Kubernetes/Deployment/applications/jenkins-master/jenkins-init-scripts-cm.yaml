@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jenkins-init-scripts
+  namespace: jenkins
+data:
+  jenkins-install-plugins.groovy: |-
+    import jenkins.model.*
+    import hudson.model.*
+    import hudson.security.*
+    import jenkins.model.Jenkins
+    import jenkins.security.s2m.AdminWhitelistRule
+    
+    def instance = Jenkins.getInstance()
+
+    // disable security and AuthorizationStrategy
+    instance.disableSecurity() 
+    def strategy = new hudson.security.AuthorizationStrategy.Unsecured()       
+    realm = new hudson.security.HudsonPrivateSecurityRealm(false, false, null)
+    instance.setAuthorizationStrategy(strategy)
+    instance.setSecurityRealm(realm)
+
+    // install plugins
+    def pm = instance.getPluginManager()
+    def uc = instance.getUpdateCenter()
+
+    println("starting to install plugins !")
+    uc.updateAllSites()
+    deployed = false
+    ["git", "active-directory","role-strategy","github","gerrit-trigger","email-ext","ssh-slaves"].each {
+    if (! pm.getPlugin(it)) {
+      println("Installing plugin $it")
+      deployment = uc.getPlugin(it).deploy()
+      deployment.get()
+    
+    }
+    }
+    
+
+    //create admin user
+    def user = new File("/run/secrets/username").text.trim()
+    def pass = new File("/run/secrets/password").text.trim()
+     
+    def hudsonRealm = new HudsonPrivateSecurityRealm(false)
+    hudsonRealm.createAccount(user, pass)
+    instance.setSecurityRealm(hudsonRealm)
+     
+    def newstrategy = new FullControlOnceLoggedInAuthorizationStrategy()
+    instance.setAuthorizationStrategy(newstrategy)
+    instance.save()
+     
+    Jenkins.instance.getInjector().getInstance(AdminWhitelistRule.class).setMasterKillSwitch(false)
+    

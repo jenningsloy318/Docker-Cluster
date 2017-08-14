@@ -118,6 +118,6 @@ spec:
             path: supervisord.conf    
       - name: jenkins-home
         persistentVolumeClaim:
-          claimName: jenkins-home-pvc                                                     
+          claimName: jenkins-master-pvc                                                    
 ---
 

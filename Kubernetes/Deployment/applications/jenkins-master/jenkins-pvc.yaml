@@ -1,7 +1,7 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: jenkins-home-pvc
+  name: jenkins-master-pvc
   namespace: jenkins
   annotations:
 spec:

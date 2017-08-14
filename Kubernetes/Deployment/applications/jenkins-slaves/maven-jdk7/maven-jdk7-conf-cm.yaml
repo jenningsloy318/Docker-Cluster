@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: maven-jdk7-conf-devops
+  name: jenkins-slave-jdk7
   namespace: jenkins
 data:
   kubeconfig: |

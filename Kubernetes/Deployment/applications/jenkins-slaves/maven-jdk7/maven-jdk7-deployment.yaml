@@ -1,17 +1,21 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: maven-jdk7
+  name: jenkins-slave-jdk7
   namespace: jenkins
 spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: jenkins-slave-jdk7
   template:
     metadata:
       labels:
-        app: maven-jdk7
-      name: maven-jdk7
+        name: jenkins-slave-jdk7
+      name: jenkins-slave-jdk7
     spec:
       containers:
-      - name: maven-jdk7
+      - name: jenkins-slave-jdk7
         image: registry.gcsc.sap.corp/maven/maven3-jdk7:latest
         imagePullPolicy: Always
         args:
@@ -56,13 +60,13 @@ spec:
           path: /etc/localtime 
       - name: kubeconfig
         configMap:
-          name: maven-jdk7-conf-devops
+          name: jenkins-slave-jdk7
           items:
           - key: kubeconfig
             path: config          
       - name: dockerconfig
         configMap:
-          name: maven-jdk7-conf-devops
+          name: jenkins-slave-jdk7
           items:
           - key: docker_client_key
             path: key.pem          
@@ -72,4 +76,4 @@ spec:
             path: ca.pem         
       - name: jenkins-home
         persistentVolumeClaim:
-          claimName: maven-jdk7-pvc-devops
+          claimName: jenkins-slave-jdk7

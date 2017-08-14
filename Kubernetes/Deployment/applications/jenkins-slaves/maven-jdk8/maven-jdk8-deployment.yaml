@@ -4,10 +4,14 @@ metadata:
   name: jenkins-slave-jdk8
   namespace: jenkins
 spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: jenkins-slave-jdk8
   template:
     metadata:
       labels:
-        app: jenkins-slave-jdk8
+        name: jenkins-slave-jdk8
       name: jenkins-slave-jdk8
     spec:
       containers:

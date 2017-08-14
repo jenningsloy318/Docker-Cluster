@@ -1,0 +1,91 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: adminserver-deployment
+  namespace: registry  
+  labels:
+    name: adminserver-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: adminserver-apps
+    spec:
+      containers:
+      - name: adminserver-app
+        image: vmware/harbor-adminserver:v1.1.2
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: MYSQL_HOST
+          valueFrom: 
+            configMapKeyRef: 
+             name: harbor-adminserver-config
+             key: MYSQL_HOST
+        - name: MYSQL_PORT
+          valueFrom: 
+            configMapKeyRef: 
+             name: harbor-adminserver-config
+             key: MYSQL_PORT
+        - name: MYSQL_USR
+          valueFrom: 
+            configMapKeyRef: 
+             name: harbor-adminserver-config
+             key: MYSQL_USR
+        - name: MYSQL_PWD
+          valueFrom: 
+            configMapKeyRef: 
+             name: harbor-adminserver-config
+             key: MYSQL_PWD
+        - name: UI_SECRET
+          valueFrom: 
+            configMapKeyRef: 
+             name: harbor-adminserver-config
+             key: UI_SECRET
+        - name: SECRET_KEY
+          valueFrom: 
+            configMapKeyRef: 
+             name: harbor-adminserver-config
+             key: SECRET_KEY
+        - name: JOBSERVICE_SECRET
+          valueFrom: 
+            configMapKeyRef: 
+             name: harbor-adminserver-config
+             key: JOBSERVICE_SECRET            
+        - name: REGISTRY_URL
+          valueFrom: 
+            configMapKeyRef: 
+             name: harbor-adminserver-config
+             key: REGISTRY_URL
+        - name: VERIFY_REMOTE_CERT
+          valueFrom: 
+            configMapKeyRef: 
+             name: harbor-adminserver-config
+             key: VERIFY_REMOTE_CERT
+        - name: MAX_JOB_WORKERS
+          valueFrom: 
+            configMapKeyRef: 
+             name: harbor-adminserver-config
+             key: MAX_JOB_WORKERS
+        - name: LOG_LEVEL
+          valueFrom: 
+            configMapKeyRef: 
+             name: harbor-adminserver-config
+             key: LOG_LEVEL
+        - name: GODEBUG
+          valueFrom: 
+            configMapKeyRef: 
+             name: harbor-adminserver-config
+             key: GODEBUG
+        - name: EXT_ENDPOINT
+          valueFrom: 
+            configMapKeyRef: 
+             name: harbor-adminserver-config
+             key: EXT_ENDPOINT
+        - name: TOKEN_SERVICE_URL
+          valueFrom: 
+            configMapKeyRef: 
+             name: harbor-adminserver-config
+             key: TOKEN_SERVICE_URL
+        ports:
+        - containerPort: 80

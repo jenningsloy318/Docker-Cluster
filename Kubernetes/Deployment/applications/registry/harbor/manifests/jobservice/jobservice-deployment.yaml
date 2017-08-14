@@ -47,6 +47,11 @@ spec:
               configMapKeyRef: 
                name: harbor-jobservice-config
                key: SECRET_KEY
+          - name: JOBSERVICE_SECRET
+            valueFrom: 
+              configMapKeyRef: 
+               name: harbor-adminserver-config
+               key: JOBSERVICE_SECRET                   
           - name: CONFIG_PATH
             valueFrom: 
               configMapKeyRef: 

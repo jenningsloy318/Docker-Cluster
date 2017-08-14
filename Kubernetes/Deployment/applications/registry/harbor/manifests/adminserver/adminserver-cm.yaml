@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: harbor-adminserver-config
+  namespace: registry
+data:
+    LOG_LEVEL : "debug"
+    EXT_ENDPOINT : "https://registry.gcsc.sap.corp"
+    AUTH_MODE : "db_auth"
+    SELF_REGISTRATION : "on"
+    DATABASE_TYPE : "mysql"
+    MYSQL_HOST : "mysql"
+    MYSQL_PORT : "3306"
+    MYSQL_USR : "root"
+    MYSQL_PWD : "devops"
+    MYSQL_DATABASE : "registry"
+    REGISTRY_URL : "http://registry:5000"
+    TOKEN_SERVICE_URL : "http://ui/service/token"
+    EMAIL_HOST : "mail.sap.corp"
+    EMAIL_PORT : "25"
+    EMAIL_SSL : "false"
+    EMAIL_FROM : "admin <jennings.liu@sap.com>"
+    HARBOR_ADMIN_PASSWORD : "DevOps2017"
+    PROJECT_CREATION_RESTRICTION : "everyone"
+    VERIFY_REMOTE_CERT : "off"
+    MAX_JOB_WORKERS : "3"
+    UI_SECRET : "1fBAUV92ULx0iuuo"
+    SECRET_KEY: "CCUZvY5lJEa1Sw9T"
+    JOBSERVICE_SECRET: "NnK3769h0thS3Nk2"
+    TOKEN_EXPIRATION : "30"
+    CFG_EXPIRATION : "5"
+    ADMIRAL_URL : "NA"
+    GODEBUG: netdns=cgo
+    WITH_NOTARY : "false"
+    WITH_CLAIR : "false"
+    CLAIR_DB_PASSWORD : "password"
+    RESET : "false"

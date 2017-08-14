@@ -24,6 +24,7 @@ data:
   LOG_LEVEL: debug
   UI_SECRET: "1fBAUV92ULx0iuuo"
   SECRET_KEY: "CCUZvY5lJEa1Sw9T"
+  JOBSERVICE_SECRET: "NnK3769h0thS3Nk2"
   GODEBUG: netdns=cgo
   EXT_ENDPOINT: "https://registry.gcsc.sap.corp"
   TOKEN_URL: http://ui
@@ -33,7 +34,7 @@ data:
   TOKEN_EXPIRATION: "30"
   EXT_REG_URL: "registry.gcsc.sap.corp"
   config: |
-    appname = registry
+    appname = ui
     runmode = dev
     [lang]
     types = en-US|zh-CN
@@ -41,7 +42,7 @@ data:
     [dev]
     httpport = 80
     [mail]
-    host = mailsin.sap.corp
+    host = mail.sap.corp
     port = 25
     from = admin <jennings.liu@sap.com>
     ssl = false

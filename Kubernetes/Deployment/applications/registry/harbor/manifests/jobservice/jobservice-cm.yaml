@@ -10,9 +10,10 @@ data:
   MYSQL_PWD: "devops"
   UI_SECRET: "1fBAUV92ULx0iuuo"
   SECRET_KEY: "CCUZvY5lJEa1Sw9T"
+  JOBSERVICE_SECRET: "NnK3769h0thS3Nk2"
   CONFIG_PATH: /etc/jobservice/app.conf
   REGISTRY_URL: http://registry:5000
-  VERIFY_REMOTE_CERT: "on"
+  VERIFY_REMOTE_CERT: "off"
   MAX_JOB_WORKERS: "3"
   LOG_LEVEL: debug
   LOG_DIR: /var/log/jobs

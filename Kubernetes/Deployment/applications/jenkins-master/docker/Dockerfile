@@ -12,12 +12,13 @@ ARG http_port=8080
 ARG agent_port=50000
 
 RUN apt-get -y update && \
-    apt-get install  --no-install-recommends -y ca-certificates  openjdk-8-jdk-headless git curl openssh-client openssh-server supervisor sudo maven && \
+    apt-get install  --no-install-recommends -y ca-certificates  openjdk-8-jdk-headless git curl openssh-client openssh-server supervisor sudo maven  python-pip rsync && \
     apt-get clean all &&  rm -rf /var/lib/apt/lists/* && \
     groupadd -g ${gid} ${group} &&\
     useradd -d "$JENKINS_HOME" -u ${uid} -g ${gid} -G sudo -m -s /bin/bash ${user} && \
     echo  "${user}:${passwd}"|chpasswd && \
-    echo "%jenkins  ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+    echo "%jenkins  ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
+    pip install ordered-startup-supervisord
 
 
 

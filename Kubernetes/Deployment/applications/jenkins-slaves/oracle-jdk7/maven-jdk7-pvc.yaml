@@ -1,7 +1,7 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: maven-jdk7-pvc-devops
+  name: jenkins-slave-jdk7
   namespace: jenkins
   annotations:
 #    volume.beta.kubernetes.io/storage-class: "devops-k8s-nfs"
@@ -10,4 +10,4 @@ spec:
     - ReadWriteMany
   resources:
     requests:
-      storage: 5Gi
+      storage: 50Gi

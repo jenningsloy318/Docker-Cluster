@@ -14,7 +14,6 @@ data:
     contexts:
     - context:
         cluster: kubernetes
-        namespace: jenkins
         user: cluster-admin
       name: cluster-admin@kubernetes
     current-context: cluster-admin@kubernetes
@@ -148,53 +147,3 @@ data:
     95hpoh5HRCC4/w==
     -----END CERTIFICATE-----
 
-  supervisord.conf: |
-    [unix_http_server]
-    file=/var/run/supervisord.sock
-
-    [supervisord]
-    nodaemon = true
-    logfile=/var/log/supervisord.log ; (main log file;default $CWD/supervisord.log)
-    pidfile=/var/run/supervisord.pid ; (supervisord pidfile;default supervisord.pid)
-    childlogdir=/var/log/supervisor         ; ('AUTO' child log dir, default $TEMP)
-    logfile_backups=0
-    loglevel =debug
-    user=root
-
-    [rpcinterface:supervisor]
-    supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
-
-    [supervisorctl]
-    serverurl = unix:///var/run/supervisord.sock
-
-    [program:chown]
-    priority=20
-    command=chown -R jenkins:jenkins /var/jenkins_home
-    startsecs=0
-    
-    [program:downloadci]
-    priority=25
-    environment=JENKINS_HOME=%(ENV_JENKINS_HOME)s
-    command=/usr/local/bin/download-ci-connect-plugin.sh
-    startsecs=0
-    user=jenkins
-    [program:jenkins]
-    priority=30
-    environment=JENKINS_HOME=%(ENV_JENKINS_HOME)s
-    command=/usr/lib/jvm/java-1.8.0-openjdk-amd64/bin/java  %(ENV_JAVA_OPTS)s -jar /usr/share/jenkins/jenkins.war 
-    redirect_stderr=true
-    redirect_stdout=true
-    #stdout_logfile=/dev/stdout
-    user=jenkins
-    startsecs=200
-    stopsignal=0
-
-    [program:sshd]
-    priority=30
-    command=/usr/sbin/sshd -D
-    redirect_stderr=true
-    redirect_stdout=true
-    stopsignal=0
-    #stdout_logfile=/dev/stdout
-    user=root
-  

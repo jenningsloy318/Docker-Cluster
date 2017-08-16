@@ -14,7 +14,6 @@ data:
     contexts:
     - context:
         cluster: kubernetes
-        namespace: jenkins
         user: cluster-admin
       name: cluster-admin@kubernetes
     current-context: cluster-admin@kubernetes
@@ -167,34 +166,76 @@ data:
     [supervisorctl]
     serverurl = unix:///var/run/supervisord.sock
 
+    [eventlistener:inorder]
+    command=/usr/local/bin/ordered-startup-listener
+    autostart=true
+    events=PROCESS_STATE
+
     [program:chown]
     priority=20
     command=chown -R jenkins:jenkins /var/jenkins_home
     startsecs=0
-    
-    [program:downloadci]
-    priority=25
-    environment=JENKINS_HOME=%(ENV_JENKINS_HOME)s
-    command=/usr/local/bin/download-ci-connect-plugin.sh
-    startsecs=0
-    user=jenkins
-    [program:jenkins]
-    priority=30
-    environment=JENKINS_HOME=%(ENV_JENKINS_HOME)s
-    command=/usr/lib/jvm/java-1.8.0-openjdk-amd64/bin/java  %(ENV_JAVA_OPTS)s -jar /usr/share/jenkins/jenkins.war 
-    redirect_stderr=true
-    redirect_stdout=true
-    #stdout_logfile=/dev/stdout
-    user=jenkins
-    startsecs=200
-    stopsignal=0
+    autorestart=false
+    autostart=false
+    startinorder=true
+    startnextafter=exited
 
     [program:sshd]
     priority=30
     command=/usr/sbin/sshd -D
     redirect_stderr=true
     redirect_stdout=true
-    stopsignal=0
+    autorestart=false
+    autostart=false
+    startinorder=true
     #stdout_logfile=/dev/stdout
     user=root
-  
+
+    [program:jenkins]
+    priority=30
+    environment=JENKINS_HOME=%(ENV_JENKINS_HOME)s
+    command=/usr/lib/jvm/java-1.8.0-openjdk-amd64/bin/java  %(ENV_JAVA_OPTS)s -jar /usr/share/jenkins/jenkins.war  %(ENV_JENKINS_OPTS)s
+    redirect_stderr=true
+    redirect_stdout=true
+    #stdout_logfile=/dev/stdout
+    user=jenkins
+    startsecs=300
+    stopsignal=0
+    autorestart=false
+    autostart=false
+    startinorder=true
+
+
+
+
+    [program:downloadci]
+    priority=35
+    environment=JENKINS_HOME=%(ENV_JENKINS_HOME)s
+    command=/usr/local/bin/download-ci-connect-plugin.sh
+    startsecs=0
+    user=jenkins
+    autorestart=false
+    autostart=false
+    startinorder=true
+    startnextafter=exited
+
+
+    [program:echo]
+    priority=40
+    environment=JENKINS_HOME=%(ENV_JENKINS_HOME)s
+    command=echo 2.0 > %(ENV_JENKINS_HOME)s/jenkins.install.UpgradeWizard.state
+    startsecs=0
+    user=jenkins
+    autorestart=false
+    autostart=false
+    startinorder=true
+
+    [program:echo2]
+    priority=40
+    environment=JENKINS_HOME=%(ENV_JENKINS_HOME)s
+    command=echo 2.0 > %(ENV_JENKINS_HOME)s/jenkins.install.InstallUtil.lastExecVersion
+    startsecs=0
+    user=jenkins
+    autorestart=false
+    autostart=false
+    startinorder=true

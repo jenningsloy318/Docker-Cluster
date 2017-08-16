@@ -1,0 +1,100 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: jenkins-slave-jdk8-2
+  namespace: jenkins
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: jenkins-slave-jdk8-2
+  template:
+    metadata:
+      labels:
+        name: jenkins-slave-jdk8-2
+      name: jenkins-slave-jdk8-2
+    spec:
+      containers:
+      - name: jenkins-slave-jdk8-2
+        image: registry.gcsc.sap.corp/maven/maven3-jdk8:latest
+        imagePullPolicy: Always
+        args:
+        resources:
+          limits:
+            cpu: 1
+            memory: 2Gi
+          requests:
+            cpu: 0.5
+            memory: 500Mi        
+        lifecycle:
+          postStart:
+            exec:
+              command:
+                - /bin/bash
+                - -c
+                - env |grep -i -E "DOCKER_HOST|DOCKER_TLS_VERIFY|proxy"| awk '{print "export "$0}' >>/etc/profile; 
+        ports:
+        - name: ssh-port
+          containerPort: 22
+          protocol: TCP
+        env:
+        - name: HOSTIP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: DOCKER_HOST
+          value: tcp://$(HOSTIP):2376
+        - name: DOCKER_TLS_VERIFY
+          value: "1"  
+        - name: HTTPS_PROXY
+          value: http://proxy.pvgl.sap.corp:8080
+        - name: HTTP_PROXY
+          value: http://proxy.pvgl.sap.corp:8080
+        - name: https_proxy
+          value: http://proxy.pvgl.sap.corp:8080
+        - name: http_proxy
+          value: http://proxy.pvgl.sap.corp:8080          
+        - name: NO_PROXY
+          value: "10.58.137.243,10.58.137.244"          
+        - name: no_proxy
+          value: "10.58.137.243,10.58.137.244"                       
+        volumeMounts: 
+          - name: jenkins-home
+            mountPath: /home/jenkins
+          - name: localtime
+            mountPath: /etc/localtime
+          - name: kubeconfig
+            mountPath: /home/jenkins/.kube/
+          - name: kubeconfig
+            mountPath: /root/.kube/            
+          - name: dockerconfig
+            mountPath: /home/jenkins/.docker/
+          - name: dockerconfig
+            mountPath: /root/.docker/   
+        securityContext:
+          privileged: true            
+      volumes: 
+      - name: localtime
+        hostPath:
+          path: /etc/localtime 
+      - name: kubeconfig
+        configMap:
+          name: jenkins-conf
+          items:
+          - key: kubeconfig
+            path: config          
+      - name: dockerconfig
+        configMap:
+          name: jenkins-conf
+          items:
+          - key: docker_client_key
+            path: key.pem          
+          - key: docker_client_cert
+            path: cert.pem   
+          - key: docker_ca_cert
+            path: ca.pem         
+      - name: jenkins-home
+        persistentVolumeClaim:
+          claimName: jenkins-slave-jdk8-2                           
+
+          

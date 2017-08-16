@@ -1,31 +1,38 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: jenkins-slave-jdk8
+  name: jenkins-slave-jdk8-1
   namespace: jenkins
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: jenkins-slave-jdk8
+      name: jenkins-slave-jdk8-1
   template:
     metadata:
       labels:
-        name: jenkins-slave-jdk8
-      name: jenkins-slave-jdk8
+        name: jenkins-slave-jdk8-1
+      name: jenkins-slave-jdk8-1
     spec:
       containers:
-      - name: jenkins-slave-jdk8
+      - name: jenkins-slave-jdk8-1
         image: registry.gcsc.sap.corp/maven/maven3-jdk8:latest
         imagePullPolicy: Always
         args:
+        resources:
+          limits:
+            cpu: 1
+            memory: 2Gi
+          requests:
+            cpu: 0.5
+            memory: 500Mi        
         lifecycle:
           postStart:
             exec:
               command:
                 - /bin/bash
                 - -c
-                - env |grep -E "DOCKER_HOST|DOCKER_TLS_VERIFY"| awk '{print "export "$0}' >>/etc/profile; 
+                - env |grep -i -E "DOCKER_HOST|DOCKER_TLS_VERIFY|proxy"| awk '{print "export "$0}' >>/etc/profile; 
         ports:
         - name: ssh-port
           containerPort: 22
@@ -38,7 +45,19 @@ spec:
         - name: DOCKER_HOST
           value: tcp://$(HOSTIP):2376
         - name: DOCKER_TLS_VERIFY
-          value: "1"             
+          value: "1"  
+        - name: HTTPS_PROXY
+          value: http://proxy.pvgl.sap.corp:8080
+        - name: HTTP_PROXY
+          value: http://proxy.pvgl.sap.corp:8080
+        - name: https_proxy
+          value: http://proxy.pvgl.sap.corp:8080
+        - name: http_proxy
+          value: http://proxy.pvgl.sap.corp:8080          
+        - name: NO_PROXY
+          value: "10.58.137.243,10.58.137.244"          
+        - name: no_proxy
+          value: "10.58.137.243,10.58.137.244"                       
         volumeMounts: 
           - name: jenkins-home
             mountPath: /home/jenkins
@@ -60,13 +79,13 @@ spec:
           path: /etc/localtime 
       - name: kubeconfig
         configMap:
-          name: maven-jdk8-conf-devops
+          name: jenkins-conf
           items:
           - key: kubeconfig
             path: config          
       - name: dockerconfig
         configMap:
-          name: jenkins-slave-jdk8
+          name: jenkins-conf
           items:
           - key: docker_client_key
             path: key.pem          
@@ -76,6 +95,6 @@ spec:
             path: ca.pem         
       - name: jenkins-home
         persistentVolumeClaim:
-          claimName: jenkins-slave-jdk8                           
+          claimName: jenkins-slave-jdk8-1                           
 
           

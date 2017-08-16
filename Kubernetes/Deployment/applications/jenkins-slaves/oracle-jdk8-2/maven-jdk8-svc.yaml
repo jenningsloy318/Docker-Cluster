@@ -2,13 +2,13 @@
 apiVersion: v1
 kind: Service
 metadata: 
-  name: jenkins-slave-jdk8
+  name: jenkins-slave-jdk8-2
   namespace: jenkins
   annotations:
 spec: 
   type: NodePort
   selector: 
-    name: jenkins-slave-jdk8
+    name: jenkins-slave-jdk8-2
   ports: 
     - name: ssh-port
       port: 22

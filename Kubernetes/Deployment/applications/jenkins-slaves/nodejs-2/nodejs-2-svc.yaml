@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: nodejs-2
+  namespace: jenkins
+  annotations:
+spec: 
+  type: NodePort
+  selector: 
+    name: nodejs-2
+  ports: 
+    - name: ssh-port
+      port: 22
+      nodePort: 32005
+      targetPort: 22
+      protocol: TCP  

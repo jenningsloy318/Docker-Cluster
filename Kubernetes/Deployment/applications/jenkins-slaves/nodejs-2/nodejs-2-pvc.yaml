@@ -1,13 +1,13 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: jenkins-master-pvc
+  name: nodejs-2
   namespace: jenkins
   annotations:
+#    volume.beta.kubernetes.io/storage-class: "devops-k8s-nfs"
 spec:
   accessModes:
     - ReadWriteMany
-  storageClassName: cscdevops-nfs
   resources:
     requests:
-      storage: 10Gi 
+      storage: 50Gi

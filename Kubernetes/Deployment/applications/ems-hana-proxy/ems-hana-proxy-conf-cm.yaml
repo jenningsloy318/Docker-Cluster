@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ems-hana-proxy-conf-cm
+  namespace: ems
+data:
+  supervisord.conf: |
+    [unix_http_server]
+    file=/var/run/supervisord.sock
+
+    [supervisord]
+    nodaemon = true
+    logfile=/var/log/supervisord.log ; (main log file;default $CWD/supervisord.log)
+    pidfile=/var/run/supervisord.pid ; (supervisord pidfile;default supervisord.pid)
+    childlogdir=/var/log/supervisor         ; ('AUTO' child log dir, default $TEMP)
+    logfile_backups=0
+    loglevel = debug
+    user=root
+
+    [rpcinterface:supervisor]
+    supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
+
+    [supervisorctl]
+    serverurl = unix:///var/run/supervisord.sock
+
+
+    [program:hana-ems-dev-proxy]
+    command=/usr/bin/chisel client --auth EMS:Welcome1 https://ems-chisel-dev.cfapps.sap.hana.ondemand.com 30015:10.253.119.82:30041
+    redirect_stderr=true
+    redirect_stdout=true
+    environment=HTTPS_PROXY=http://proxy.pvgl.sap.corp:8080,https_proxy=http://proxy.pvgl.sap.corp:8080,HTTP_PROXY=http://proxy.pvgl.sap.corp:8080,http_proxy=http://proxy.pvgl.sap.corp:8080,all_proxy=http://proxy.pvgl.sap.corp:8080
+
+    [program:hana-ems-test-proxy]
+    command=/usr/bin/chisel client --auth EMS:Welcome1 https://chisel-connection.cfapps.sap.hana.ondemand.com 30115:10.253.78.35:30041
+    redirect_stderr=true
+    redirect_stdout=true
+    environment=HTTPS_PROXY=http://proxy.pvgl.sap.corp:8080,https_proxy=http://proxy.pvgl.sap.corp:8080,HTTP_PROXY=http://proxy.pvgl.sap.corp:8080,http_proxy=http://proxy.pvgl.sap.corp:8080,all_proxy=http://proxy.pvgl.sap.corp:8080

@@ -1,0 +1,64 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata: 
+  name: ems-hana-proxy
+  namespace: ems
+  labels: 
+    name: ems-hana-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: ems-hana-proxy
+  template: 
+    metadata: 
+      name: ems-hana-proxy
+      labels: 
+        name: ems-hana-proxy
+    spec: 
+      terminationGracePeriodSeconds: 10
+      containers: 
+      - name: ems-hana-proxy
+        image: registry.gcsc.sap.corp/chisel/chisel
+        imagePullPolicy: Always
+        args:
+        ports: 
+          - name: dev-port 
+            containerPort: 30015
+            hostPort: 30015
+          - name: test-port
+            containerPort: 30115
+            hostPort: 30115
+        resources:
+          requests:
+            cpu: 0.5
+            memory: 256Mi
+        env:
+        - name: HTTPS_PROXY
+          value: http://proxy.pvgl.sap.corp:8080
+        - name: HTTP_PROXY
+          value: http://proxy.pvgl.sap.corp:8080
+        - name: https_proxy
+          value: http://proxy.pvgl.sap.corp:8080
+        - name: http_proxy
+          value: http://proxy.pvgl.sap.corp:8080          
+        volumeMounts: 
+          - name: localtime
+            mountPath: /etc/localtime 
+          - name: supervisior-conf
+            mountPath: /etc/supervisord.conf
+            subPath: supervisord.conf            
+        securityContext:
+          privileged: true
+      volumes: 
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+      - name: supervisior-conf
+        configMap:
+          name: ems-hana-proxy-conf-cm
+          items:     
+          - key: supervisord.conf
+            path: supervisord.conf                                               
+---
+

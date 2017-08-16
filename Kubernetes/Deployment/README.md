@@ -251,20 +251,27 @@
 
     16.4 create [dashboard ingress](./addons/kubernetes-dashboard/kubernetes-dashboard-ingress).
 
-17. Install [Monitoring and Logging](./monitoring)
 
-    17.1 Totally we use influxdb as the overall storage backend, save logs from fluentbit, save prometheus metrics and heapster data.
 
-    17.2 as for fluentbit, it reads logs from systemd-journald, as we have configured journald as the docker log-driver, hence install fluentbit as daemonset, read journal logs from shared directory /var/log/journal, after processing, finally save it to influxd.
+17. configure storage
 
-    17.3 heapster inherently support to external storage influxdb 
+    17.1  [local storage provisioner](./storage/local-storage)
+    17.2  [nfs provisioner](./storage/nfs-provisioner)
 
-    17.4 prometheus has alpha support to save data to remote storage via  remote_storage_adapter, now create prometheus alongside with a remote-storage-adapter container in a single pod. also use alertmanager to send out alerts. 
+18. Install [Monitoring and Logging](./monitoring)
 
-    17.5 we can reload prometheus via `curl -X POST http(s)://{prometheus-host}:{prometheus-port}/-/reloador` and reload altermanager via `curl -X POST http(s)://{alertmanager-host}:{alertmanager-port}/-/reload`.
+    18.1 Totally we use influxdb as the overall storage backend, save logs from fluentbit, save prometheus metrics and heapster data.
 
-    17.6 we can customize prometheus by creating different prometheus.yaml and alter-rules via [prometheus-cm.yaml](./monitoring/prometheus/prometheus-cm.yml) 
+    18.2 as for fluentbit, it reads logs from systemd-journald, as we have configured journald as the docker log-driver, hence install fluentbit as daemonset, read journal logs from shared directory /var/log/journal, after processing, finally save it to influxd.
 
-    17.7 customize alertmanager by creating [alertmanager-cm.yaml](./monitoring/prometheus/alertmanager-cm.yml) and [template](./monitoring/prometheus/default.tmpl)
+    18.3 heapster inherently support to external storage influxdb 
 
-    17.8 visulization via [grafana](./monitoring/grafana), we still need to customizing the dashboards
+    18.4 prometheus has alpha support to save data to remote storage via  remote_storage_adapter, now create prometheus alongside with a remote-storage-adapter container in a single pod. also use alertmanager to send out alerts. 
+
+    18.5 we can reload prometheus via `curl -X POST http(s)://{prometheus-host}:{prometheus-port}/-/reloador` and reload altermanager via `curl -X POST http(s)://{alertmanager-host}:{alertmanager-port}/-/reload`.
+
+    18.6 we can customize prometheus by creating different prometheus.yaml and alter-rules via [prometheus-cm.yaml](./monitoring/prometheus/prometheus-cm.yml) 
+
+    18.7 customize alertmanager by creating [alertmanager-cm.yaml](./monitoring/prometheus/alertmanager-cm.yml) and [template](./monitoring/prometheus/default.tmpl)
+
+    18.8 visulization via [grafana](./monitoring/grafana), we still need to customizing the dashboards

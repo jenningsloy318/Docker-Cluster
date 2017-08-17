@@ -31,7 +31,7 @@ spec:
             hostPort: 30115
         resources:
           requests:
-            cpu: 0.5
+            cpu: 200m
             memory: 256Mi
         env:
         - name: HTTPS_PROXY

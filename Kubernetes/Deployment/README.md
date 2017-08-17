@@ -162,7 +162,22 @@
 
 5. create [kubeconfig](./kubeconfig) for different components and roles, this is due to RBAC roles used. 
 
-6. prepare [kubelet.service](./systemd/kubelet.service), it also will be placed in `container.slice`
+6. prepare [kubelet.service](./systemd/kubelet.service), it also will be placed in `container.slice`. one more option need to explain, the `Delegate=yes` in the `kubelet.service`, this will prevent the error message when setiing `--cgrout-root=/container.slice`, this will place all pod under `/container.slice/kubepods.slice`
+
+    Errors:
+    ```
+    failed to run Kubelet: invalid configuration: cgroup-root "/container.slice/" doesn't exist:
+    ```
+
+    and add `Delegate=yes` will fix this error. 
+    ```
+    Delegate=
+    Turns on delegation of further resource control partitioning to processes of the unit. For unprivileged services (i.e. those using the User= setting), this allows processes to create a subhierarchy beneath its control group path. For privileged services and scopes, this ensures the processes will have all control group controllers enabled.
+    ```
+
+    also `--kube-reserved=cpu=1000m,memory=2Gi   --system-reserved=cpu=2000m,memory=4Gi` will limit the kube process and other process resouce utilization, ensure pod will not eat all resources.
+
+    PS. we can still add `Delegate=yes` to `docker.service`, but we ignored, since there is already a parameter `"cgroup-parent": "container.slice" ` in `daemon.json` has same functionality.
 
 7. prepare the static pod manifests,[etcd.yaml](./manifests/etcd.yaml), [kube-apiserver.yaml](./manifests/kube-apiserver.yaml),[kube-controller-manager.yaml](./manifests/kube-controller-manager.yaml) and [kube-scheduler.yaml](kube-scheduler.yaml)
 

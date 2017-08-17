@@ -1,0 +1,65 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pvc-nginx-upload
+  namespace: devops
+  annotations:
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: nginx-upload
+  namespace: devops
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx-php-upload
+    spec:
+      containers:
+      - name: nginx-php
+        image: registry.gcsc.sap.corp/library/nginx-upload:2.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+        #You need to mount your own directories to save data.
+        volumeMounts:
+        - name: upload-dir
+          mountPath: /usr/share/nginx/html/project/ems
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "64Mi"
+          limits:
+            cpu: "300m"
+            memory: "512Mi"
+      volumes:
+      - name: upload-dir
+        persistentVolumeClaim:
+          claimName: pvc-nginx-upload
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-upload-svc
+  namespace: devops
+  labels:
+    app: nginx-svc
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30039
+    protocol: TCP
+  selector:
+    app: nginx-php-upload
+

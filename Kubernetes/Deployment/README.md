@@ -16,9 +16,12 @@
     Before=slices.target
     
     [Slice]
-    MemoryLimit=40G
+    MemoryHigh=48G
+    MemoryMax=52G
    ```
-    
+    while MemoryHigh  is a throttle limit while  MemoryMax is a hard limit and replace MemoryLimit. both  MemoryHigh and MemoryMax are cgroup-v2 while MemoryLimit is cgroup-v1. 
+    more description on resouce control, refer to [systemd.resource-control](https://www.freedesktop.org/software/systemd/man/systemd.resource-control.html)
+    and [cgroupv2: Linux's new unified control group hierarchy](https://fosdem.org/2017/schedule/event/cgroupv2/)
 2. Deploy and configure docker engine
 
     2.1 get the docker-engine file 

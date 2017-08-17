@@ -4,4 +4,5 @@ DefaultDependencies=no
 Before=slices.target
 
 [Slice]
-MemoryLimit=48G
+MemoryHigh=48G
+MemoryMax=52G

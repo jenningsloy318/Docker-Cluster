@@ -1,0 +1,56 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pvc-redis
+  namespace: redis
+  annotations:
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 3Gi
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  namespace: redis
+  name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: redis
+  template:
+    metadata:
+      labels:
+        name: redis
+    spec:
+      containers:
+      - name: redis-master
+        image: gcr.io/google_containers/redis:v1
+        env:
+        - name: MASTER
+          value: "true"
+        ports:
+        - containerPort: 6379
+        resources:
+          limits:
+            cpu: "0.1"
+        volumeMounts:
+        - mountPath: /redis-master-data
+          name: data
+      - name: redis-commander
+        image: rediscommander/redis-commander
+        env:
+        - name: REDIS_HOSTS
+          value: instance1:redis-master:6379
+        ports:
+        - name: redis-commander
+          containerPort: 8081
+
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pvc-redis
+

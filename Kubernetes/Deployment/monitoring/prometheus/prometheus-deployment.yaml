@@ -20,7 +20,9 @@ spec:
       - name: prometheus
         image: prom/prometheus:master
         args:
-          - '-storage.local.engine=none'
+      #    - '-storage.local.engine=none'
+          - -storage.local.retention=36h
+          - -storage.local.path=/data
           - '-config.file=/etc/prometheus/prometheus.yml'
           - '-alertmanager.url=http://alertmanager:9093'
         ports:
@@ -31,6 +33,8 @@ spec:
           mountPath: /etc/prometheus
         - name: localtime
           mountPath: /etc/localtime
+        - name: prometheus-data
+          mountPath: /data          
         resources:
           limits:
             cpu: 1200m
@@ -45,6 +49,9 @@ spec:
       - name: localtime
         hostPath:
           path: /etc/localtime
+      - name: prometheus-data
+        persistentVolumeClaim:
+          claimName: prometheus-data-pvc         
 
 ---
 apiVersion: v1

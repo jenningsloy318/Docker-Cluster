@@ -44,7 +44,7 @@ data:
     [mail]
     host = mail.sap.corp
     port = 25
-    from = admin <jennings.liu@sap.com>
+    from = "jennings Liu<jennings.liu@sap.com>"
     ssl = false
   pkey: |
     -----BEGIN RSA PRIVATE KEY-----

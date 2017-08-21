@@ -7,8 +7,8 @@ data:
   alertmanager.yml: |-
     global:
       # The smarthost and SMTP sender used for mail notifications.
-      smtp_smarthost: 'mailsin.sap.corp:25'
-      smtp_from: 'altermanager@sap.com'
+      smtp_smarthost: 'mail.sap.corp:25'
+      smtp_from: 'DL_57BA68805F99B710F600001A@exchange.sap.corp'
       smtp_require_tls: false
     templates:
     - '/etc/alertmanager-templates/*.tmpl'

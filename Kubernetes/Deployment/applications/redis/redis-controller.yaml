@@ -37,6 +37,10 @@ spec:
         resources:
           limits:
             cpu: "0.1"
+        lifecycle:
+          preStop:
+            exec:
+              command: ["umount","/redis-master-data"]
         volumeMounts:
         - mountPath: /redis-master-data
           name: data
@@ -44,10 +48,14 @@ spec:
         image: rediscommander/redis-commander
         env:
         - name: REDIS_HOSTS
-          value: instance1:redis-master:6379
+          value: instance1:localhost:6379
         ports:
         - name: redis-commander
           containerPort: 8081
+      - name: redis-exporter
+        image: oliver006/redis_exporter
+        ports:
+        - containerPort: 9121
 
       volumes:
         - name: data

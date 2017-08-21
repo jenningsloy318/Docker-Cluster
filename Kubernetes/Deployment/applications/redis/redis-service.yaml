@@ -29,6 +29,26 @@ spec:
       #nodePort: 30381
   selector:
     name: redis
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: redis
+  name: redis-exporter
+  annotations:
+    prometheus.io/port: '9121'
+    prometheus.io/scrape: 'true'
+    prometheus.io/scheme: 'http'
+    prometheus.io/path: '/metrics'
+spec:
+  type: NodePort
+  ports:
+    - port: 9121
+      name: redis-exporter
+      targetPort: 9121
+     # nodePort: 30021
+  selector:
+    name: redis
 
 ---
 apiVersion: extensions/v1beta1

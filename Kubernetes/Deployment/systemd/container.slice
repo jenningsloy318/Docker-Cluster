@@ -2,7 +2,8 @@
 Description=Limited resources Slice
 DefaultDependencies=no
 Before=slices.target
-
+Requires=-.slice
+After=-.slice
 [Slice]
 MemoryHigh=48G
 MemoryMax=52G

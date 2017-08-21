@@ -14,14 +14,17 @@
     Description=Limited resources Slice
     DefaultDependencies=no
     Before=slices.target
-    
+    Requires=-.slice
+    After=-.slice
     [Slice]
     MemoryHigh=48G
     MemoryMax=52G
    ```
     while MemoryHigh  is a throttle limit while  MemoryMax is a hard limit and replace MemoryLimit. both  MemoryHigh and MemoryMax are cgroup-v2 while MemoryLimit is cgroup-v1. 
     more description on resouce control, refer to [systemd.resource-control](https://www.freedesktop.org/software/systemd/man/systemd.resource-control.html)
-    and [cgroupv2: Linux's new unified control group hierarchy](https://fosdem.org/2017/schedule/event/cgroupv2/)
+    and [cgroupv2: Linux's new unified control group hierarchy](https://fosdem.org/2017/schedule/event/cgroupv2/)。
+
+    to enable cgroup2 in kernel >4.6, modify `GRUB_CMDLINE_LINUX=" "` in file ` /etc/default/grub`,  to `GRUB_CMDLINE_LINUX="systemd.unified_cgroup_hierarchy=1 cgroup_no_v1=all"`
 2. Deploy and configure docker engine
 
     2.1 get the docker-engine file 

@@ -32,7 +32,7 @@ spec:
               command:
                 - /bin/bash
                 - -c
-                - env |grep -i -E "DOCKER_HOST|DOCKER_TLS_VERIFY|proxy"| awk '{print "export "$0}' >>/etc/profile; 
+                - env |grep -i -E "DOCKER_HOST|DOCKER_TLS_VERIFY|proxy|JAVA_HOME|PATH"| awk '{print "export "$0}' >>/etc/profile; 
         ports:
         - name: ssh-port
           containerPort: 22

@@ -1,0 +1,15 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: redis-ingress 
+  namespace: redis
+spec:
+  rules:
+  - host: redis.gcsc.sap.corp
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: redis-commander
+          servicePort: 8081
+

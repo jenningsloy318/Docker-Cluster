@@ -106,7 +106,7 @@ spec:
             containerPort: 9103
         resources:
           limits:
-            cpu: 0.1
+            cpu: 0.5
             memory: 128Mi
         env:             
           - name: jenkins_username

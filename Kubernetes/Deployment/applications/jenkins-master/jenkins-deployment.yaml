@@ -14,12 +14,7 @@ spec:
     metadata: 
       name: jenkins-master
       labels: 
-        name: jenkins-master
-      annotations:
-        prometheus.io/port: '8080'
-        prometheus.io/scrape: 'true'
-        prometheus.io/scheme: 'http'
-        prometheus.io/path: '/prometheus'        
+        name: jenkins-master        
     spec: 
       terminationGracePeriodSeconds: 10
       containers: 
@@ -101,6 +96,29 @@ spec:
                 - /bin/bash
                 - -c 
                 - env |grep -E "DOCKER_HOST|JENKINS_HOME|DOCKER_TLS_VERIFY|GIT_SSL_NO_VERIFY|PROXY"| awk '{print "export "$0}' >>/etc/profile;
+      - name: jenkins-exporter  
+        image: tboerger/jenkins-exporter
+        imagePullPolicy: Always
+        command: ["/bin/jenkins_exporter","-jenkins.address","http://localhost:8080","-jenkins.username","$(jenkins_username)","-jenkins.password","$(jenkins_password)","-log.level","debug"," -web.listen-address","0.0.0.0:9103"]
+        args:
+        ports: 
+          - name: http-port 
+            containerPort: 9103
+        resources:
+          limits:
+            cpu: 0.1
+            memory: 128Mi
+        env:             
+          - name: jenkins_username
+            valueFrom:
+              secretKeyRef:
+                name: jenkins-credetials
+                key: username        
+          - name: jenkins_password
+            valueFrom:
+              secretKeyRef:
+                name: jenkins-credetials
+                key: password            
       volumes: 
       - name: localtime
         hostPath:

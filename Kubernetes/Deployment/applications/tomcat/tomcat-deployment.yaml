@@ -1,0 +1,95 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata: 
+  name: tomcat
+  namespace: tomcat
+  labels: 
+    name: tomcat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: tomcat
+  template: 
+    metadata: 
+      name: tomcat
+      labels: 
+        name: tomcat     
+
+      annotations:
+        prometheus.io/port: '8080'
+        prometheus.io/scrape: 'true'
+        prometheus.io/scheme: 'http'
+        prometheus.io/path: '/metrics'     
+    spec: 
+      terminationGracePeriodSeconds: 10
+      containers: 
+      - name: tomcat
+        image: registry.gcsc.sap.corp/tomcat/tomcat8.5-supervisior:v2
+        imagePullPolicy: IfNotPresent
+        args:
+#        - -c 
+#        - /etc/supervisord.conf
+        ports: 
+          - name: http-port 
+            containerPort: 8080
+          - name: ssh-port
+            containerPort: 22
+            protocol: TCP
+        resources:
+          limits:
+            cpu: 1
+            memory: 2Gi
+          requests:
+            cpu: 0.5
+            memory: 500Mi
+        env:
+          - name: HTTPS_PROXY
+            value: http://proxy.pvgl.sap.corp:8080
+          - name: HTTP_PROXY
+            value: http://proxy.pvgl.sap.corp:8080
+          - name: NO_PROXY
+            value: "10.58.137.243,10.58.137.244"
+        volumeMounts: 
+          - name: tomcat-webapp
+            mountPath: /usr/local/tomcat/webapps/myapps
+          - name: localtime
+            mountPath: /etc/localtime       
+          - name: supervisior-conf
+            mountPath: /etc/supervisord.conf
+            subPath: supervisord.conf            
+        securityContext:
+          privileged: true
+        readinessProbe:
+          tcpSocket:
+            port: 22
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+        lifecycle:
+          postStart:
+            exec:
+              command:
+                - /bin/sh
+                - -c 
+                - env |grep -i -E "PROXY|JAVA|PATH"| awk '{print "export "$0}' >>/etc/profile;
+          preStop:
+            exec:
+              command:
+                - /bin/sh
+                - -c 
+                - /usr/local/tomcat/bin/catalina.sh stop
+      volumes: 
+      - name: localtime
+        hostPath:
+          path: /etc/localtime    
+      - name: supervisior-conf
+        configMap:
+          name: tomcat-conf
+          items:     
+          - key: supervisord.conf
+            path: supervisord.conf    
+      - name: tomcat-webapp
+        persistentVolumeClaim:
+          claimName: tomcat-pvc                                                    
+---
+

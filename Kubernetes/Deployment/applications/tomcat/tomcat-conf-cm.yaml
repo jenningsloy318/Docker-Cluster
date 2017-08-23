@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tomcat-conf
+  namespace: tomcat
+data:
+  supervisord.conf: |
+    [unix_http_server]
+    file=/var/run/supervisord.sock
+
+    [supervisord]
+    nodaemon = true
+    logfile=/var/log/supervisord.log ; (main log file;default $CWD/supervisord.log)
+    pidfile=/var/run/supervisord.pid ; (supervisord pidfile;default supervisord.pid)
+    childlogdir=/var/log/supervisor         ; ('AUTO' child log dir, default $TEMP)
+    logfile_backups=0
+    loglevel =debug
+    user=root
+
+    [rpcinterface:supervisor]
+    supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
+
+    [supervisorctl]
+    serverurl = unix:///var/run/supervisord.sock
+
+    [eventlistener:inorder]
+    command=/usr/local/bin/ordered-startup-listener
+    autostart=true
+    events=PROCESS_STATE
+
+    [program:mkdir]
+    priority=20
+    command=mkdir /run/sshd
+    startsecs=0
+    autorestart=false
+    autostart=false
+    startinorder=true
+    startnextafter=exited
+
+    [program:chown]
+    priority=20
+    command=chown -R tomcat:tomcat /usr/local/tomcat/
+    startsecs=0
+    autorestart=false
+    autostart=false
+    startinorder=true
+    startnextafter=exited
+
+    [program:sshd]
+    priority=30
+    command=/usr/sbin/sshd -D
+    redirect_stderr=true
+    redirect_stdout=true
+    autorestart=false
+    autostart=false
+    startinorder=true
+    #stdout_logfile=/dev/stdout
+    user=root
+
+    [program:tomcat]
+    priority=30
+    command=/usr/local/tomcat/bin/catalina.sh run
+    redirect_stderr=true
+    redirect_stdout=true
+    #stdout_logfile=/dev/stdout
+    user=tomcat
+    startsecs=30
+    stopsignal=0
+    autorestart=false
+    autostart=false
+    startinorder=true

@@ -20,7 +20,8 @@ spec:
     spec:
       containers:
       - name: redis-master
-        image: gcr.io/google_containers/redis:v1
+        image: registry.gcsc.sap.corp/redis/redis:v1
+        imagePullPolicy: IfNotPresent 
         env:
         - name: MASTER
           value: "true"
@@ -40,8 +41,11 @@ spec:
         volumeMounts:
         - mountPath: /redis-master-data
           name: data
+        - mountPath: /redis-master/
+          name: redis-config
       - name: redis-commander
-        image: rediscommander/redis-commander
+        image: registry.gcsc.sap.corp/redis/redis-commander
+        imagePullPolicy: IfNotPresent
         env:
         - name: REDIS_HOSTS
           value: instance1:localhost:6379
@@ -49,7 +53,8 @@ spec:
         - name: redis-commander
           containerPort: 8081
       - name: redis-exporter
-        image: oliver006/redis_exporter
+        image: registry.gcsc.sap.corp/redis/redis_exporter
+        imagePullPolicy: IfNotPresent
         ports:
         - name: http 
           containerPort: 9121
@@ -59,4 +64,6 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: pvc-redis
-
+        - name: redis-config
+          configMap:
+            name: redis-configmap 

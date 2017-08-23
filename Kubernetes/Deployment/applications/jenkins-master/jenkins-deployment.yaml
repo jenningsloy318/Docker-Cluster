@@ -20,7 +20,7 @@ spec:
       containers: 
       - name: jenkins-master
         image: registry.gcsc.sap.corp/jenkins/jenkins_2.60.2:v2.0
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         args:
 #        - -c 
 #        - /etc/supervisord.conf

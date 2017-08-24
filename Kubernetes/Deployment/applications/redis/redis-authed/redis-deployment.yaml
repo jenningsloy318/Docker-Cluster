@@ -1,0 +1,60 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  namespace: redis
+  name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: redis
+  template:
+    metadata:
+      labels:
+        name: redis
+      annotations:
+        prometheus.io/port: '9121'
+        prometheus.io/scrape: 'true'
+        prometheus.io/scheme: 'http'
+        prometheus.io/path: '/metrics'         
+    spec:
+      containers:
+      - name: redis-master
+        image: registry.gcsc.sap.corp/redis/redis:v1
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: MASTER
+          value: "true"
+        ports:
+        - containerPort: 6379
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: 512Mi
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /bin/bash
+              - -c  
+              - /usr/local/bin/redis-cli shutdown
+        volumeMounts:
+        - mountPath: /redis-master-data
+          name: data
+        - mountPath: /redis-master/
+          name: redis-config
+      - name: redis-exporter
+        image: registry.gcsc.sap.corp/redis/redis_exporter
+        imagePullPolicy: IfNotPresent 
+        ports:
+        - name: http 
+          containerPort: 9121
+          protocol: TCP
+
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pvc-redis
+        - name: redis-config
+          configMap:
+            name: redis-configmap 

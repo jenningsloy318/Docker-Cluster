@@ -1,0 +1,66 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  namespace: redis
+  name: redis-commander
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: redis-commander
+  template:
+    metadata:
+      labels:
+        name: redis-commander
+    spec:
+      serviceAccountName: redis-sa
+      containers:
+      - name: redis-commander
+        image: registry.gcsc.sap.corp/redis/redis-commander:v2 
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            cpu: "0.2"
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8081
+          initialDelaySeconds: 15
+          timeoutSeconds: 1
+        env:
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+               name: redis-commander-configmap
+               key: redis-host
+        - name: REDIS_PORT
+          valueFrom:
+            configMapKeyRef:
+               name: redis-commander-configmap
+               key: redis-port
+        - name: REDIS_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+               name: redis-commander-configmap
+               key: redis-password
+        - name: HTTP_USER
+          valueFrom:
+             configMapKeyRef:
+               name: redis-commander-configmap
+               key: http-user
+        - name: HTTP_PASSWORD
+          valueFrom:
+             configMapKeyRef:
+               name: redis-commander-configmap
+               key: http-password
+        command: ["redis-commander"]
+        args: 
+        - --redis-host=$(REDIS_HOST)
+        - --redis-port=$(REDIS_PORT)
+        - --redis-password=$(REDIS_PASSWORD)
+        - --http-auth-username=$(HTTP_USER)
+        - --http-auth-password=$(HTTP_PASSWORD)
+        ports:
+        - name: redis-commander
+          containerPort: 8081

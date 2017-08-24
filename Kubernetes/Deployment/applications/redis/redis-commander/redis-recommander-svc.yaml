@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: redis
+  name: redis-commander
+spec:
+  type: NodePort
+  ports:
+    - port: 8081
+      name: redis-commander
+      targetPort: 8081
+      nodePort: 30381
+  selector:
+    name: redis-commander
+
+

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-commander-configmap
+  namespace: redis
+data:
+  # redis server info
+  redis-host: "192.168.137.11"
+  redis-port: "30379"
+  redis-password: myPassword
+  # auth to login redis-commander, default admin/admin, change it.
+  http-user: admin
+  http-password: admin

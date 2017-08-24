@@ -95,7 +95,7 @@ spec:
               command:
                 - /bin/bash
                 - -c 
-                - env |grep -E "DOCKER_HOST|JENKINS_HOME|DOCKER_TLS_VERIFY|GIT_SSL_NO_VERIFY|PROXY"| awk '{print "export "$0}' >>/etc/profile;
+                - env |grep -E "DOCKER_HOST|JENKINS_HOME|DOCKER_TLS_VERIFY|GIT_SSL_NO_VERIFY|PROXY|JAVA_HOME|PATH"| awk '{print "export "$0}' >>/etc/profile;
       - name: jenkins-exporter  
         image: tboerger/jenkins-exporter
         imagePullPolicy: Always

@@ -69,7 +69,7 @@ spec:
           imagePullPolicy: IfNotPresent
           args:
           - -mongodb.uri
-          - "mongodb://admin:admin@localhost:27017"
+          - "mongodb://monitor:monitor@localhost:27017"
           - -v
           - "10"
           resources:

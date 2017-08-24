@@ -8,22 +8,34 @@ spec:
   template:
     metadata:
       labels:
-        role: mongo
-        environment: prod
+        name: mongo
       annotations:
-        prometheus.io/port: '9104'
+        prometheus.io/port: '9001'
         prometheus.io/scrape: 'true'
         prometheus.io/scheme: 'http'
         prometheus.io/path: '/metrics'  
     spec:
       terminationGracePeriodSeconds: 10
       serviceAccountName: owl-mongo
+      initContainers:
+      - name: mongo-init
+        image: registry.gcsc.sap.corp/mongodb/mongo:3.4
+        command:
+        - /bin/bash 
+        - /root/create-user.sh
+        volumeMounts:
+        - name: mongo-persistent-storage
+          mountPath: /data/db        
+        - name: create-user-shell
+          mountPath: /root/create-user.sh
+          subPath: create-user.sh                   
       containers:
         - name: mongo
           image: registry.gcsc.sap.corp/mongodb/mongo:3.4
           imagePullPolicy: IfNotPresent
           command:
             - mongod
+            - --auth
             - --smallfiles
             - --noprealloc
             - --storageEngine=wiredTiger
@@ -34,15 +46,6 @@ spec:
           ports:
           - containerPort: 27017
           lifecycle:
-            postStart:
-              exec:
-                command:
-                  - /bin/bash
-                  - -c 
-                  - sleep 60;
-                  - user_count=$(/usr/bin/mongo --quiet --eval "db.getSiblingDB('admin').system.users.find({user:'db'}).count()");
-                  - if  [[ $user_count -ne 1 ]] ; then
-                  - /usr/bin/mongo --eval "db.getSiblingDB('dashboard').createUser({user:'db',pwd:'dbpass',roles:[{role:'readWrite',db:'dashboard'}]})"; fi
             preStop:
               exec:
                 command: 
@@ -61,29 +64,31 @@ spec:
           resources:
             limits:
               memory: 2Gi
-        - name: mongo-sidecar
-          image: registry.gcsc.sap.corp/mongodb/mongo-k8s-sidecar:latest
-          imagePullPolicy: IfNotPresent
-          env:
-            - name: MONGO_SIDECAR_POD_LABELS
-              value: "role=mongo,environment=prod"
-        - name: mongodb-exporter
+        - name: mongo-exporter
           image: registry.gcsc.sap.corp/mongodb/mongodb_exporter:latest
           imagePullPolicy: IfNotPresent
           args:
-          - -mongodb.uri 
-          - mongodb://localhost:27017
+          - -mongodb.uri
+          - "mongodb://admin:admin@localhost:27017"
+          - -v
+          - "10"
           resources:
             limits:
-              memory: 50Mi     
+              memory: 100Mi     
           ports:
           - name: mon-port
-            containerPort: 9104
+            containerPort: 9001
             protocol: TCP        
         - name: mongo-express
           image: registry.gcsc.sap.corp/mongodb/mongo-express:0.40
           imagePullPolicy: IfNotPresent
           env:
+          - name: ME_CONFIG_MONGODB_ENABLE_ADMIN
+            value: "true"
+          - name: ME_CONFIG_MONGODB_ADMINUSERNAME 
+            value: admin
+          - name: ME_CONFIG_MONGODB_ADMINPASSWORD 
+            value: admin
           - name: ME_CONFIG_MONGODB_SERVER
             value: localhost
           - name: ME_CONFIG_BASICAUTH_USERNAME
@@ -93,8 +98,18 @@ spec:
           ports:
           - name: web-port
             containerPort: 8081
-            protocol: TCP              
+            protocol: TCP        
+          resources:
+            limits:
+              memory: 100Mi                    
       volumes:   
       - name: mongo-persistent-storage
         persistentVolumeClaim:
-          claimName: mongo-pvc             
+          claimName: mongo-pvc     
+      - name: create-user-shell
+        configMap:
+          name: owl-mongo-cm
+          items:     
+          - key: create-user.sh
+            path: create-user.sh   
+                  

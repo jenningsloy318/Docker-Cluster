@@ -31,6 +31,11 @@ spec:
           limits:
             cpu: "0.5"
             memory: 512Mi
+        livenessProbe:
+          tcpSocket:
+            port: 6379
+          initialDelaySeconds: 15
+          timeoutSeconds: 1
         lifecycle:
           preStop:
             exec:

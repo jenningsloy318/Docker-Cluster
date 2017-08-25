@@ -30,10 +30,8 @@ spec:
           mountPath: /etc/localtime
         resources:
           limits:
-            cpu: 200m
-            memory: 256Mi
-          requests:
-            memory: 10Mi              
+            cpu: 512m
+            memory: 512Mi
         ports:
         - containerPort: 9201
           protocol: TCP

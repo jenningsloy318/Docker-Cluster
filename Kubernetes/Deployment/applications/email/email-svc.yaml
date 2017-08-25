@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: mail
+  name: mail
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: mail
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: mail-ingress
+spec:
+  rules:
+  - host: devops-owl-email.mo.sap.corp
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: mail
+          servicePort: 80

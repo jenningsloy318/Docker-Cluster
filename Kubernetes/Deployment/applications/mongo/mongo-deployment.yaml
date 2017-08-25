@@ -65,11 +65,13 @@ spec:
             limits:
               memory: 2Gi
         - name: mongo-exporter
-          image: registry.gcsc.sap.corp/mongodb/mongodb_exporter:latest
+          image: registry.gcsc.sap.corp/mongodb/mongodb_exporter:v1.0.1
           imagePullPolicy: IfNotPresent
           args:
           - -mongodb.uri
           - "mongodb://monitor:monitor@localhost:27017"
+          - -web.listen-address
+          - ":9001"
           - -v
           - "10"
           resources:

@@ -23,13 +23,6 @@ spec:
         prometheus.io/path: '/metrics'     
     spec: 
       terminationGracePeriodSeconds: 10
-      initContainers:
-      - name: tomcat-init
-        image: registry.gcsc.sap.corp/tomcat/tomcat8.5-supervisior:v2
-        command: ["cp -r /usr/local/tomcat/webapps/* /data "]
-        volumeMounts:
-          - name: tomcat-webapp
-            mountPath: /data/
       containers: 
       - name: tomcat
         image: registry.gcsc.sap.corp/tomcat/tomcat8.5-supervisior:v2
@@ -47,9 +40,6 @@ spec:
           limits:
             cpu: 1
             memory: 2Gi
-          requests:
-            cpu: 0.5
-            memory: 500Mi
         env:
           - name: HTTPS_PROXY
             value: http://proxy.pvgl.sap.corp:8080
@@ -59,7 +49,7 @@ spec:
             value: "10.58.137.243,10.58.137.244"
         volumeMounts: 
           - name: tomcat-webapp
-            mountPath: /usr/local/tomcat/webapps/
+            mountPath: /usr/local/tomcat/webapps/myapps
           - name: localtime
             mountPath: /etc/localtime       
           - name: supervisior-conf

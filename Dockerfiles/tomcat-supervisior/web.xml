@@ -1,0 +1,14 @@
+<filter>
+  <filter-name>ServletMetricsFilter</filter-name>
+  <filter-class>nl.nlighten.prometheus.tomcat.TomcatServletMetricsFilter</filter-class>
+  <async-supported>true</async-supported>
+  <init-param>
+    <param-name>buckets</param-name>
+    <param-value>.01, .05, .1, .25, .5, 1, 2.5, 5, 10, 30</param-value>
+  </init-param>
+</filter>
+
+<filter-mapping>
+  <filter-name>ServletMetricsFilter</filter-name>
+  <url-pattern>/*</url-pattern>
+</filter-mapping>

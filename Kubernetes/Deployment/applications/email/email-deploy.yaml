@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: mail-pod
-        image: mo-b166c2b61.mo.sap.corp/email/email-service:1.0.0
+        image: registry.gcsc.sap.corp/email/email-service:1.0.0
         ports:
         - containerPort: 80
           protocol: TCP

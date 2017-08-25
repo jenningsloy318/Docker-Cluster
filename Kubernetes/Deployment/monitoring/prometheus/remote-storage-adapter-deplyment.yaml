@@ -17,14 +17,17 @@ spec:
       serviceAccountName: prometheus
       containers:
       - name: remote-storage-adapter
-        image: apsm/remote_storage_adapter
-        args:
-        - /bin/sh
-        - -c
+        image: registry.gcsc.sap.corp/monitor/remote_storage_adapter:v1.0.1
+        command:
         - /usr/bin/remote_storage_adapter
-          '-influxdb-url=http://influxdb:8086'
-          '-influxdb.database=prometheus'
-          '-influxdb.retention-policy=autogen'
+        - -influxdb-url
+        - http://influxdb:8086
+        - -influxdb.database
+        -  prometheus
+        - -influxdb.retention-policy
+        - autogen
+        - -log.level
+        - debug
         volumeMounts: 
         - name: localtime
           mountPath: /etc/localtime

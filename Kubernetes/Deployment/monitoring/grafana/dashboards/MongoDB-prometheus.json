@@ -83,7 +83,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(mongodb_mongod_op_counters_total{instance=~\"$env\"}[$interval])",
+              "expr": "rate(mongodb_op_counters_total{instance=~\"$instance\"}[$interval])",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
@@ -165,7 +165,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(mongodb_mongod_metrics_document_total{instance=~\"$env\"}[$interval])",
+              "expr": "rate(mongodb_metrics_document_total{instance=~\"$instance\"}[$interval])",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
@@ -242,13 +242,13 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(mongodb_mongod_metrics_query_executor_total{instance=~\"$env\"}[$interval])",
+              "expr": "rate(mongodb_metrics_query_executor_total{instance=~\"$instance\"}[$interval])",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
               "legendFormat": "{{state}}",
               "refId": "A",
-              "step": 120
+              "step": 240
             }
           ],
           "thresholds": [],
@@ -292,7 +292,7 @@
       "repeatIteration": null,
       "repeatRowId": null,
       "showTitle": true,
-      "title": "Query Metrics for $env",
+      "title": "Query Metrics for $instance",
       "titleSize": "h4"
     },
     {
@@ -331,13 +331,13 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "mongodb_mongod_replset_number_of_members{instance=~\"$env\"}",
+              "expr": "mongodb_mongod_replset_number_of_members{instance=~\"$instance\"}",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
               "legendFormat": "# members",
               "refId": "A",
-              "step": 120
+              "step": 240
             },
             {
               "expr": "sum(mongodb_mongod_replset_member_health{instance=~\"$env\"})",
@@ -346,7 +346,7 @@
               "intervalFactor": 2,
               "legendFormat": "healthy members",
               "refId": "B",
-              "step": 120
+              "step": 240
             }
           ],
           "thresholds": [],
@@ -421,13 +421,13 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "mongodb_mongod_replset_member_state{instance=~\"$env\"}",
+              "expr": "mongodb_mongod_replset_member_state{instance=~\"$instance\"}",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
               "legendFormat": "{{state}} - {{name}}",
               "refId": "A",
-              "step": 60
+              "step": 120
             }
           ],
           "thresholds": [],
@@ -500,13 +500,13 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(mongodb_mongod_op_counters_repl_total{instance=~\"$env\"}[$interval])",
+              "expr": "rate(mongodb_op_counters_repl_total{instance=~\"$instance\"}[$interval])",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
               "legendFormat": "{{type}}",
               "refId": "A",
-              "step": 120
+              "step": 240
             }
           ],
           "thresholds": [],
@@ -550,12 +550,12 @@
       "repeatIteration": null,
       "repeatRowId": null,
       "showTitle": true,
-      "title": "Replica Set Metrics for $env",
+      "title": "Replica Set Metrics for $instance",
       "titleSize": "h4"
     },
     {
       "collapse": false,
-      "height": 128,
+      "height": 58,
       "panels": [
         {
           "cacheTimeout": null,
@@ -614,15 +614,15 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "mongodb_mongod_instance_uptime_seconds{instance=~\"$env\"}",
+              "expr": "mongodb_instance_uptime_seconds{instance=~\"$instance\"}",
               "format": "time_series",
               "hide": false,
               "interval": "",
               "intervalFactor": 2,
               "legendFormat": "",
-              "metric": "",
+              "metric": "mongodb_instance_uptime_seconds{instance=\"192.188.95.235:9001\"}",
               "refId": "A",
-              "step": 600
+              "step": 1200
             }
           ],
           "thresholds": "0,360",
@@ -695,13 +695,13 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "mongodb_mongod_connections{instance=~\"$env\",state=\"available\"}",
+              "expr": "mongodb_connections{instance=~\"$instance\",state=\"available\"}",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "",
               "metric": "mongodb_connections",
               "refId": "A",
-              "step": 600
+              "step": 1200
             }
           ],
           "thresholds": "",
@@ -773,13 +773,13 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "mongodb_mongod_connections{instance=~\"$env\",state=\"current\"}",
+              "expr": "mongodb_connections{instance=~\"$instance\",state=\"current\"}",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "",
               "metric": "mongodb_connections",
               "refId": "A",
-              "step": 600
+              "step": 1200
             }
           ],
           "thresholds": "",
@@ -800,7 +800,7 @@
       "repeatIteration": null,
       "repeatRowId": null,
       "showTitle": true,
-      "title": "Health metrics for $env",
+      "title": "Health metrics for $instance",
       "titleSize": "h4"
     },
     {
@@ -839,7 +839,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "mongodb_replset_oplog_size_bytes{instance=~\"$env\"}",
+              "expr": "mongodb_metrics_repl_oplog_insert_bytes_total{instance=~\"$instance\"}",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
@@ -921,7 +921,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "mongodb_mongod_memory{instance=~\"$env\",type=~\"resident|virtual\"}",
+              "expr": "mongodb_memory{instance=~\"$instance\",type=~\"resident|virtual\"}",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
@@ -1000,7 +1000,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(mongodb_mongod_network_bytes_total{instance=~\"$env\"}[$interval])",
+              "expr": "rate(mongodb_metrics_repl_network_bytes_total{instance=~\"$instance\"}[$interval])",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
@@ -1068,16 +1068,19 @@
         "datasource": "${DS_PROMETHEUS-MONITORING}",
         "hide": 0,
         "includeAll": true,
-        "label": "env",
+        "label": "instance",
         "multi": true,
-        "name": "env",
+        "name": "instance",
         "options": [],
-        "query": "label_values(mongodb_mongod_connections, instance)",
+        "query": "label_values(mongodb_connections, instance)",
         "refresh": 1,
         "regex": "",
         "sort": 1,
         "tagValuesQuery": "/.*-(.*?)-.*/",
-        "tags": [],
+        "tags": [
+          "192.188.95.235:9001",
+          "192.188.95.235:9001"
+        ],
         "tagsQuery": "label_values(mongodb_connections, instance)",
         "type": "query",
         "useTags": true
@@ -1187,5 +1190,5 @@
   },
   "timezone": "browser",
   "title": "MongoDB -Prometheus",
-  "version": 3
+  "version": 8
 }

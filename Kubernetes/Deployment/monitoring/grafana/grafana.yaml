@@ -48,10 +48,7 @@ spec:
         resources:
           limits:
             memory: 2048Mi
-            cpu: 2048m
-          requests:
-            memory: 100Mi 
-            cpu: 100m             
+            cpu: 2048m      
         volumeMounts:
         - name: gf-data
           mountPath: /data

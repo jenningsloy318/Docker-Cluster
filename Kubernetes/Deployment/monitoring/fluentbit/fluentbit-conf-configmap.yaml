@@ -11,11 +11,12 @@ data:
         Log_Level    trace
     [INPUT]
         Name           systemd
+        Max_Entries     20
         Tag             *
         Path           /var/log/journal
         Systemd_Filter  _SYSTEMD_UNIT=docker.service
         Systemd_Filter  _TRANSPORT=journal
-        DB              /fluent-bit/journald.db
+        DB              /fluent-bit/db/journald.db
     [FILTER]
         Name          kubernetes
         Kube_URL      https://kubernetes.default.svc:443
@@ -26,7 +27,7 @@ data:
     [OUTPUT]
         Name          influxdb
         Match         *
-        Host          monitoring-influxdb.monitoring.svc
+        Host          influxdb.monitoring.svc
         Port          8086
         Database      k8slog
         Sequence_Tag  _seq

@@ -6,7 +6,8 @@ metadata:
 data:
   create-user.sh: |
     #!/bin/bash -x
-    /usr/bin/mongod --fork --logpath /var/log/mongodb.log --dbpath /data/db 
+    rm -f /data/db/mongod.lock  
+    /usr/bin/mongod --fork  --repair --logpath /var/log/mongodb.log --dbpath /data/db 
     admin_user_count=$(/usr/bin/mongo --quiet --eval "db.getSiblingDB('admin').system.users.find({user:'admin'}).count()")
 
     if  [[ $admin_user_count -ne 1 ]] ; then

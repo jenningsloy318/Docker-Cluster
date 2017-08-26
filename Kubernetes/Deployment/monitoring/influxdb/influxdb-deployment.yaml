@@ -22,11 +22,8 @@ spec:
           containerPort: 8086
         resources:
           limits:
-            memory: 2048Mi
+            memory: 4Gi
             cpu: 2048m
-          requests:
-            memory: 1024Mi  
-            cpu: 512m                   
         volumeMounts:
         - mountPath: /data
           name: influxdb-storage

@@ -7,17 +7,22 @@ data:
   create-user.sh: |
     #!/bin/bash -x
     rm -f /data/db/mongod.lock  
-    /usr/bin/mongod --fork  --repair --logpath /var/log/mongodb.log --dbpath /data/db 
+    /usr/bin/mongod --fork  --repair --logpath  /data/db/mongodb.log --dbpath /data/db 
     admin_user_count=$(/usr/bin/mongo --quiet --eval "db.getSiblingDB('admin').system.users.find({user:'admin'}).count()")
 
     if  [[ $admin_user_count -ne 1 ]] ; then
-    /usr/bin/mongo  --quiet --eval "db.getSiblingDB('admin').createUser({user:'admin',pwd:'admin',roles:[{role:'userAdminAnyDatabase',db:'admin'}]})"
+      /usr/bin/mongo  --quiet --eval "db.getSiblingDB('admin').createUser({user:'admin',pwd:'admin',roles:[{role:'userAdminAnyDatabase',db:'admin'}]})"
+    else 
+      echo "user admin exists"
     fi
 
     monitor_user_count=$(/usr/bin/mongo --quiet --eval "db.getSiblingDB('admin').system.users.find({user:'monitor'}).count()")
 
     if  [[ $monitor_user_count -ne 1 ]] ; then 
-    /usr/bin/mongo  --quiet --eval "db.getSiblingDB('admin').createUser({user:'monitor',pwd:'monitor',roles:[{role:'clusterMonitor',db:'admin'},{'role':'read','db':'local'}]})" 
+      /usr/bin/mongo  --quiet --eval "db.getSiblingDB('admin').createUser({user:'monitor',pwd:'monitor',roles:[{role:'clusterMonitor',db:'admin'},{'role':'read','db':'local'}]})" 
+    else
+        echo "user monitor exists"
+
     fi
 
     /usr/bin/mongod --shutdown

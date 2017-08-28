@@ -20,3 +20,14 @@ kubectl create configmap fluentbit-conf --from-file=fluent-bit.conf  --from-file
    3.5 in the filter, we add `Match       *` and `use_journal  On` plus the default kubernetes setting. 
 
 4. set corect RBAC for service account fluentbit
+
+5. create database in influxdb 
+
+   ```
+   create database k8slog
+   ```
+6. create RETENTION POLICY
+   
+   ```
+   CREATE RETENTION POLICY "docker" ON "k8slog" DURATION 30d REPLICATION 1 DEFAULT
+   ```

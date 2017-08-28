@@ -24,10 +24,11 @@ data:
         Kube_Token_File /var/run/secrets/kubernetes.io/serviceaccount/token
         Match       *
         use_journal  On
+        dummy_meta   On 
     [OUTPUT]
         Name          influxdb
         Match         *
         Host          influxdb.monitoring.svc
         Port          8086
         Database      k8slog
-        Sequence_Tag  _seq
+        Sequence_Tag  seq

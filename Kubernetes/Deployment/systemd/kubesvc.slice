@@ -1,0 +1,8 @@
+[Unit]
+Description=Limited resources Slice for kubelet and  rkt service 
+DefaultDependencies=no
+Before=slices.target
+Requires=-.slice
+After=-.slice
+[Slice]
+MemoryLimit=4G

@@ -21,7 +21,7 @@ spec:
         - name: MY_NODE_NAME
           valueFrom:
             fieldRef:
-              fieldPath: status.hostIP
+              fieldPath: status.nodeName
       volumes:
       - name: discovery-vol
         hostPath:

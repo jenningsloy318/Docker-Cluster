@@ -2,12 +2,12 @@ Unit]
 Description=kubelet service
 	
 [Service]
-ExecStart=/usr/bin/kubelet --kubeconfig=/srv/kubernetes/kubelet.kubeconfig --require-kubeconfig=true --enable-debugging-handlers=true --pod-manifest-path=/var/lib/manifests --allow-privileged=true  --cluster-dns=192.168.0.10 --cluster-domain=cluster.local   --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin --register-node=true   --cgroup-driver=systemd  --kube-reserved=cpu=2,memory=4Gi,storage=5Gi  --system-reserved=cpu=2,memory=4Gi,storage=10Gi 
+Slice=kubesvc.slice
+ExecStart=/usr/bin/kubelet --kubeconfig=/srv/kubernetes/kubelet.kubeconfig --require-kubeconfig=true --enable-debugging-handlers=true --pod-manifest-path=/var/lib/manifests --allow-privileged=true  --cluster-dns=192.168.0.10 --cluster-domain=cluster.local   --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin --register-node=true   --cgroup-driver=systemd  --kube-reserved=cpu=2,memory=4Gi,storage=5Gi --kube-reserved-cgroup=/kubesvc.slice --system-reserved=cpu=2,memory=4Gi,storage=10Gi --system-reserved-cgroup=/system.slice --eviction-hard=memory.available<1Gi,nodefs.available<10 --enforce-node-allocatable=pods,system-reserved,kube-reserved
 
 Restart=always
 RestartSec=2s
 StartLimitInterval=0
 KillMode=process
-Delegate=yes	
 [Install]
 WantedBy=multi-user.target

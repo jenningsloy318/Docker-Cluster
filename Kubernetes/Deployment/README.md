@@ -4,22 +4,56 @@
 # prequisistes #
 
   1. check the docker and other componenet requirements before deploying the cluster, visit the [Kubernetes CHANGELOG](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG.md), and find the section `External Dependency Version Information`.
-   1. build docker images with `docker build --rm --force-rm  --no-cache --tag XXX . `
-
+  2. build docker images with `docker build --rm --force-rm  --no-cache --tag XXX . `
+  3. configure systemd to enable more cgroup controllers, since kubelet (https://github.com/kubernetes/kubernetes/blob/release-1.7/pkg/kubelet/cm/cgroup_manager_linux.go, line 236) will check if `"cpu", "cpuacct", "cpuset", "memory", "hugetlb", "systemd"`  exist in the cgroup hierarchy. edit `/etc/systemd/system.conf`:
+    
+  ```
+  JoinControllers=cpu,cpuacct,cpuset,net_cls,net_prio,hugetlb,memory
+  ```
+    This will resove the error `failed to run Kubelet: invalid configuration: cgroup-root "/container.slice/" doesn't exist:`, when specified `--cgroup-root=/container.slice/` in kubelet.service.
 # Deployment #
-1. create cgroup slice to accommodate docker containers and pods, here created a slice nemed [container.slice](./systemd/container.slice) 
+1. create cgroup slices
+    
+    - [container.slice](./systemd/container.slice), used for containers and pods
 
-    ```
-    [Unit]
-    Description=Limited resources Slice
-    DefaultDependencies=no
-    Before=slices.target
-    Requires=-.slice
-    After=-.slice
-    [Slice]
-    MemoryLimit=48G
+        ```
+        [Unit]
+        Description=Limited resources Slice
+        DefaultDependencies=no
+        Before=slices.target
+        Requires=-.slice
+        After=-.slice
+        [Slice]
+        MemoryLimit=48G
 
-   ```
+        ```
+    - [kubesvc.slice](./systemd/kubesvc.slice), used for kubelet and docker runtime processes
+
+        ```
+        [Unit]
+        Description=Limited resources Slice
+        DefaultDependencies=no
+        Before=slices.target
+        Requires=-.slice
+        After=-.slice
+        [Slice]
+        MemoryLimit=4G
+
+        ```        
+
+    - [system.slice](./systemd/system.slice), used for other processes
+
+        ```
+        MemoryLimit[Unit]
+        Description=Limited resources Slice for system services
+        DefaultDependencies=no
+        Before=slices.target
+        Requires=-.slice
+        After=-.slice
+
+        [Slice]
+        MemoryLimit=4G
+        ```
     `MemoryLimit`: set the memory limits in cgroup v1.
 
     MemoryHigh and MemoryMax are cgroup v2 memory limits which will replace MemoryLimit in future.
@@ -28,6 +62,7 @@
     and [cgroupv2: Linux's new unified control group hierarchy](https://fosdem.org/2017/schedule/event/cgroupv2/)。
 
      to enable cgroup2 in kernel >4.6, modify `GRUB_CMDLINE_LINUX=" "` in file ` /etc/default/grub`,  to `GRUB_CMDLINE_LINUX="systemd.unified_cgroup_hierarchy=1 cgroup_no_v1=all"`, but right now cpu controller is not merged into main kernel, so we can't use cgroup v2 right now.
+
 2. Deploy and configure docker engine
 
     2.1 get the docker-engine file 
@@ -47,53 +82,16 @@
       ``` 
     
     2.3 modify systemd service file [docker.service](./systemd/docker.service)
-      - slice into the `[service]` section, 
+
+      - add `Slice=kubesvc.slice` into the `[service]` section, this will place docker service in kubesvc.slice.
       - add HTTP_PROXY / HTTPS_PROXY Environment, 
       - since we have moved all docker conf to `/etc/docker/daemon.json`, then modify `ExecStart` to `ExecStart=/usr/bin/dockerd`
 
     2.4 configure docker via [daemon.json](./Docker/daemon.json).serveral things need to mention.
         
-      - `cgroup-parent: /container.slice/` which means that all container will under  `/container.slice/` 
-        ```
-        #systemd-cgls
-        Control group /:
-        -.slice
-        ├─user.slice
-        │ └─user-0.slice
-        │   ├─user@0.service
-        │   │ └─init.scope
-        │   │   ├─2231 /lib/systemd/systemd --user
-        │   │   └─2237 (sd-pam)
-        │   └─session-1.scope
-        │     ├─2229 sshd: root@pts/0
-        │     ├─2279 -bash
-        │     └─3509 systemd-cgls
-        ├─container.slice
-        │ ├─docker.service
-        │ │ ├─  372 docker-containerd-shim f89a4edfd306962007b06f0c2f570f5ca35c596997...
-        │ │ ├─20017 /usr/bin/dockerd
-        │ │ ├─20041 docker-containerd -l unix:///var/run/docker/libcontainerd/docker-...
-        │ │ ├─20165 docker-containerd-shim 169f72e5e35e072f5dc105afc3d19a322cd94db4a7...
-        │ │ ├─20166 docker-containerd-shim 332d8273dd8b146c81f31a5dcf52f945ac7e43fd5c...
-        │ │ ├─20226 docker-containerd-shim e15fb8e6a2e75e744f5b2c2b87a1602de23972283e...
-        │ │ ├─20329 docker-containerd-shim 30e7f7c6964f0303d67ee5299a79862f08f309a897...
-        │ │ ├─25313 docker-containerd-shim bcfd15acca0a2e5ffd60b915adbcdb2c6bc2103b94...
-        │ │ ├─kubepods-besteffort-pod14fe43a305055176089fe3b2cac4f54b.slice
-        │ │ │ └─30e7f7c6964f0303d67ee5299a79862f08f309a897e10e5c3eb22fc30e94666e
-        │ │ │   └─20345 /pause
-        │ │ ├─kubepods-besteffort-pod7fcc959e8f7eba8bbc086c150649966a.slice
-        │ │ │ └─332d8273dd8b146c81f31a5dcf52f945ac7e43fd5c105c64bb32f1954a9d3e47
-        │ │ │   └─20200 /pause
-        │ │ ├─kubepods-besteffort-pod2c9b83837ac6042e7a2f50a365a0e7d1.slice
-        │ │ │ └─169f72e5e35e072f5dc105afc3d19a322cd94db4a7267045daa8d4c6ef77a65b
-        │ │ │   └─20198 /pause
-        │ │ └─kubepods-besteffort-pod25ed2b09dadfee5f5ffc39bb68b4baa3.slice
-        │ │   └─e15fb8e6a2e75e744f5b2c2b87a1602de23972283e093c6fa78d76c8ca747b6f
-        │ │     └─20249 /pause
-        │ └─kubelet.service
-        │   ├─21639 /usr/bin/kubelet --api-servers=https://10.58.137.243:6443 --kubec...
-        │   └─21701 journalctl -k -f
-        ```
+      - `cgroup-parent: container.slice`  which means that all container will under be created under  `/container.slice/`.
+      - `"exec-opts": ["native.cgroupdriver=systemd"]`,  the cgroup drivers has two types `cgroupfs` and `systemd`, if specified with `systemd`, `cgroup-parent` is `container.slice`, if specified `cgroupfs`,`cgroup-parent` is `/container.slice`.
+
       - `hosts: ["tcp://0.0.0.0:2375","unix:///var/run/docker.sock"]`, which makes it not only listen to unix socket, but also listen on tcp socket.
 
       - `log-driver": "journald"`: since we use systemd as init system, we can also use `system-journald` for docker log driver. leveraging journald make all containers logs will be aggreated and sent to journald daemon, thus it is easy for log rotation and other operations, so we don't deal with logs in individual container. In addition to the text of the log message itself, the journald log driver stores the following metadata in the journal with each message:
@@ -129,7 +127,9 @@
         Jul 13 12:35:41 cnpvgl56588417 dockerd[3357]: 10.130.226.76 - - [13/Jul/2017:04:35:41 +0000] "GET / HTTP/1.1" 304 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebK
         ```
       - `"log-opts":  {"tag":"docker_{{.Name}}_{{.ID}}"}`: this will create container tag with docker_CONTAINER_NAME_CONTAINER_ID
+
       - add TLS cert after creating SSL keys.
+
 3. journald configuration, which is located in `/etc/systemd/journald.conf`.
     ```
     [Journal]
@@ -171,22 +171,16 @@
 
 5. create [kubeconfig](./kubeconfig) for different components and roles, this is due to RBAC roles used. 
 
-6. prepare [kubelet.service](./systemd/kubelet.service), it also will be placed in `container.slice`. one more option need to explain, the `Delegate=yes` in the `kubelet.service`, this will prevent the error message when setiing `--cgrout-root=/container.slice`, this will place all pod under `/container.slice/kubepods.slice`
+6. prepare [kubelet.service](./systemd/kubelet.service).
 
-    Errors:
-    ```
-    failed to run Kubelet: invalid configuration: cgroup-root "/container.slice/" doesn't exist:
-    ```
+    -  add `Slice=kubesvc.slice` into the `[service]` section, this will place kubelet service in kubesvc.slice.
 
-    and add `Delegate=yes` will fix this error. 
-    ```
-    Delegate=
-    Turns on delegation of further resource control partitioning to processes of the unit. For unprivileged services (i.e. those using the User= setting), this allows processes to create a subhierarchy beneath its control group path. For privileged services and scopes, this ensures the processes will have all control group controllers enabled.
-    ```
+    - `--cgrout-root=/container.slice`:  this will place all pods under `/container.slice/kubepods.slice`
 
-    also `--kube-reserved=cpu=1000m,memory=2Gi   --system-reserved=cpu=2000m,memory=4Gi` will limit the kube process and other process resouce utilization, ensure pod will not eat all resources.
+    - `--kube-reserved=cpu=2,memory=4Gi --kube-reserved-cgroup=/kubesvc.slice   --system-reserved=cpu=2,memory=4Gi --system-reserved-cgroup=/system.slice`:  these parameter will limit the kube process and other process resouce.
 
-    PS. we can still add `Delegate=yes` to `docker.service`, but we ignored, since there is already a parameter `"cgroup-parent": "container.slice" ` in `daemon.json` has same functionality.
+    - `--enforce-node-allocatable=pods,system-reserved,kube-reserved`: this will garentee that pod,system processes and kubelet/rkt process are all existing in the system, prevent any crashes due to lack of the resources.
+
 
 7. prepare the static pod manifests,[etcd.yaml](./manifests/etcd.yaml), [kube-apiserver.yaml](./manifests/kube-apiserver.yaml),[kube-controller-manager.yaml](./manifests/kube-controller-manager.yaml) and [kube-scheduler.yaml](kube-scheduler.yaml)
 

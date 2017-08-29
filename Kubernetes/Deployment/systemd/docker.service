@@ -4,7 +4,7 @@ Documentation=https://docs.docker.com
 After=network.target
 
 [Service]
-Slice=container.slice
+Slice=kubesvc.slice
 Type=notify
 Environment="HTTP_PROXY=http://proxy:8080"
 Environment="HTTPS_PROXY=http://proxy:8080"
@@ -22,8 +22,6 @@ LimitCORE=infinity
 # Only systemd 226 and above support this version.
 TasksMax=infinity
 TimeoutStartSec=0
-# set delegate yes so that systemd does not reset the cgroups of docker containers
-Delegate=yes
 # kill only the docker process, not all processes in the cgroup
 KillMode=process
 

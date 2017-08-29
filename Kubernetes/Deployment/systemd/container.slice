@@ -1,9 +1,8 @@
 [Unit]
-Description=Limited resources Slice
+Description=Limited resources Slice for containers and pods
 DefaultDependencies=no
 Before=slices.target
 Requires=-.slice
 After=-.slice
 [Slice]
-MemoryHigh=48G
-MemoryMax=52G
+MemoryLimit=4G

@@ -35,3 +35,9 @@ data:
     redirect_stderr=true
     redirect_stdout=true
     environment=HTTPS_PROXY=http://proxy.pvgl.sap.corp:8080,https_proxy=http://proxy.pvgl.sap.corp:8080,HTTP_PROXY=http://proxy.pvgl.sap.corp:8080,http_proxy=http://proxy.pvgl.sap.corp:8080,all_proxy=http://proxy.pvgl.sap.corp:8080
+
+      [program:hana-usdemo1-proxy]
+    command=/usr/bin/chisel client --auth EMS:Welcome1 https://chisel-perftest.cfapps.sap.hana.ondemand.com 30215:10.253.73.255:30041
+    redirect_stderr=true
+    redirect_stdout=true
+    environment=HTTPS_PROXY=http://proxy.pvgl.sap.corp:8080,https_proxy=http://proxy.pvgl.sap.corp:8080,HTTP_PROXY=http://proxy.pvgl.sap.corp:8080,http_proxy=http://proxy.pvgl.sap.corp:8080,all_proxy=http://proxy.pvgl.sap.corp:8080

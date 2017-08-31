@@ -20,3 +20,8 @@ spec:
       nodePort: 30115
       targetPort: 30115
       protocol: TCP        
+    - name: usdemo1-port
+      port: 30215
+      nodePort: 30215
+      targetPort: 30215
+      protocol: TCP           

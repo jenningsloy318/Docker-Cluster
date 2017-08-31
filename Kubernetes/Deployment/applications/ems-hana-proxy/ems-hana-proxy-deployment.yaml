@@ -29,6 +29,9 @@ spec:
           - name: test-port
             containerPort: 30115
             hostPort: 30115
+          - name: usdemo1-port
+            containerPort: 30215
+            hostPort: 30215            
         resources:
           requests:
             cpu: 200m

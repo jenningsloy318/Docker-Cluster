@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: heapster
-  namespace: monitoring
+  namespace: kube-system
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -16,13 +16,13 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: heapster
-  namespace: monitoring
+  namespace: kube-system
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: heapster
-  namespace: monitoring
+  namespace: kube-system
 spec:
   replicas: 1
   template:
@@ -34,7 +34,7 @@ spec:
       serviceAccountName: heapster
       containers:
       - name: heapster
-        image: gcr.io/google_containers/heapster-amd64:v1.4.0
+        image: gcr.io/google_containers/heapster-amd64:v1.4.2
         imagePullPolicy: IfNotPresent
         command:
         - /heapster
@@ -49,7 +49,7 @@ spec:
         - name: localtime
           mountPath: /etc/localtime  
       - name: eventer
-        image: gcr.io/google_containers/heapster-amd64:v1.4.0
+        image: gcr.io/google_containers/heapster-amd64:v1.4.2
         imagePullPolicy: IfNotPresent
         command:
         - /eventer

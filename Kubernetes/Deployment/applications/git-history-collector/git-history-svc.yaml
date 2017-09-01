@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: git
+  name: git-history-svc
+spec:
+  type: NodePort
+  ports:
+    - port: 5000
+      name: redis-master
+      targetPort: 5000
+      nodePort: 30500
+  selector:
+    name: git-history-collector

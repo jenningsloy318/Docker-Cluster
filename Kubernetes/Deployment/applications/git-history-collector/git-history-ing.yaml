@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: git-history-ingress
+  namespace: git
+spec:
+  rules:
+  - host: devops-git-collector.mo.sap.corp
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: git-history-svc
+          servicePort: 5000

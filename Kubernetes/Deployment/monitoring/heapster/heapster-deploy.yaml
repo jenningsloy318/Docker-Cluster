@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: heapster
-  namespace: kube-system
+  namespace: monitoring
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -16,13 +16,13 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: heapster
-  namespace: kube-system
+  namespace: monitoring
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: heapster
-  namespace: kube-system
+  namespace: monitoring
 spec:
   replicas: 1
   template:
@@ -38,8 +38,23 @@ spec:
         imagePullPolicy: IfNotPresent
         command:
         - /heapster
-        - --source=kubernetes:https://kubernetes.default
-        - --sink=influxdb:http://influxdb.monitoring.svc:8086
+        - --source=kubernetes
+        - --sink=influxdb:http://10.58.137.244:8086
+        resources:
+          limits:
+            memory: 512Mi
+          requests:
+            memory: 100Mi          
+        volumeMounts: 
+        - name: localtime
+          mountPath: /etc/localtime  
+      - name: eventer
+        image: gcr.io/google_containers/heapster-amd64:v1.4.0
+        imagePullPolicy: IfNotPresent
+        command:
+        - /eventer
+        - --source=kubernetes
+        - --sink=influxdb:http://10.58.137.244:8086?withfields=true
         resources:
           limits:
             memory: 512Mi
@@ -52,20 +67,3 @@ spec:
       - name: localtime
         hostPath:
           path: /etc/localtime
-                
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    task: monitoring
-    kubernetes.io/cluster-service: 'true'
-    kubernetes.io/name: Heapster
-  name: heapster
-  namespace: kube-system
-spec:
-  ports:
-  - port: 80
-    targetPort: 8082
-  selector:
-    k8s-app: heapster

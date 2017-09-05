@@ -230,6 +230,10 @@
 
     11.4 create calico via [calico.yaml](./network/calico/calico.yaml)
 
+
+    we will still consider using [cilium](https://github.com/cilium/cilium), it has many advanced features, it will implement kube-proxy function, and use bpf to replace iptables thus has higher performance, but now it lacks some functionality, such as NodePort, ingress,..etcd.
+
+
 12. install [kube-proxy](./addons/kube-proxy/kube-proxy.yaml) via daemonset, but before that created a configmap to store `kube-proxy.kubeconfig`, and then mount in the kube-proxy pods.
 
 13. install [kube-dns](./addons/kube-dns/kube-dns.yaml), this file contains a configmap to store some addtional config of `upstreamNameservers`, and modify the DNS domains and DNS  service IP `clusterIP: 192.168.0.10`, also enable prometheus monitoring on service and exposes coresponding ports.
@@ -273,23 +277,31 @@
 
 17. configure storage
 
-    17.1  [local storage provisioner](./storage/local-storage)
-    17.2  [nfs provisioner](./storage/nfs-provisioner)
+    17.1  [local storage provisioner](./storage/local-storage), now it doesn't support **Dynamic provisioning**, so we don't use it at this moment, consider it in future.
+    17.2  [nfs provisioner](./storage/nfs-provisioner), here we deploy on nodes, not in of kubernetes, this makes the storage system more robust.
 
-18. Install [Monitoring and Logging](./monitoring)
+18. Install [Monitoring and Logging](./monitoring), 
 
     18.1 Totally we use influxdb as the overall storage backend, save logs from fluentbit, save prometheus metrics and heapster data.
 
-    18.2 as for fluentbit, it reads logs from systemd-journald, as we have configured journald as the docker log-driver, hence install fluentbit as daemonset, read journal logs from shared directory /var/log/journal, after processing, finally save it to influxd.
+    18.2 as for fluentbit, it reads logs from systemd-journald, as we have configured journald as the docker log-driver, hence install fluentbit as daemonset, read journal logs from shared directory /var/log/journal, after processing, finally save it to influxd. we deploy influxdb on nodes, not in kubernetes cluster.
 
     18.3 heapster inherently support to external storage influxdb 
 
-    18.4 prometheus has alpha support to save data to remote storage via  remote_storage_adapter, now create prometheus alongside with a remote-storage-adapter container in a single pod. also use alertmanager to send out alerts. 
+    18.4 prometheus has alpha support to save data to remote storage via  remote_storage_adapter, now create prometheus alongside with a remote-storage-adapter container in a single pod. also use alertmanager to send out alerts. we deploy prometheus,alertmanager,node-exporter and remote-storage-adapter on nodes, not in kubernetes cluster.
 
     18.5 we can reload prometheus via `curl -X POST http(s)://{prometheus-host}:{prometheus-port}/-/reloador` and reload altermanager via `curl -X POST http(s)://{alertmanager-host}:{alertmanager-port}/-/reload`.
 
-    18.6 we can customize prometheus by creating different prometheus.yaml and alter-rules via [prometheus-cm.yaml](./monitoring/prometheus/prometheus-cm.yml) 
+    18.6 we can customize prometheus by creating different prometheus.yaml and alter-rules via  in-cluster configmap [prometheus-cm.yaml](./monitoring/In-Cluster/prometheus/prometheus-cm.yml) or out-cluster [prometheus.yml](./monitoring/Out-Cluster/prometheus/prometheus.yml)
 
-    18.7 customize alertmanager by creating [alertmanager-cm.yaml](./monitoring/prometheus/alertmanager-cm.yml) and [template](./monitoring/prometheus/default.tmpl)
+    18.7 customize alertmanager by creating  in-cluster configmap [alertmanager-cm.yaml](./monitoring/In-Cluster/alertmanager/alertmanager-cm.yml) and [template](./monitoring/In-Cluster/alertmanagerdefault.tmpl) or out-cluster [altermanager.yml](./monitoring/Out-Cluster/alertmanager/altermanager.yml)
 
-    18.8 visulization via [grafana](./monitoring/grafana), we still need to customizing the dashboards
+    18.8 visulization via in-cluster [grafana](./monitoring/In-Cluster/grafana) or out-cluster [grafana](./monitoring/Out-Cluster/grafana)  , we still need to customizing the dashboards
+
+19. Create default [ResourceLimt and Quota](./ResourceLimitQuota).
+
+20. deploy multiple [applications](./applications).
+    
+21. define some [autoscaler](./Autoscaler) rules.
+
+22. [Network policy](./NetworkPolicy) is another considerations.

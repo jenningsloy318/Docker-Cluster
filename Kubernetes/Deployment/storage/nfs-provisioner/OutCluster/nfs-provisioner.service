@@ -1,0 +1,13 @@
+[Unit]
+Description=nfs-provisioner service
+Requires=nfs-kernel-server.service
+
+[Service]
+Slice=container.slice
+ExecStart=/usr/bin/nfs-provisioner -kubeconfig=/srv/kubernetes/nfsprovisioner.kubeconfig -provisioner=cscdevops-nfs -run-server=false -use-ganesha=false -server-hostname=cnpvgl56588418
+Restart=always
+RestartSec=2s
+StartLimitInterval=0
+KillMode=process
+[Install]
+WantedBy=multi-user.target

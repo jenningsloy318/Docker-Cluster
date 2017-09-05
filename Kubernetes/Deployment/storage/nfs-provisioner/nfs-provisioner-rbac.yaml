@@ -19,10 +19,14 @@ rules:
     verbs: ["get", "list", "watch"]
   - apiGroups: [""]
     resources: ["events"]
-    verbs: ["watch", "create", "update", "patch","get"]
+    verbs: ["list", "watch", "create", "update", "patch"]
   - apiGroups: [""]
     resources: ["services", "endpoints"]
     verbs: ["get"]
+  - apiGroups: ["extensions"]
+    resources: ["podsecuritypolicies"]
+    resourceNames: ["nfs-provisioner"]
+    verbs: ["use"]
 
 ---
 kind: ClusterRoleBinding

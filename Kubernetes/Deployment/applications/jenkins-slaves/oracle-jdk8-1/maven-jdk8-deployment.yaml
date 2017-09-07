@@ -59,8 +59,10 @@ spec:
         - name: no_proxy
           value: "10.58.137.243,10.58.137.244"                       
         volumeMounts: 
-          - name: jenkins-home
-            mountPath: /home/jenkins
+          - name: jenkins-workspace
+            mountPath: /home/jenkins/workspace
+          - name: jenkins-maven
+            mountPath: /home/jenkins/.m2  
           - name: localtime
             mountPath: /etc/localtime
           - name: kubeconfig
@@ -93,8 +95,11 @@ spec:
             path: cert.pem   
           - key: docker_ca_cert
             path: ca.pem         
-      - name: jenkins-home
+      - name: jenkins-workspace
         persistentVolumeClaim:
-          claimName: jenkins-slave-jdk8-1                           
+          claimName: jdk8-1-workspace                         
+      - name: jenkins-maven
+        persistentVolumeClaim:
+          claimName: jdk8-1-maven                           
 
           

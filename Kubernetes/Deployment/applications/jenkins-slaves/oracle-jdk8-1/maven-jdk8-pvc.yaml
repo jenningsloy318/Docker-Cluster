@@ -1,7 +1,21 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: jenkins-slave-jdk8-1
+  name: jenkins-slave-jdk8-1-workspace
+  namespace: jenkins
+  annotations:
+#    volume.beta.kubernetes.io/storage-class: "devops-k8s-nfs"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: jenkins-slave-jdk8-1-maven
   namespace: jenkins
   annotations:
 #    volume.beta.kubernetes.io/storage-class: "devops-k8s-nfs"

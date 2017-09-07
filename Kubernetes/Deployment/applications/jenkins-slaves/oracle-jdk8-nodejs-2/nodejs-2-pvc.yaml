@@ -1,7 +1,7 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: jenkins-slave-jdk8-2-workspace
+  name: jenkins-slave-nodejs-2-workspace
   namespace: jenkins
   annotations:
 #    volume.beta.kubernetes.io/storage-class: "devops-k8s-nfs"
@@ -15,7 +15,7 @@ spec:
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: jenkins-slave-jdk8-2-maven
+  name: jenkins-slave-nodejs-2-maven
   namespace: jenkins
   annotations:
 #    volume.beta.kubernetes.io/storage-class: "devops-k8s-nfs"

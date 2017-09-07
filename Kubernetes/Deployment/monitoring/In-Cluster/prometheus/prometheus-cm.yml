@@ -262,6 +262,12 @@ data:
       - url: "http://remote-storage-adapter:9201/write"
     remote_read:
       - url: "http://remote-storage-adapter:9201/read"
+    alerting:
+      alertmanagers:
+      - scheme: http
+        static_configs:
+        - targets:
+          - "alertmanager:9093"
   alert.rules: |-
     ## alert.rules ##
 

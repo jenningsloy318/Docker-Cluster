@@ -1,0 +1,12 @@
+[Unit]
+Description=alertmanager  service
+
+[Service]
+Slice=container.slice
+ExecStart=/usr/bin/alertmanager -config.file=/etc/prometheus/alertmanager.yml  -storage.path=/data/monitoring/alertmanager
+Restart=always
+RestartSec=2s
+StartLimitInterval=0
+KillMode=process
+[Install]
+WantedBy=multi-user.target

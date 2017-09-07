@@ -1,0 +1,12 @@
+[Unit]
+Description=remote_storage_adapter service
+
+[Service]
+Slice=container.slice
+ExecStart=/usr/bin/remote_storage_adapter -influxdb-url=http://localhost:8086/ -influxdb.database=prometheus -influxdb.retention-policy=autogen
+Restart=always
+RestartSec=2s
+StartLimitInterval=0
+KillMode=process
+[Install]
+WantedBy=multi-user.target

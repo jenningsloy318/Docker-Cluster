@@ -2,7 +2,8 @@
 Description=Node Exporter
 
 [Service]
-ExecStart=/usr/bin/node_exporter 
+Slice=container.slice
+ExecStart=/usr/bin/node_exporter
 
 [Install]
 WantedBy=multi-user.target

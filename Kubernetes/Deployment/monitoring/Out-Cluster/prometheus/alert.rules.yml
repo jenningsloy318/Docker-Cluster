@@ -1,0 +1,146 @@
+groups:
+- name: alert.rules
+  rules:
+  - alert: HighCPU
+    expr: ((sum(node_cpu{mode=~"^(?:user|nice|system|irq|softirq|steal|idle|iowait)$"})
+      BY (instance, job)) - (sum(node_cpu{mode=~"^(?:idle|iowait)$"}) BY (instance,
+      job))) / (sum(node_cpu{mode=~"^(?:user|nice|system|irq|softirq|steal|idle|iowait)$"})
+      BY (instance, job)) * 100 > 95
+    for: 10m
+    labels:
+      severity: page
+    annotations:
+      description: This machine  has really high CPU usage for over 10m
+      summary: High CPU Usage
+  - alert: DNSLookupFailureFromPrometheus
+    expr: prometheus_dns_sd_lookup_failures_total > 5
+    for: 1m
+    labels:
+      severity: page
+    annotations:
+      description: The prometheus unit reported that it failed to query the DNS.  Look
+        at the kube-dns to see if it is having any problems
+      summary: Prometheus reported over 5 DNS lookup failure
+  - alert: NodeLoadAverage
+    expr: ((node_load5 / count(node_cpu{mode="system"}) WITHOUT (cpu, mode)) > 1)
+    for: 2m
+    labels:
+      severity: page
+    annotations:
+      DESCRIPTION: '{{$labels.instance}}: Average Load is high'
+      SUMMARY: '{{$labels.instance}}: High Average Load detected'
+  - alert: NodeSwapUsage
+    expr: (((node_memory_SwapTotal - node_memory_SwapFree) / node_memory_SwapTotal)
+      * 100) > 75
+    for: 2m
+    labels:
+      severity: page
+    annotations:
+      DESCRIPTION: '{{$labels.instance}}: Swap usage usage is above 75% (current value
+        is: {{ $value }})'
+      SUMMARY: '{{$labels.instance}}: Swap usage detected'
+  - alert: NodeMemoryUsage
+    expr: (((node_memory_MemTotal - node_memory_MemFree - node_memory_Cached) / (node_memory_MemTotal)
+      * 100)) > 75
+    for: 2m
+    labels:
+      severity: page
+    annotations:
+      DESCRIPTION: '{{$labels.instance}}: Memory usage is above 75% (current value
+        is: {{ $value }})'
+      SUMMARY: '{{$labels.instance}}: High memory usage detected'
+  - alert: NodeLowDataDisk
+    expr: ((node_filesystem_size{app="prometheus-node-exporter",mountpoint="/node_datafs"}
+      - node_filesystem_free{app="prometheus-node-exporter",mountpoint="/node_datafs"})
+      / node_filesystem_size{app="prometheus-node-exporter",mountpoint="/node_datafs"}
+      * 100) > 75
+    for: 1m
+    labels:
+      severity: page
+    annotations:
+      DESCRIPTION: '{{$labels.instance}}: data disk usage is above 75% (current value
+        is: {{ $value }})'
+      SUMMARY: '{{$labels.instance}}: Low data disk space'
+  - alert: NodeLowRootDisk
+    expr: ((node_filesystem_size{app="prometheus-node-exporter",mountpoint="/node_rootfs"}
+      - node_filesystem_free{app="prometheus-node-exporter",mountpoint="/node_rootfs"})
+      / node_filesystem_size{app="prometheus-node-exporter",mountpoint="/node_rootfs"}
+      * 100) > 75
+    for: 1m
+    labels:
+      severity: page
+    annotations:
+      DESCRIPTION: '{{$labels.instance}}: root disk usage is above 75% (current value
+        is: {{ $value }})'
+      SUMMARY: '{{$labels.instance}}: Low root disk space'
+  - alert: DeploymentGenerationMismatch
+    expr: kube_deployment_status_observed_generation{job="kubernetes-service-endpoints"}
+      != kube_deployment_status_observed_generation{job="kubernetes-service-endpoints"}
+    for: 5m
+    labels:
+      severity: page
+    annotations:
+      description: Deployment of {{$labels.namespace}}/{{$labels.deployment}} failed
+        - observed generation != intended generation.
+      summary: Deployment of {{$labels.namespace}}/{{$labels.deployment}} failed
+  - alert: DeploymentReplicasMismatch
+    expr: (kube_deployment_spec_replicas{job="kubernetes-service-endpoints"} != kube_deployment_status_replicas_available{job="kubernetes-service-endpoints"})
+      or (kube_deployment_spec_replicas{job="kubernetes-service-endpoints"} unless
+      kube_deployment_status_replicas_available{job="kubernetes-service-endpoints"})
+    for: 5m
+    labels:
+      severity: page
+    annotations:
+      description: Deployment of {{$labels.namespace}}/{{$labels.deployment}} failed
+        - observed replicas != intended replicas.
+      summary: Deployment of {{$labels.namespace}}/{{$labels.deployment}} failed
+  - alert: PodRestartingTooMuch
+    expr: rate(kube_pod_container_status_restarts[1m]) > 1 / (5 * 60)
+    for: 1h
+    labels:
+      severity: page
+    annotations:
+      description: Pod {{$labels.namespace}}/{{$label.pod}} restarting too much.
+      summary: Pod {{$labels.namespace}}/{{$label.pod}} restarting too much.
+  - alert: InstanceDown
+    expr: up == 0
+    for: 5m
+    labels:
+      severity: page
+    annotations:
+      description: '{{$labels.instance}} of job {{$labels.job}} has been down for
+        more than 5 minutes.'
+      summary: Instance {{$labels.instance}} down
+  - alert: KubeApiserverDown
+    expr: kube_pod_container_status_ready{container="kube-apiserver"} == 0
+    for: 5m
+    labels:
+      severity: page
+    annotations:
+      description: kube-apiserver in pod {{$labels.pod}} is down.
+      summary: kube-apiserver in pod {{$labels.pod}} is down
+  - alert: KubeControllerManagerDown
+    expr: kube_pod_container_status_ready{container="kube-controller-manager"} ==
+      0
+    for: 5m
+    labels:
+      severity: page
+    annotations:
+      description: kube-controller-manager in pod {{$labels.pod}} is down.
+      summary: kube-controller-manager in pod {{$labels.pod}} is down
+  - alert: KubeSchedulerDown
+    expr: kube_pod_container_status_ready{container="kube-scheduler"} == 0
+    for: 5m
+    labels:
+      severity: page
+    annotations:
+      description: kube-scheduler in pod {{$labels.pod}} is down.
+      summary: kube-scheduler in pod {{$labels.pod}} is down
+  - alert: etcdDown
+    expr: kube_pod_container_status_ready{container="etcd-container"} == 0
+    for: 5m
+    labels:
+      severity: page
+    annotations:
+      description: etcd-container in pod {{$labels.pod}} is down.
+      summary: etcd-container in pod {{$labels.pod}} is down

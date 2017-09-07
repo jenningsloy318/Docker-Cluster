@@ -1,0 +1,12 @@
+[Unit]
+Description= grafana service
+
+[Service]
+Slice=container.slice
+ExecStart=/usr/bin/grafana-server -config /etc/grafana/grafana.ini --homepath=/etc/grafana
+Restart=always
+RestartSec=2s
+StartLimitInterval=0
+KillMode=process
+[Install]
+WantedBy=multi-user.target

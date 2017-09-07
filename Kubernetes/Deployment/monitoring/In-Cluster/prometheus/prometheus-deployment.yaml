@@ -24,7 +24,6 @@ spec:
           - '-storage.local.retention=36h'
           - '-storage.local.path=/data'
           - '-config.file=/etc/prometheus/prometheus.yml'
-          - '-alertmanager.url=http://alertmanager:9093'
         ports:
         - containerPort: 9090
           protocol: TCP

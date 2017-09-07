@@ -6,8 +6,8 @@ FROM registry.gcsc.sap.corp/base/debian:stretch
 # Fluent Bit version
 ENV FLB_MAJOR 0
 ENV FLB_MINOR 12
-ENV FLB_PATCH 0
-ENV FLB_VERSION 0.12.0
+ENV FLB_PATCH 1
+ENV FLB_VERSION 0.12.1
 
 ENV FLB_TARBALL https://github.com/fluent/fluent-bit/archive/v${FLB_VERSION}.zip
 
@@ -29,7 +29,7 @@ RUN apt-get  update   \
        procps\
        curl \
        bash\
-    && apt-get install -y  -qq --reinstall lsb-base lsb-release \
+    && apt-get install -y --no-install-recommends  -qq --reinstall lsb-base lsb-release \
     && curl -SL -o "/tmp/fluent-bit-${FLB_VERSION}.zip" ${FLB_TARBALL} \
     && cd /tmp && unzip "fluent-bit-${FLB_VERSION}.zip" \
     && cd "fluent-bit-${FLB_VERSION}"/build/ \
@@ -42,6 +42,7 @@ RUN apt-get  update   \
        make \
        wget \
        unzip \
+       libsystemd-dev \
     && rm -rf /tmp/*
 
 # Configuration files

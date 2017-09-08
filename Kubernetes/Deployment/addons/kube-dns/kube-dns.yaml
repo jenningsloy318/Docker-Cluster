@@ -36,6 +36,10 @@ spec:
         k8s-app: kube-dns
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: ''
+        prometheus.io/port: '10055'
+        prometheus.io/scrape: 'true'
+        prometheus.io/scheme: 'http'
+        prometheus.io/path: '/metrics'
     spec:
       #tolerations:
       #- key: "CriticalAddonsOnly"
@@ -172,10 +176,6 @@ metadata:
     k8s-app: kube-dns
     kubernetes.io/cluster-service: "true"
     kubernetes.io/name: "KubeDNS"
-  annotations:
-    prometheus.io/scrape: 'true'
-    prometheus.io/port: '10055'
-
 spec:
   selector:
     k8s-app: kube-dns

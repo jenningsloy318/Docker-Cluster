@@ -1,11 +1,8 @@
 groups:
-- name: alert.rules
+- name: cluster rules
   rules:
   - alert: HighCPU
-    expr: ((sum(node_cpu{mode=~"^(?:user|nice|system|irq|softirq|steal|idle|iowait)$"})
-      BY (instance, job)) - (sum(node_cpu{mode=~"^(?:idle|iowait)$"}) BY (instance,
-      job))) / (sum(node_cpu{mode=~"^(?:user|nice|system|irq|softirq|steal|idle|iowait)$"})
-      BY (instance, job)) * 100 > 95
+    expr: ((sum(node_cpu{mode=~"^(?:user|nice|system|irq|softirq|steal|idle|iowait)$"}) BY (instance, job)) - (sum(node_cpu{mode=~"^(?:idle|iowait)$"}) BY (instance, job))) / (sum(node_cpu{mode=~"^(?:user|nice|system|irq|softirq|steal|idle|iowait)$"}) BY (instance, job)) * 100 > 95
     for: 10m
     labels:
       severity: page
@@ -30,8 +27,7 @@ groups:
       DESCRIPTION: '{{$labels.instance}}: Average Load is high'
       SUMMARY: '{{$labels.instance}}: High Average Load detected'
   - alert: NodeSwapUsage
-    expr: (((node_memory_SwapTotal - node_memory_SwapFree) / node_memory_SwapTotal)
-      * 100) > 75
+    expr: (((node_memory_SwapTotal - node_memory_SwapFree) / node_memory_SwapTotal) * 100) > 75
     for: 2m
     labels:
       severity: page
@@ -40,60 +36,59 @@ groups:
         is: {{ $value }})'
       SUMMARY: '{{$labels.instance}}: Swap usage detected'
   - alert: NodeMemoryUsage
-    expr: (((node_memory_MemTotal - node_memory_MemFree - node_memory_Cached) / (node_memory_MemTotal)
-      * 100)) > 75
+    expr: (((node_memory_MemTotal - node_memory_MemFree - node_memory_Cached) / (node_memory_MemTotal) * 100)) > 75
     for: 2m
     labels:
       severity: page
     annotations:
-      DESCRIPTION: '{{$labels.instance}}: Memory usage is above 75% (current value
-        is: {{ $value }})'
+      DESCRIPTION: '{{$labels.instance}}: Memory usage is above 75% (current value is: {{ $value }})'
       SUMMARY: '{{$labels.instance}}: High memory usage detected'
+
   - alert: NodeLowDataDisk
-    expr: ((node_filesystem_size{app="prometheus-node-exporter",mountpoint="/node_datafs"}
-      - node_filesystem_free{app="prometheus-node-exporter",mountpoint="/node_datafs"})
-      / node_filesystem_size{app="prometheus-node-exporter",mountpoint="/node_datafs"}
-      * 100) > 75
+    expr: ((node_filesystem_size{mountpoint="/data"} - node_filesystem_free{mountpoint="/node_datafs"})  / node_filesystem_size{mountpoint="/node_datafs"} * 100) > 75
     for: 1m
     labels:
       severity: page
     annotations:
-      DESCRIPTION: '{{$labels.instance}}: data disk usage is above 75% (current value
-        is: {{ $value }})'
+      DESCRIPTION: '{{$labels.instance}}: data disk usage is above 75% (current value is: {{ $value }})'
       SUMMARY: '{{$labels.instance}}: Low data disk space'
   - alert: NodeLowRootDisk
-    expr: ((node_filesystem_size{app="prometheus-node-exporter",mountpoint="/node_rootfs"}
-      - node_filesystem_free{app="prometheus-node-exporter",mountpoint="/node_rootfs"})
-      / node_filesystem_size{app="prometheus-node-exporter",mountpoint="/node_rootfs"}
-      * 100) > 75
+    expr: ((node_filesystem_size{mountpoint="/"} - node_filesystem_free{mountpoint="/"})/ node_filesystem_size{mountpoint="/"}* 100) > 75
     for: 1m
     labels:
       severity: page
     annotations:
-      DESCRIPTION: '{{$labels.instance}}: root disk usage is above 75% (current value
-        is: {{ $value }})'
+      DESCRIPTION: '{{$labels.instance}}: root disk usage is above 75% (current value is: {{ $value }})'
       SUMMARY: '{{$labels.instance}}: Low root disk space'
+
+  - alert: NodeLowVarDisk
+    expr: ((node_filesystem_size{mountpoint="/var"} - node_filesystem_free{mountpoint="/var"})/ node_filesystem_size{mountpoint="/var"}* 100) > 75
+    for: 1m
+    labels:
+      severity: page
+    annotations:
+      DESCRIPTION: '{{$labels.instance}}: root disk usage is above 75% (current value is: {{ $value }})'
+      SUMMARY: '{{$labels.instance}}: Low root disk space'
+
+
   - alert: DeploymentGenerationMismatch
-    expr: kube_deployment_status_observed_generation{job="kubernetes-service-endpoints"}
-      != kube_deployment_status_observed_generation{job="kubernetes-service-endpoints"}
+    expr: kube_deployment_status_observed_generation{job="kubernetes-service-endpoints"} != kube_deployment_status_observed_generation{job="kubernetes-service-endpoints"}
     for: 5m
     labels:
       severity: page
     annotations:
-      description: Deployment of {{$labels.namespace}}/{{$labels.deployment}} failed
-        - observed generation != intended generation.
+      description: Deployment of {{$labels.namespace}}/{{$labels.deployment}} failed - observed generation != intended generation.
       summary: Deployment of {{$labels.namespace}}/{{$labels.deployment}} failed
+
   - alert: DeploymentReplicasMismatch
-    expr: (kube_deployment_spec_replicas{job="kubernetes-service-endpoints"} != kube_deployment_status_replicas_available{job="kubernetes-service-endpoints"})
-      or (kube_deployment_spec_replicas{job="kubernetes-service-endpoints"} unless
-      kube_deployment_status_replicas_available{job="kubernetes-service-endpoints"})
+    expr:  (kube_deployment_spec_replicas{job="kubernetes-service-endpoints"} != kube_deployment_status_replicas_available{job="kubernetes-service-endpoints"})      or (kube_deployment_spec_replicas{job="kubernetes-service-endpoints"}  unless    kube_deployment_status_replicas_available{job="kubernetes-service-endpoints"})
     for: 5m
     labels:
       severity: page
     annotations:
-      description: Deployment of {{$labels.namespace}}/{{$labels.deployment}} failed
-        - observed replicas != intended replicas.
+      description: Deployment of {{$labels.namespace}}/{{$labels.deployment}} failed - observed replicas != intended replicas.
       summary: Deployment of {{$labels.namespace}}/{{$labels.deployment}} failed
+  
   - alert: PodRestartingTooMuch
     expr: rate(kube_pod_container_status_restarts[1m]) > 1 / (5 * 60)
     for: 1h
@@ -102,14 +97,14 @@ groups:
     annotations:
       description: Pod {{$labels.namespace}}/{{$label.pod}} restarting too much.
       summary: Pod {{$labels.namespace}}/{{$label.pod}} restarting too much.
+
   - alert: InstanceDown
     expr: up == 0
     for: 5m
     labels:
       severity: page
     annotations:
-      description: '{{$labels.instance}} of job {{$labels.job}} has been down for
-        more than 5 minutes.'
+      description: '{{$labels.instance}} of job {{$labels.job}} has been down for  more than 5 minutes.'
       summary: Instance {{$labels.instance}} down
   - alert: KubeApiserverDown
     expr: kube_pod_container_status_ready{container="kube-apiserver"} == 0
@@ -144,3 +139,88 @@ groups:
     annotations:
       description: etcd-container in pod {{$labels.pod}} is down.
       summary: etcd-container in pod {{$labels.pod}} is down
+
+  - alert: POD memory usage high
+    expr: 100 * container_memory_working_set_bytes{container_name !=''} / container_spec_memory_limit_bytes{container_name !=''} > 80  and  container_spec_memory_limit_bytes {container_name !=''} !=0
+    for: 5m
+    labels:
+      severity: page
+    annotations:
+      description: "POD {{$labels.pod}}  usage  is above 80% of its limits(current value is: {{$value}}) !"
+      summary:  "POD {{$labels.pod}}  usage  is above 80% of its limits(current value is: {{$value}})!"
+
+- name: Jenkins rules
+  rules:
+  - alert: Jenkins JVM  memory high
+    expr: 100 * vm_memory_total_used / vm_memory_total_max  >80
+    for: 5m
+    labels:
+      severity: page
+    annotations:
+      description: "Jenkins  {{$labels.instance}}  JVM  memory usage  is above 80%(current value is: {{$value}}) ! "
+      summary:  "Jenkins  {{$labels.instance}}  JVM  memory usage  is above 80%(current value is: {{$value}}) !"
+  - alert: jenkins slave node offline 
+    expr: jenkins_node_offline_value >1
+    for: 5m
+    labels:
+      severity: page
+    annotations:
+      description: "Jenkins  {{$labels.instance}}   has more than 1 slave node down(current value is: {{$value}}) !"
+      summary:  "Jenkins  {{$labels.instance}}   has more than 1 slave node down(current value is: {{$value}}) !"  
+  - alert: jenkins  is not healthy
+    expr: jenkins_health_check_score !=1 
+    for: 5m
+    labels:
+      severity: page
+    annotations:
+      description: "Jenkins  {{$labels.instance}}  is not healthy!"
+      summary:  "Jenkins  {{$labels.instance}}    is not healthy  !"
+  - alert: jenkins  CPU usage is high
+    expr: vm_cpu_load > 0.8
+    for: 5m
+    labels:
+      severity: page
+    annotations:
+      description: "Jenkins  {{$labels.instance}}   CPU load is high(current value is: {{$value}}) !"
+      summary:  "Jenkins  {{$labels.instance}}    CPU load is high(current value is: {{$value}}) !"
+
+- name: nginx controller rules
+  rules:
+  - alert: too much unexpected  ingress response
+    expr: irate(nginx_upstream_responses_total{kubernetes_pod_name!='',status_code !="2xx"} [5m]) >10
+    for: 5m
+    labels:
+      severity: page
+    annotations:
+      description: "the unexpected  ingress response(response code: {{$labels.status_code}}) for upstream {{$labels.upstream}}:{{$labels.server}} is increased !"
+      summary:    "the unexpected  ingress response(response code: {{$labels.status_code}}) for upstream {{$labels.upstream}}:{{$labels.server}} is increased !"
+
+
+- name: kube-dns rules
+  rules:
+  - alert: The rate of DNS  error is increasing
+    expr: irate(skydns_skydns_dns_error_count_total[5m]) !=0
+    for: 5m
+    labels:
+      severity: page
+    annotations:
+      description: "The {{$labels.cause}} error is increasing in {{$labels.k8s_app}}  for system {{$label.system}},current irate is {{value}"
+      summary: "The {{$labels.cause}} error is increasing in {{$labels.k8s_app}}  for system {{$label.system}},current irate is {{value}"
+
+
+- name: etcd rules
+  rules:
+  - alert: etcd is down 
+    expr: etcd_server_has_leader !=1 
+    for: 2m
+    labels:
+      severity: page
+    annotations:
+      description: "etcd is down "
+      summary: "etcd is down"
+  
+
+
+- name: calico rules
+  rules:
+  - alert: too much unexpected  ingress response

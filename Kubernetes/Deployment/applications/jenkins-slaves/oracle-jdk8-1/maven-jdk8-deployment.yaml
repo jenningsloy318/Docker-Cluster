@@ -97,9 +97,7 @@ spec:
             path: ca.pem         
       - name: jenkins-workspace
         persistentVolumeClaim:
-          claimName: jdk8-1-workspace                         
+          claimName: jenkins-slave-jdk8-1-workspace                         
       - name: jenkins-maven
         persistentVolumeClaim:
-          claimName: jdk8-1-maven                           
-
-          
+          claimName: jenkins-slave-jdk8-1-maven 

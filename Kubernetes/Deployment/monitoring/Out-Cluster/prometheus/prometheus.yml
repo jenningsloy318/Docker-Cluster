@@ -4,9 +4,19 @@ rule_files:
 - '/etc/prometheus/alert.rules.yml'
 
 scrape_configs:
-- job_name: 'k8s-nodes-exporter'
-  static_configs:
-  - targets: ['10.58.137.243:9100','10.58.137.244:9100']
+- job_name: 'nodes-exporter'
+  file_sd_configs:
+  - files: ['/etc/prometheus/file_sd_configs/k8s-nodes-exporter.json']
+
+- job_name: 'etcd-nodes'
+  file_sd_configs:
+  - files: ['/etc/prometheus/file_sd_configs/etcd-nodes.json']
+  scheme: https
+  tls_config:
+    ca_file: /srv/kubernetes/ca.pem
+    cert_file: /srv/kubernetes/etcd.pem  
+    key_file: /srv/kubernetes/etcd-key.pem
+
 - job_name: 'kubernetes-apiservers'
 
   kubernetes_sd_configs:

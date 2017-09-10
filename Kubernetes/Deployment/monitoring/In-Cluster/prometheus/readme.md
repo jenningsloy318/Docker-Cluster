@@ -7,3 +7,5 @@
 4. since we use prometheus 2.0, we configure the alertmanager in its conf `prometheus.yml`
 
 5. transform the `alert.rules` to `alert.rules.yml` using `promtool  update rules alert.rules`.
+
+6. we can reference the prometheus documents at  https://github.com/1046102779/prometheus

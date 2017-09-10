@@ -9,3 +9,5 @@
 5. transform the `alert.rules` to `alert.rules.yml` using `promtool  update rules alert.rules`.
 
 6. remember to copy directory of `console_libraries` and `consoles` to `/etc/prometheus/`.
+
+7. we can reference the prometheus documents at  https://github.com/1046102779/prometheus

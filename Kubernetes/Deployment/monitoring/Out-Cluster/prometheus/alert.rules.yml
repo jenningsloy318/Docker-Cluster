@@ -141,7 +141,7 @@ groups:
       summary: etcd-container in pod {{$labels.pod}} is down
 
   - alert: POD memory usage high
-    expr: 100 * container_memory_working_set_bytes{container_name !=''} / container_spec_memory_limit_bytes{container_name !=''} > 80  and  container_spec_memory_limit_bytes {container_name !=''} !=0
+    expr: 100 * container_memory_working_set_bytes{image!="",name=~"^k8s_.*"} / container_spec_memory_limit_bytes{image!="",name=~"^k8s_.*"} > 80  and  container_spec_memory_limit_bytes {image!="",name=~"^k8s_.*"} !=0
     for: 5m
     labels:
       severity: page
@@ -221,6 +221,15 @@ groups:
   
 
 
-- name: calico rules
+- name: tomcat rules
   rules:
-  - alert: too much unexpected  ingress response
+  - alert: The conext of tomcat is not running 
+    expr: tomcat_context_state_started !=1 
+    for: 2m
+    labels:
+      severity: page
+    annotations:
+      description: "The conext {{label.context}} is not running on instance {{label.instance}}:{{label:kubernetes_pod_name}}  "
+      summary: "The conext {{label.context}} is not running on instance {{label.instance}}:{{label:kubernetes_pod_name}}  "
+
+

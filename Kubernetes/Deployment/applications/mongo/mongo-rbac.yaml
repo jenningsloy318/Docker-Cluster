@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: owl-mongo
-  namespace: owl
+  name: mongo
+  namespace: mongo
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  name: owl-mongo-read
+  name: mongo-read
 rules:
 - apiGroups: [""]
   resources:
@@ -21,8 +21,8 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: owl-mongo-read
+  name: mongo-read
 subjects:
 - kind: ServiceAccount
-  name: owl-mongo
-  namespace: owl
+  name: mongo
+  namespace: mongo

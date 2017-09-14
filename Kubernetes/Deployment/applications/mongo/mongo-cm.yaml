@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: owl-mongo-cm
-  namespace: owl
+  name: mongo-cm
+  namespace: mongo
 data:
   create-user.sh: |
     #!/bin/bash -x
@@ -27,3 +27,4 @@ data:
 
     /usr/bin/mongod --shutdown
     
+    exit 0

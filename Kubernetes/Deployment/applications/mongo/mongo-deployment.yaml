@@ -2,7 +2,7 @@ apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: mongo
-  namespace: owl
+  namespace: mongo
 spec:
   replicas: 1
   template:
@@ -16,7 +16,7 @@ spec:
         prometheus.io/path: '/metrics'  
     spec:
       terminationGracePeriodSeconds: 10
-      serviceAccountName: owl-mongo
+      serviceAccountName: mongo
       initContainers:
       - name: mongo-init
         image: registry.gcsc.sap.corp/mongodb/mongo:3.4
@@ -110,7 +110,7 @@ spec:
           claimName: mongo-pvc     
       - name: create-user-shell
         configMap:
-          name: owl-mongo-cm
+          name: mongo-cm
           items:     
           - key: create-user.sh
             path: create-user.sh   

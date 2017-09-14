@@ -2,7 +2,7 @@
  kind: Ingress
  metadata:
    name: mongo-ui
-   namespace: owl
+   namespace: mongo
    annotations:
      kubernetes.io/ingress.class: nginx
      #ingress.kubernetes.io/ssl-passthrough: "true"

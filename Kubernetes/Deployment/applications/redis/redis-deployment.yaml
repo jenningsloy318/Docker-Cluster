@@ -47,8 +47,12 @@ spec:
         image: registry.gcsc.sap.corp/redis/redis-commander
         imagePullPolicy: IfNotPresent
         env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
         - name: REDIS_HOSTS
-          value: instance1:localhost:6379
+          value: instance1:$(POD_IP):6379
         ports:
         - name: redis-commander
           containerPort: 8081
@@ -59,7 +63,14 @@ spec:
         - name: http 
           containerPort: 9121
           protocol: TCP
-
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP    
+        - name: REDIS_ADDR
+          value: redis://$(POD_IP):6379
+          
       volumes:
         - name: data
           persistentVolumeClaim:

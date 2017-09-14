@@ -99,7 +99,7 @@ spec:
       - name: jenkins-exporter  
         image: tboerger/jenkins-exporter
         imagePullPolicy: Always
-        command: ["/bin/jenkins_exporter","-jenkins.address","http://localhost:8080","-jenkins.username","$(jenkins_username)","-jenkins.password","$(jenkins_password)","-log.level","debug"," -web.listen-address","0.0.0.0:9103"]
+        command: ["/bin/jenkins_exporter","-jenkins.address","http://${POD_IP}:8080","-jenkins.username","${jenkins_username}","-jenkins.password","${jenkins_password}","-log.level","debug"," -web.listen-address","0.0.0.0:9103"]
         args:
         ports: 
           - name: http-port 
@@ -108,7 +108,11 @@ spec:
           limits:
             cpu: 0.5
             memory: 128Mi
-        env:             
+        env:    
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP                   
           - name: jenkins_username
             valueFrom:
               secretKeyRef:
@@ -119,6 +123,7 @@ spec:
               secretKeyRef:
                 name: jenkins-credetials
                 key: password            
+                
       volumes: 
       - name: localtime
         hostPath:

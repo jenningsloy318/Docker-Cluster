@@ -3,7 +3,7 @@ Description=Node Exporter
 
 [Service]
 Slice=container.slice
-ExecStart=/usr/bin/node_exporter
+ExecStart=/usr/bin/node_exporter -collectors.enabled conntrack,diskstats,entropy,edac,filefd,filesystem,hwmon,infiniband,loadavg,mdadm,meminfo,netdev,netstat,sockstat,stat,textfile,time,uname,vmstat,wifi,zfs,systemd
 
 [Install]
 WantedBy=multi-user.target

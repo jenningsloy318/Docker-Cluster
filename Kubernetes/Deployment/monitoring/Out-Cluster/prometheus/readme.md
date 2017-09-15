@@ -11,3 +11,15 @@
 6. remember to copy directory of `console_libraries` and `consoles` to `/etc/prometheus/`.
 
 7. we can reference the prometheus documents at  https://github.com/1046102779/prometheus
+
+8. exporters
+
+    8.1 jenkins-exporter: https://github.com/webhippie/jenkins_exporter, different value stands for different job status
+
+    ```
+    0: SUCCESS
+	1: UNSTABLE
+	2:FAILURE
+	3:NOT_BUILT
+	4:ABORTED
+    ```

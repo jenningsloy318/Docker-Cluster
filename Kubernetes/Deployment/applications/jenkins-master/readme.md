@@ -37,3 +37,13 @@ JENKINS_HOME /var/jenkins_home/
     ```
     kubectl create secret generic jenkins-tls-keystore --from-file=jenkins-keystore.p12
     ```
+
+##. Extra conf
+
+1. Configure Global Security
+
+    if we use AD for authentication, we can set set following two parameters in order to accelerate the access speed.
+    ![Configure-Global-Security](./imgs/Configure-Global-Security.jpg)
+    
+    - `Remove irrelevant groups`
+    - `Enable cache` and `Cache TTL`

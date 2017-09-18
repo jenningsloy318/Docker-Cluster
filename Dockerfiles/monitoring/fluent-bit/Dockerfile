@@ -7,7 +7,7 @@ FROM registry.gcsc.sap.corp/base/debian:stretch
 ENV FLB_MAJOR 0
 ENV FLB_MINOR 12
 ENV FLB_PATCH 1
-ENV FLB_VERSION 0.12.1
+ENV FLB_VERSION 0.12.2
 
 ENV FLB_TARBALL https://github.com/fluent/fluent-bit/archive/v${FLB_VERSION}.zip
 

@@ -1,0 +1,49 @@
+ apiVersion: apps/v1beta1
+kind: Deployment
+metadata: 
+  name: jenkins-exporter
+  namespace: jenkins
+  labels: 
+    name: jenkins-exporter
+spec:
+  replicas: 1
+  template: 
+    metadata: 
+      name: jenkins-exporter
+      labels: 
+        name: jenkins-exporter       
+      annotations:
+        prometheus.io/port: '9103'
+        prometheus.io/scrape: 'true'
+        prometheus.io/scheme: 'http'
+        prometheus.io/path: '/metrics'         
+    spec: 
+      terminationGracePeriodSeconds: 10
+      containers: 
+      - name: jenkins-exporter  
+        image: tboerger/jenkins-exporter
+        imagePullPolicy: Always
+        command: ["/bin/jenkins_exporter","-jenkins.address","http://${POD_IP}:8080","-jenkins.username","${jenkins_username}","-jenkins.password","${jenkins_password}","-log.level","debug"," -web.listen-address","0.0.0.0:9103"]
+        args:
+        ports: 
+          - name: http-port 
+            containerPort: 9103
+        resources:
+          limits:
+            cpu: 0.5
+            memory: 128Mi
+        env:    
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP                   
+          - name: jenkins_username
+            valueFrom:
+              secretKeyRef:
+                name: jenkins-credetials
+                key: username        
+          - name: jenkins_password
+            valueFrom:
+              secretKeyRef:
+                name: jenkins-credetials
+                key: password            

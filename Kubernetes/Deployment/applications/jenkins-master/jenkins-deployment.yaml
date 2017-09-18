@@ -14,7 +14,12 @@ spec:
     metadata: 
       name: jenkins-master
       labels: 
-        name: jenkins-master        
+        name: jenkins-master   
+      annotations:
+        prometheus.io/port: '8080'
+        prometheus.io/scrape: 'true'
+        prometheus.io/scheme: 'http'
+        prometheus.io/path: '/prometheus'       
     spec: 
       terminationGracePeriodSeconds: 10
       containers: 
@@ -95,35 +100,7 @@ spec:
               command:
                 - /bin/bash
                 - -c 
-                - env |grep -E "DOCKER_HOST|JENKINS_HOME|DOCKER_TLS_VERIFY|GIT_SSL_NO_VERIFY|PROXY|JAVA_HOME|PATH"| awk '{print "export "$0}' >>/etc/profile;
-      - name: jenkins-exporter  
-        image: tboerger/jenkins-exporter
-        imagePullPolicy: Always
-        command: ["/bin/jenkins_exporter","-jenkins.address","http://${POD_IP}:8080","-jenkins.username","${jenkins_username}","-jenkins.password","${jenkins_password}","-log.level","debug"," -web.listen-address","0.0.0.0:9103"]
-        args:
-        ports: 
-          - name: http-port 
-            containerPort: 9103
-        resources:
-          limits:
-            cpu: 0.5
-            memory: 128Mi
-        env:    
-          - name: POD_IP
-            valueFrom:
-              fieldRef:
-                fieldPath: status.podIP                   
-          - name: jenkins_username
-            valueFrom:
-              secretKeyRef:
-                name: jenkins-credetials
-                key: username        
-          - name: jenkins_password
-            valueFrom:
-              secretKeyRef:
-                name: jenkins-credetials
-                key: password            
-                
+                - env |grep -E "DOCKER_HOST|JENKINS_HOME|DOCKER_TLS_VERIFY|GIT_SSL_NO_VERIFY|PROXY|JAVA_HOME|PATH"| awk '{print "export "$0}' >>/etc/profile;               
       volumes: 
       - name: localtime
         hostPath:

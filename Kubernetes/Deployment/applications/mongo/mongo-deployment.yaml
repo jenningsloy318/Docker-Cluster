@@ -63,29 +63,7 @@ spec:
               mountPath: /data/db
           resources:
             limits:
-              memory: 2Gi
-        - name: mongo-exporter
-          image: registry.gcsc.sap.corp/mongodb/mongodb_exporter:v1.0.1
-          imagePullPolicy: IfNotPresent
-          args:
-          - -mongodb.uri
-          - "mongodb://monitor:monitor@${POD_IP}:27017"
-          - -web.listen-address
-          - ":9001"
-          - -v
-          - "10"
-          resources:
-            limits:
-              memory: 100Mi     
-          ports:
-          - name: mon-port
-            containerPort: 9001
-            protocol: TCP
-          env:
-          - name: POD_IP
-            valueFrom:
-              fieldRef:
-                fieldPath: status.podIP                 
+              memory: 2Gi              
         - name: mongo-express
           image: registry.gcsc.sap.corp/mongodb/mongo-express:0.40
           imagePullPolicy: IfNotPresent

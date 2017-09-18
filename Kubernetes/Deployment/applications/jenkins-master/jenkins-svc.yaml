@@ -3,11 +3,7 @@ kind: Service
 metadata: 
   name: jenkins-master
   namespace: jenkins
-  annotations:
-    prometheus.io/port: '8080'
-    prometheus.io/scrape: 'true'
-    prometheus.io/scheme: 'http'
-    prometheus.io/path: '/prometheus'  
+
 spec: 
   type: ClusterIP
   selector: 
@@ -20,28 +16,7 @@ spec:
     - name: slave-port
       port: 50000
       targetPort: 50000
-      protocol: TCP    
----
-apiVersion: v1
-kind: Service
-metadata: 
-  name: jenkins-exporter
-  namespace: jenkins
-  annotations:
-    prometheus.io/port: '9103'
-    prometheus.io/scrape: 'true'
-    prometheus.io/scheme: 'http'
-    prometheus.io/path: '/metrics'
-spec: 
-  type: ClusterIP
-  selector: 
-    name: jenkins-master
-  ports: 
-    - name: http
-      port: 9103
-      targetPort: 9103
       protocol: TCP
-
 ---
 apiVersion: v1
 kind: Service

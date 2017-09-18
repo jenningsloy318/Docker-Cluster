@@ -1,0 +1,32 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  namespace: redis-exporter
+  name: redis-exporter
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: redis-exporter
+      annotations:
+        prometheus.io/port: '9121'
+        prometheus.io/scrape: 'true'
+        prometheus.io/scheme: 'http'
+        prometheus.io/path: '/metrics'         
+    spec:
+      containers:
+      - name: redis-exporter
+        image: registry.gcsc.sap.corp/redis/redis_exporter
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http 
+          containerPort: 9121
+          protocol: TCP
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP    
+        - name: REDIS_ADDR
+          value: redis://$(IP1):6379,redis://$(IP2):6379,

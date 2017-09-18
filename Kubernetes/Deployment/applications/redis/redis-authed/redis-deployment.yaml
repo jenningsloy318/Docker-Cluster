@@ -48,14 +48,6 @@ spec:
           name: data
         - mountPath: /redis-master/
           name: redis-config
-      - name: redis-exporter
-        image: registry.gcsc.sap.corp/redis/redis_exporter
-        imagePullPolicy: IfNotPresent 
-        ports:
-        - name: http 
-          containerPort: 9121
-          protocol: TCP
-
       volumes:
         - name: data
           persistentVolumeClaim:

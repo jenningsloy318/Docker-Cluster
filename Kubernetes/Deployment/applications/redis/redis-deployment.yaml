@@ -55,22 +55,7 @@ spec:
           value: instance1:$(POD_IP):6379
         ports:
         - name: redis-commander
-          containerPort: 8081
-      - name: redis-exporter
-        image: registry.gcsc.sap.corp/redis/redis_exporter
-        imagePullPolicy: IfNotPresent
-        ports:
-        - name: http 
-          containerPort: 9121
-          protocol: TCP
-        env:
-        - name: POD_IP
-          valueFrom:
-            fieldRef:
-              fieldPath: status.podIP    
-        - name: REDIS_ADDR
-          value: redis://$(POD_IP):6379
-          
+          containerPort: 8081          
       volumes:
         - name: data
           persistentVolumeClaim:

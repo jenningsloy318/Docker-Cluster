@@ -23,7 +23,7 @@ spec:
         imagePullPolicy: IfNotPresent
         args:
         - -mongodb.uri
-        - "mongodb://monitor:monitor@${POD_IP}:27017"
+        - "mongodb://monitor:monitor@${IP1}:27017,mongodb://monitor:monitor@${IP2}:27017"
         - -web.listen-address
         - ":9001"
         - -v

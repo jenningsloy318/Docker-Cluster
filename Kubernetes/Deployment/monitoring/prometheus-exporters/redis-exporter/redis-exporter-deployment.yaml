@@ -29,4 +29,4 @@ spec:
             fieldRef:
               fieldPath: status.podIP    
         - name: REDIS_ADDR
-          value: redis://$(IP1):6379,redis://$(IP2):6379,
+          value: redis://$(IP1):6379,redis://$(IP2g):6379

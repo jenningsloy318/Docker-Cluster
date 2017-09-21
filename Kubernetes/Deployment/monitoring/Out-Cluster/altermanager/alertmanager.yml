@@ -46,4 +46,4 @@ receivers:
 - name: 'default-slack-receiver'
   slack_configs:
   - send_resolved: true
-    channel: monitoring
+    channel: '#monitoring'

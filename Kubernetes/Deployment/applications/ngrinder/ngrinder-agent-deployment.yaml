@@ -1,0 +1,41 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  namespace: ngrinder
+  name: ngrinder-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: ngrinder-agent
+  template:
+    metadata:
+      labels:
+        name: ngrinder-agent
+    spec:
+      containers:
+      - name: ngrinder-agent
+        image: registry.gcsc.sap.corp/ngrinder/ngrinder-agent:3.4
+        imagePullPolicy: IfNotPresent
+        args:
+        - "ngrinder-controller.ngrinder.svc.cluster.local"
+        env:
+        - name: NGRINDER_AGENT_HOME
+          value: /opt/ngrinder-agent
+
+        resources:
+          limits:
+            cpu: 4
+            memory: 8Gi
+        volumeMounts:
+        - name: ngrinder-agent-data
+          mountPath: /opt/ngrinder-agent
+        - name: localtime
+          mountPath: /etc/localtime          
+      volumes:
+        - name: ngrinder-agent-data
+          persistentVolumeClaim:
+            claimName: ngrinder-agent-pvc
+        - name: localtime
+          hostPath:
+            path: /etc/localtime

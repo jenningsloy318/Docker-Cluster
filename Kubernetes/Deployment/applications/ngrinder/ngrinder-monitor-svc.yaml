@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata: 
+  name: ngrinder-monitor
+  namespace: ngrinder
+spec: 
+  type: ClusterIP
+  selector: 
+    name: ngrinder-monitor
+  ports: 
+    - name: web-port
+      port: 13243
+      targetPort: 13243
+      protocol: TCP
+---
+ apiVersion: extensions/v1beta1
+ kind: Ingress
+ metadata:
+   name: ngrinder-monitor
+   namespace: ngrinder
+   annotations:
+     kubernetes.io/ingress.class: nginx
+     #ingress.kubernetes.io/ssl-passthrough: "true"
+ spec:
+   rules:
+   - host: ngrinder-mon.gcsc.sap.corp
+     http:
+       paths:
+       - path: /
+         backend:
+           serviceName: ngrinder-monitor
+           servicePort: 13243

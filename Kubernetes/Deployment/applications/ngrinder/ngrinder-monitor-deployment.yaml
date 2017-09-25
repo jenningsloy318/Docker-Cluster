@@ -1,0 +1,43 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  namespace: ngrinder
+  name: ngrinder-monitor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: ngrinder-monitor
+  template:
+    metadata:
+      labels:
+        name: ngrinder-monitor
+    spec:
+      containers:
+      - name: ngrinder-monitor
+        image: registry.gcsc.sap.corp/ngrinder/ngrinder-monitor:3.4
+        imagePullPolicy: IfNotPresent
+        args:
+        - "ngrinder-controller.ngrinder.svc.cluster.local"
+        env:
+        - name: NGRINDER_MONITOR_HOME
+          value: /opt/ngrinder-monitor
+        ports: 
+          - name: monitor-port
+            containerPort: 13243
+        resources:
+          limits:
+            cpu: 1
+            memory: 2Gi
+        volumeMounts:
+        - name: ngrinder-monitor-data
+          mountPath: /opt/ngrinder-monitor
+        - name: localtime
+          mountPath: /etc/localtime          
+      volumes:
+        - name: ngrinder-monitor-data
+          persistentVolumeClaim:
+            claimName: ngrinder-monitor-pvc
+        - name: localtime
+          hostPath:
+            path: /etc/localtime

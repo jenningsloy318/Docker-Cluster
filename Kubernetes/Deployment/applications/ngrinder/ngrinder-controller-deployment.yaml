@@ -1,0 +1,52 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  namespace: ngrinder
+  name: ngrinder-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: ngrinder-controller
+  template:
+    metadata:
+      labels:
+        name: ngrinder-controller
+    spec:
+      containers:
+      - name: ngrinder-controller
+        image: registry.gcsc.sap.corp/ngrinder/ngrinder-controller:3.4
+        imagePullPolicy: IfNotPresent 
+        env:
+        - name: NGRINDER_HOME
+          value: /opt/ngrinder-controller
+        ports: 
+          - name: web-port
+            containerPort: 80   
+          - name: controller-port 
+            containerPort: 16001 
+          - containerPort: 12001
+          - containerPort: 12002
+          - containerPort: 12003 
+          - containerPort: 12004 
+          - containerPort: 12005 
+          - containerPort: 12006 
+          - containerPort: 12007 
+          - containerPort: 12008 
+          - containerPort: 12009           
+        resources:
+          limits:
+            cpu: 4
+            memory: 8Gi
+        volumeMounts:
+        - mountPath: /opt/ngrinder-controller
+          name: ngrinder-controller-data
+        - name: localtime
+          mountPath: /etc/localtime          
+      volumes:
+        - name: ngrinder-controller-data
+          persistentVolumeClaim:
+            claimName: ngrinder-controller-pvc
+        - name: localtime
+          hostPath:
+            path: /etc/localtime

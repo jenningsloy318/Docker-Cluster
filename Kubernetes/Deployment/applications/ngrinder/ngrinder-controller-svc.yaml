@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: Service
+metadata: 
+  name: ngrinder-controller
+  namespace: ngrinder
+spec: 
+  type: ClusterIP
+  selector: 
+    name: ngrinder-controller
+  ports: 
+    - name: web-port
+      port: 80
+      targetPort: 80
+      protocol: TCP
+    - name: controller-port
+      port: 16001
+      targetPort: 16001
+      protocol: TCP
+    - name: slave-port0
+      port: 12000
+      targetPort: 12000
+      protocol: TCP      
+    - name: slave-port1
+      port: 12001
+      targetPort: 12001
+      protocol: TCP
+    - name: slave-port2
+      port: 12002
+      targetPort: 12002
+      protocol: TCP
+    - name: slave-port3
+      port: 12003
+      targetPort: 12003
+      protocol: TCP
+    - name: slave-port4
+      port: 12004
+      targetPort: 12004
+      protocol: TCP      
+    - name: slave-port5
+      port: 12005
+      targetPort: 12005
+      protocol: TCP         
+    - name: slave-port6
+      port: 12006
+      targetPort: 12006
+      protocol: TCP  
+    - name: slave-port7
+      port: 12007
+      targetPort: 12007
+      protocol: TCP         
+    - name: slave-port8
+      port: 12008
+      targetPort: 12008
+      protocol: TCP  
+    - name: slave-port9
+      port: 12009
+      targetPort: 12009
+      protocol: TCP                     

@@ -1,0 +1,13 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: ngrinder-agent-pvc
+  namespace: ngrinder
+  annotations:
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: cscdevops-nfs
+  resources:
+    requests:
+      storage: 10Gi 

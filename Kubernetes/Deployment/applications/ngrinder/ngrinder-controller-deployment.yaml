@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: ngrinder-controller
-        image: registry.gcsc.sap.corp/ngrinder/ngrinder-controller:3.4
+        image: registry.gcsc.sap.corp/ngrinder/ngrinder-controller:3.4.1
         imagePullPolicy: IfNotPresent 
         env:
         - name: NGRINDER_HOME
@@ -25,6 +25,7 @@ spec:
             containerPort: 80   
           - name: controller-port 
             containerPort: 16001 
+          - containerPort: 12000
           - containerPort: 12001
           - containerPort: 12002
           - containerPort: 12003 

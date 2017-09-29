@@ -2,10 +2,7 @@
 ```
 kubectl create secret tls foo-secret --key /tmp/tls.key --cert /tmp/tls.crt
 ```
-2. create configmap for nginx tmplate
-```
-kubectl create configmap nginx-tmpl --from-file=nginx.tmpl=nginx.tmpl -n kube-system
-```
+2.  set the  listen port via `--http-port int` and `--https-port int`  in the command line args, details for [ngix controller readme](https://github.com/kubernetes/ingress/blob/master/controllers/nginx/README.md).  
 
 3. vts
 

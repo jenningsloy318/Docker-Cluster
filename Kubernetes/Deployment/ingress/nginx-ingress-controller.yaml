@@ -22,7 +22,7 @@ spec:
       terminationGracePeriodSeconds: 60
       serviceAccountName: nginx-ingress-serviceaccount
       containers:
-      - image: gcr.io/google_containers/nginx-ingress-controller:0.9.0-beta.11
+      - image:  gcr.io/google_containers/nginx-ingress-controller:0.9.0-beta.13
         name: nginx-ingress-controller
         ports:
         - name: http
@@ -69,16 +69,11 @@ spec:
         - --default-backend-service=$(POD_NAMESPACE)/default-http-backend
         - --configmap=$(POD_NAMESPACE)/ingress-customization
         - --tcp-services-configmap=$(POD_NAMESPACE)/tcp-configmap
+        - --http-port=8088
         volumeMounts:
-          - mountPath: /etc/nginx/template
-            name: nginx-template-volume
-            readOnly: true
           - name: localtime
             mountPath: /etc/localtime            
       volumes:
-        - name: nginx-template-volume
-          configMap:
-            name: nginx-tmpl
         - name: localtime
           hostPath:
             path: /etc/localtime            

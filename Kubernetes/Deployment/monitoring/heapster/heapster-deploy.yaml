@@ -34,7 +34,7 @@ spec:
       serviceAccountName: heapster
       containers:
       - name: heapster
-        image: gcr.io/google_containers/heapster-amd64:v1.4.2
+        image: gcr.io/google_containers/heapster-amd64:v1.5.0-beta.0
         imagePullPolicy: IfNotPresent
         command:
         - /heapster
@@ -49,7 +49,7 @@ spec:
         - name: localtime
           mountPath: /etc/localtime  
       - name: eventer
-        image: gcr.io/google_containers/heapster-amd64:v1.4.2
+        image: gcr.io/google_containers/heapster-amd64:v1.5.0-beta.0
         imagePullPolicy: IfNotPresent
         command:
         - /eventer

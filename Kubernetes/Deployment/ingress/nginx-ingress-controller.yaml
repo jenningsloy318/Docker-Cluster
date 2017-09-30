@@ -70,6 +70,9 @@ spec:
         - --configmap=$(POD_NAMESPACE)/ingress-customization
         - --tcp-services-configmap=$(POD_NAMESPACE)/tcp-configmap
         - --http-port=8088
+        - --update-status=true
+        - --status-port=18080
+        - --election-id=ingress-controller-leader
         volumeMounts:
           - name: localtime
             mountPath: /etc/localtime            

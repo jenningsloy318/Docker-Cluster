@@ -21,11 +21,14 @@ spec:
     spec:
       containers:
       - name: kubernetes-dashboard
-        image: gcr.io/google_containers/kubernetes-dashboard-amd64:v1.6.3
+        image: gcr.io/google_containers/kubernetes-dashboard-amd64:v1.7.0
         ports:
-        - containerPort: 9090
+        - name: http-port 
+          containerPort: 9090
           protocol: TCP
         args:
+        - --authentication-mode=basic
+        - --heapster-host=http://heapster:8082
           # Uncomment the following line to manually specify Kubernetes API server Host
           # If not specified, Dashboard will attempt to auto discover the API server and connect
           # to it. Uncomment only if the default does not work.
@@ -43,12 +46,13 @@ spec:
             memory: "256Mi"
         volumeMounts:
         - name: localtime
-          mountPath: /etc/localtime               
+          mountPath: /etc/localtime     
       volumes:            
       - name: localtime
         hostPath:
-          path: /etc/localtime
+          path: /etc/localtime          
       serviceAccountName: kubernetes-dashboard
+
       # Comment the following tolerations if Dashboard must not be deployed on master
 ---
 kind: Service
@@ -61,7 +65,8 @@ metadata:
   namespace: kube-system
 spec:
   ports:
-  - port: 80
+  - name: http-port 
+    port: 9090
     targetPort: 9090
   selector:
     k8s-app: kubernetes-dashboard

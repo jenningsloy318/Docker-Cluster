@@ -220,7 +220,8 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum (container_memory_working_set_bytes{id=\"/\",kubernetes_io_hostname=~\"^$Node$\"}) / sum (machine_memory_bytes{kubernetes_io_hostname=~\"^$Node$\"}) * 100",
+              "expr": "sum (container_memory_working_set_bytes{id=\"/\",kubernetes_io_hostname=~\"^$Node$\"}) / sum (kube_node_status_allocatable_memory_bytes{node=~\"^$Node$\"}) * 100",
+              "format": "time_series",
               "interval": "10s",
               "intervalFactor": 1,
               "refId": "A",
@@ -301,7 +302,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum (rate (container_cpu_usage_seconds_total{id=\"/\",kubernetes_io_hostname=~\"^$Node$\"}[1m])) / sum (machine_cpu_cores{kubernetes_io_hostname=~\"^$Node$\"}) * 100",
+              "expr": "sum (rate (container_cpu_usage_seconds_total{id=\"/\",kubernetes_io_hostname=~\"^$Node$\"}[1m])) / sum (kube_node_status_allocatable_cpu_cores{node=~\"^$Node$\"}) * 100",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 1,
@@ -382,7 +383,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "100 * sum (node_filesystem_size{mountpoint=\"/var\",kubernetes_io_hostname=~\"^$Node$\"}-node_filesystem_free{mountpoint=\"/var\",kubernetes_io_hostname=~\"^$Node$\"}) / sum (node_filesystem_size{mountpoint=\"/var\",kubernetes_io_hostname=~\"^$Node$\"}) ",
+              "expr": "100 * sum (node_filesystem_size{mountpoint=\"/var\",node=~\"^$Node$\"}-node_filesystem_free{mountpoint=\"/var\",node=~\"^$Node$\"}) / sum (node_filesystem_size{mountpoint=\"/var\",node=~\"^$Node$\"}) ",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 1,
@@ -465,7 +466,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "100 * sum (node_filesystem_size{mountpoint=\"/\",kubernetes_io_hostname=~\"^$Node$\"}-node_filesystem_free{mountpoint=\"/\",kubernetes_io_hostname=~\"^$Node$\"}) / sum (node_filesystem_size{mountpoint=\"/\",kubernetes_io_hostname=~\"^$Node$\"}) ",
+              "expr": "100 * sum (node_filesystem_size{mountpoint=\"/\",node=~\"^$Node$\"}-node_filesystem_free{mountpoint=\"/\",node=~\"^$Node$\"}) / sum (node_filesystem_size{mountpoint=\"/\",node=~\"^$Node$\"}) ",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 1,
@@ -629,7 +630,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum (machine_memory_bytes{kubernetes_io_hostname=~\"^$Node$\"})",
+              "expr": "sum (kube_node_status_allocatable_memory_bytes{node=~\"^$Node$\"})",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 1,
@@ -790,7 +791,8 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum (machine_cpu_cores{kubernetes_io_hostname=~\"^$Node$\"})",
+              "expr": "sum (kube_node_status_allocatable_cpu_cores{node=~\"^$Node$\"})",
+              "format": "time_series",
               "interval": "10s",
               "intervalFactor": 1,
               "refId": "A",
@@ -870,7 +872,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum (node_filesystem_size{mountpoint=\"/var\",kubernetes_io_hostname=~\"^$Node$\"}-node_filesystem_free{mountpoint=\"/var\",kubernetes_io_hostname=~\"^$Node$\"}) ",
+              "expr": "sum (node_filesystem_size{mountpoint=\"/var\",node=~\"^$Node$\"}-node_filesystem_free{mountpoint=\"/var\",node=~\"^$Node$\"}) ",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 1,
@@ -951,7 +953,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum (node_filesystem_size{mountpoint=\"/var\",kubernetes_io_hostname=~\"^$Node$\"}) ",
+              "expr": "sum (node_filesystem_size{mountpoint=\"/var\",node=~\"^$Node$\"}) ",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 1,
@@ -1032,7 +1034,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum (node_filesystem_size{mountpoint=\"/\",kubernetes_io_hostname=~\"^$Node$\"}-node_filesystem_free{mountpoint=\"/\",kubernetes_io_hostname=~\"^$Node$\"}) ",
+              "expr": "sum (node_filesystem_size{mountpoint=\"/\",node=~\"^$Node$\"}-node_filesystem_free{mountpoint=\"/\",node=~\"^$Node$\"}) ",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 1,
@@ -1113,7 +1115,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum (node_filesystem_size{mountpoint=\"/var\",kubernetes_io_hostname=~\"^$Node$\"}) ",
+              "expr": "sum (node_filesystem_size{mountpoint=\"/var\",node=~\"^$Node$\"}) ",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 1,
@@ -1557,7 +1559,7 @@
       "titleSize": "h6"
     },
     {
-      "collapse": true,
+      "collapse": false,
       "height": "250px",
       "panels": [
         {
@@ -2314,5 +2316,5 @@
   },
   "timezone": "browser",
   "title": "Kubernetes cluster monitoring (via Prometheus)",
-  "version": 6
+  "version": 9
 }

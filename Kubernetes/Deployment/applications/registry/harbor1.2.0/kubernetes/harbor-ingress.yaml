@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ name: harbor-ingress
+ annotations:
+  ingress.kubernetes.io/proxy-body-size: 1024m
+spec:
+ tls:
+ - hosts:
+   - registry.gcsc.sap.corp
+   secretName: registry-secret
+ rules:
+   - host: registry.gcsc.sap.corp
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: ui
+             servicePort: 80
+         - path: /v2
+           backend:
+             serviceName: registry
+             servicePort: 5000

@@ -47,3 +47,5 @@ receivers:
   slack_configs:
   - send_resolved: true
     channel: '#monitoring'
+    title: "{{ .Status | toUpper }}: {{ .CommonAnnotations.summary }}\n"
+    text: "{{range .Alerts }}\nDescription: {{ .Annotations.description }}\n{{ range .Labels.SortedPairs }} {{ .Name }}: {{ .Value }}\n{{end}}Metrics: <{{ .GeneratorURL}}| Click here>\n{{ end }}"

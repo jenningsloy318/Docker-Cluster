@@ -24,20 +24,17 @@ spec:
           - "--kvstore"
           - "etcd"
           - "--kvstore-opt"
-          - "etcd.config=http://${ETCD_ADDRESS}"
+          - "etcd.address=http://${etcd addr}:2379"
+          #- "etcd.config=/var/lib/cilium/etcd-config.yml"
           - "-t"
           - "vxlan"
           - "--k8s-api-server=https://kubernetes.default.svc:443"
-          - "/var/lib/kubelet/kubeconfig"
+          - "--k8s-kubeconfig-path=/var/lib/kubernetes/kubelet.kubeconfig"
         lifecycle:
           postStart:
             exec:
               command:
                 - "/cni-install.sh"
-          preStop:
-            exec:
-              command:
-                - "/cni-uninstall.sh"
         env:
           - name: "K8S_NODE_NAME"
             valueFrom:
@@ -67,11 +64,8 @@ spec:
             mountPath: /host/opt/cni/bin
           - name: etc-cni-netd
             mountPath: /host/etc/cni/net.d
-          - name: docker-socket
-            mountPath: /var/run/docker.sock
-            readOnly: true
           - name: kubeconfig-path
-            mountPath: /var/lib/kubelet/kubeconfig
+            mountPath: /var/lib/kubernetes/kubelet.kubeconfig
             readOnly: true
           - name: kubeconfig-cert
             mountPath: /var/lib/kubernetes/ca.pem
@@ -92,15 +86,12 @@ spec:
         - name: bpf-maps
           hostPath:
             path: /sys/fs/bpf
-        - name: docker-socket
-          hostPath:
-            path: /var/run/docker.sock
         - name: etc-cni-netd
           hostPath:
               path: /etc/cni/net.d
         - name: kubeconfig-path
           hostPath:
-              path: /var/lib/kubelet/kubeconfig
+              path: /var/lib/kubernetes/kubelet.kubeconfig
         - name: kubeconfig-cert
           hostPath:
               path: /var/lib/kubernetes/ca.pem

@@ -11,6 +11,8 @@
   JoinControllers=cpu,cpuacct,cpuset,net_cls,net_prio,hugetlb,memory
   ```
     This will resove the error `failed to run Kubelet: invalid configuration: cgroup-root "/container.slice/" doesn't exist:`, when specified `--cgroup-root=/container.slice/` in kubelet.service.
+
+  4. check for the kernel, for ubuntu 16.04.3, install latest kernel `apt install  linux-image-generic-hwe-16.04 linux-headers-generic-hwe-16.04 -y` 
 # Deployment #
 1. create cgroup slices
     

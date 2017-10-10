@@ -16,7 +16,9 @@ spec:
       containers:
       - name: ngrinder-controller
         image: registry.gcsc.sap.corp/ngrinder/ngrinder-controller:3.4.1
-        imagePullPolicy: IfNotPresent 
+        imagePullPolicy: IfNotPresent
+        args:
+
         env:
         - name: NGRINDER_HOME
           value: /opt/ngrinder-controller
@@ -40,10 +42,13 @@ spec:
             cpu: 4
             memory: 8Gi
         volumeMounts:
-        - mountPath: /opt/ngrinder-controller
-          name: ngrinder-controller-data
+        - name: ngrinder-controller-data
+          mountPath: /opt/ngrinder-controller          
         - name: localtime
-          mountPath: /etc/localtime          
+          mountPath: /etc/localtime  
+#       - name: db-conf
+#          mountPath: /opt/ngrinder-controller/database.conf
+#          subPath: database.conf                 
       volumes:
         - name: ngrinder-controller-data
           persistentVolumeClaim:
@@ -51,3 +56,9 @@ spec:
         - name: localtime
           hostPath:
             path: /etc/localtime
+#        - name: db-conf
+#          configMap:
+#            name: ngrinder-db-conf   
+#            items:
+#            - key: database.conf
+#              path: database.conf 

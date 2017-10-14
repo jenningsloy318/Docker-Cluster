@@ -18,7 +18,7 @@ spec:
       serviceAccountName: fluentbit
       containers:
       - name: fluent-bit
-        image: registry.gcsc.sap.corp/monitor/fluent-bit:v0.12.2
+        image: fluent/fluent-bit:0.12.6
         command: ["/fluent-bit/bin/fluent-bit", "-c", "/fluent-bit/etc/fluent-bit.conf"]
         env:
         resources:

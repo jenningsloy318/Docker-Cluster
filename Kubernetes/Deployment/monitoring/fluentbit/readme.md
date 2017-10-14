@@ -21,13 +21,9 @@ kubectl create configmap fluentbit-conf --from-file=fluent-bit.conf  --from-file
 
 4. set corect RBAC for service account fluentbit
 
-5. create database in influxdb 
+5. create database k8slog    with RETENTION POLICY docker in influxdb
 
    ```
-   create database k8slog
+   CREATE DATABASE k8slog WITH DURATION 30d REPLICATION 1 NAME docker
    ```
-6. create RETENTION POLICY
-   
-   ```
-   CREATE RETENTION POLICY "docker" ON "k8slog" DURATION 30d REPLICATION 1 DEFAULT
-   ```
+

@@ -25,6 +25,14 @@ spec:
       --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname --anonymous-auth=false
       --secure-port=6443   --v=5
       --allow-privileged=true 
+      --requestheader-client-ca-file=/srv/kubernetes/ca.pem
+      --requestheader-allowed-names=system:kube-controller-manager,system:kube-proxy,system:kube-scheduler,system:node:cnpvgl56588417,system:node:cnpvgl56588418
+      --requestheader-extra-headers-prefix=X-Remote-Extra-
+      --requestheader-group-headers=X-Remote-Group
+      --requestheader-username-headers=X-Remote-User
+      --proxy-client-cert-file=/srv/kubernetes/kubelet-cnpvgl56588417.pem
+      --proxy-client-key-file=/srv/kubernetes/kubelet-key.pem
+
     ports:
     - containerPort: 6443
       hostPort: 6443

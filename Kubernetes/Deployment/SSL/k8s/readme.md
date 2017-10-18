@@ -46,12 +46,15 @@ openssl genrsa -out cluster-admin-key.pem 4096
 2. create sign request 
 
 ```
-openssl req -new -key cluster-admin-key.pem -out cluster-admin.csr -subj "/O=system:masters" 
+openssl req -new -key cluster-admin-key.pem -out cluster-admin.csr -subj "/O=system:masters"
 ```
+
+3. create openssl-client.conf
+ echo -e  "[client_server_ssl]\nextendedKeyUsage = serverAuth,clientAuth" > openssl-client.conf
 3 sign cluster-admin.pem
 
 ```
-openssl x509 -req -in cluster-admin.csr -CA ../CA/ca.pem -CAkey ../CA/ca-key.pem -CAcreateserial -out cluster-admin.pem -days 3650 
+openssl x509 -req -in cluster-admin.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out cluster-admin.pem -days 3650   -extfile   openssl-client.conf   -extensions client_server_ssl 
 ```
 
 ## create system:kube-scheduler  certificates 

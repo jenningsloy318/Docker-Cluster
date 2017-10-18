@@ -34,5 +34,5 @@ openssl req -in registry.csr  -text -noout
 
 4. create secret
 ```
- kubectl create secret tls registry-secret --key registry-key2.pem --cert registry-cert.pem -n registry
+ kubectl create secret tls registry-secret --key registry-key.pem --cert registry-cert.pem -n registry
  ```

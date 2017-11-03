@@ -31,7 +31,10 @@ spec:
             hostPort: 30115
           - name: usdemo1-port
             containerPort: 30215
-            hostPort: 30215            
+            hostPort: 30215       
+          - name: perf-port
+            containerPort: 30016
+            hostPort: 30016       
         resources:
           requests:
             cpu: 200m

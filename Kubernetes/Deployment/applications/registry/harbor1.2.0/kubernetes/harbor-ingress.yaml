@@ -3,7 +3,10 @@ kind: Ingress
 metadata:
  name: harbor-ingress
  annotations:
-  ingress.kubernetes.io/proxy-body-size: 1024m
+  ingress.kubernetes.io/proxy-body-size: 20480m
+  ingress.kubernetes.io/affinity: "cookie"
+  ingress.kubernetes.io/session-cookie-name: "harbor"
+  ingress.kubernetes.io/session-cookie-hash: "sha"
 spec:
  tls:
  - hosts:

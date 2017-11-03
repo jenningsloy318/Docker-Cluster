@@ -2,7 +2,7 @@
 ```
 kubectl create secret tls foo-secret --key /tmp/tls.key --cert /tmp/tls.crt
 ```
-2.  set the  listen port via `--http-port int` and `--https-port int`  in the command line args, details for [ngix controller readme](https://github.com/kubernetes/ingress/blob/master/controllers/nginx/README.md).  
+2.  set the  listen port via `--http-port int` and `--https-port int`  in the command line args, details for [cli-arguments](https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/cli-arguments.md).  
 
 3. vts
 
@@ -10,11 +10,12 @@ vts port is 18080, the ingress nginx controller use https://github.com/vozlt/ngi
 
 4. enable TCP loadbalancing by creating [tcp configmap](./tcp-configmap.yaml) and pass the parameter `--tcp-services-configmap=$(POD_NAMESPACE)/tcp-configmap` to ingress controller. official [example](https://github.com/kubernetes/ingress/tree/master/examples/tcp/nginx).
 
+5. create [rbac](https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/rbac.yaml)
 Note:
 
-1. more conf https://github.com/kubernetes/ingress/blob/master/controllers/nginx/configuration.md
+1. more conf https://github.com/kubernetes/ingress-nginx/tree/master/docs
 
-2. Annotations
+2. [Annotations](https://github.com/kubernetes/ingress-nginx/blob/master/docs/annotations.md)
 
 
 |Name |	type|

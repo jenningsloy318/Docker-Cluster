@@ -132,6 +132,12 @@
 
       - add TLS cert after creating SSL keys.
 
+      - enable docker engine metrics
+         ```
+        "metrics-addr" : "0.0.0.0:9323",
+        "experimental" : true
+         ```
+
 3. journald configuration, which is located in `/etc/systemd/journald.conf`.
     ```
     [Journal]

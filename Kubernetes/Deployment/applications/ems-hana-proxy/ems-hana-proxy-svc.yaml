@@ -26,7 +26,7 @@ spec:
       targetPort: 30215
       protocol: TCP      
     - name: perf-port
-      port: 30016
-      nodePort: 30016
-      targetPort: 30016
+      port: 30315
+      nodePort: 30315
+      targetPort: 30315
       protocol: TCP             

@@ -13,8 +13,14 @@
     ```
     2.3 save the cert to dashboard-cert.pem
 
-    2.4 create configmap 
+    2.4 create secret for dashboard deployment
+
     ```
-    kubectl create secret tls dashboard-secret --key dashboard-key.pem --cert dashboard-cert.pem -n kube-system
+    kubectl create secret generic kubernetes-dashboard-certs --from-file=certs/ -n kube-system
     ```
-    
+
+    2.4 create secret for ingress
+    ```
+    kubectl create secret tls dashboard-ingress-secret --key certs/dashboard.key --cert certs/dashboard.crt -n kube-system
+    ```
+3. for deployment, refer to https://github.com/kubernetes/dashboard/wiki/Installation

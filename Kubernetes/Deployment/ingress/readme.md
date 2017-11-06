@@ -54,7 +54,7 @@ Note:
   The annotation ingress.kubernetes.io/ssl-passthrough allows to configure TLS termination in the pod and not in NGINX. This is possible thanks to the ngx_stream_ssl_preread_module that enables the extraction of the server name information requested through SNI from the ClientHello message at the preread phase.
 
   Important: using the annotation ingress.kubernetes.io/ssl-passthrough invalidates all the other available annotations. This is because SSL Passthrough works in L4 (TCP).
-
+- [opentracing](https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/opentracing.md) is added to nginx controller
 
 
 

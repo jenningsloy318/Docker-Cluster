@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jnc-mysql-config
+  namespace: jnc
+data:
+  MYSQL_ROOT_PASSWORD: "myPassword"

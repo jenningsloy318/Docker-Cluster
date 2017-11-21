@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jnc-rocketmq-configmap
+  namespace: jnc
+data:
+  broker.conf: |-
+    brokerClusterName = DefaultCluster
+    brokerName = broker-a
+    #brokerIp1 = 10.58.137.244
+    namesrvAddr = localhost:9876
+    listenPort=10911
+    brokerId = 0
+    deleteWhen = 04
+    fileReservedTime = 48
+    brokerRole = ASYNC_MASTER
+    flushDiskType = ASYNC_FLUSH

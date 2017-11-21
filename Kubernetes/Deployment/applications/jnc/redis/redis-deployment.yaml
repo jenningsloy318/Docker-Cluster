@@ -2,16 +2,16 @@ apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   namespace: jnc
-  name: redis
+  name: jnc-redis
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: redis
+      name: jnc-redis
   template:
     metadata:
       labels:
-        name: redis
+        name: jnc-redis
       annotations:
         prometheus.io/port: '9121'
         prometheus.io/scrape: 'true'
@@ -20,17 +20,14 @@ spec:
     spec:
       containers:
       - name: jnc-redis
-        image: registry.gcsc.sap.corp/redis/redis:v1
+        image: redis:4.0.2
         imagePullPolicy: IfNotPresent
-        env:
-        - name: MASTER
-          value: "true"
         ports:
         - containerPort: 6379
         resources:
           limits:
-            cpu: "0.5"
-            memory: 2048Mi
+            cpu: "1"
+            memory: 4096Mi
         livenessProbe:
           tcpSocket:
             port: 6379
@@ -43,15 +40,17 @@ spec:
               - /bin/bash
               - -c  
               - /usr/local/bin/redis-cli shutdown
+        command: ["/usr/local/bin/redis-server"]
+        args: ["/usr/local/etc/redis.conf"]
         volumeMounts:
-        - mountPath: /redis-master-data
-          name: data
-        - mountPath: /redis-master/
+        - mountPath: /data
+          name: redis-data
+        - mountPath: /usr/local/etc
           name: redis-config
       volumes:
-        - name: data
+        - name: redis-data
           persistentVolumeClaim:
-            claimName: pvc-jnc-redis
+            claimName: jnc-redis-pvc
         - name: redis-config
           configMap:
-            name: redis-jnc-configmap 
+            name: jnc-redis-configmap 

@@ -1,0 +1,65 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  namespace: jnc
+  name: jnc-rocketmq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: jnc-rocketmq
+  template:
+    metadata:
+      labels:
+        name: jnc-rocketmq
+      annotations:
+        prometheus.io/port: '9121'
+        prometheus.io/scrape: 'true'
+        prometheus.io/scheme: 'http'
+        prometheus.io/path: '/metrics'         
+    spec:
+      #hostNetwork: true
+      containers:
+      - name: jnc-rocketmq-namesrv
+        image: registry.gcsc.sap.corp/jnc/apache-rocketmq-namesrv:4.0.0 
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: JAVA_OPT
+          value: " -Duser.home=/opt -server -Xms2g -Xmx2g -Xmn1g -XX:PermSize=128m -XX:MaxPermSize=320m"
+        ports:
+        - containerPort: 9876
+        #command: ["sh","/opt/rocketmq-4.0.0-incubating/bin/mqnamesrv"] 
+        #resources:
+        #  limits:
+        #    cpu: "1"
+        #    memory: 8192Mi
+      
+      - name: jnc-rocketmq-broker
+        image: registry.gcsc.sap.corp/jnc/apache-rocketmq-broker:4.0.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: JAVA_OPT
+          value: " -Duser.home=/opt -server -Xms2g -Xmx2g -Xmn1g" 
+        command: ["sh","/opt/rocketmq-4.0.0-incubating/bin/mqbroker","-c","/opt/rocketmq-4.0.0-incubating/conf/broker.conf"]
+        #resources:
+        #  limits:
+        #    cpu: "1"
+        #    memory: 15360Mi
+        env:
+        - name: NAMESRV_ADDR
+          value: localhost:9876
+        ports:
+        - containerPort: 10909
+        volumeMounts:
+        - mountPath: /opt/store
+          name: rocketmq-data
+        - mountPath: /opt/rocketmq-4.0.0-incubating/conf/broker.conf
+          name: rocketmq-config
+          subPath: broker.conf
+      volumes:
+        - name: rocketmq-data
+          persistentVolumeClaim:
+            claimName: jnc-rocketmq-pvc
+        - name: rocketmq-config
+          configMap:
+            name: jnc-rocketmq-configmap 

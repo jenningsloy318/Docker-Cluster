@@ -1,0 +1,20 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: jnc
+  name: jnc-rocketmq-svc
+spec:
+  type: NodePort
+  ports:
+    - port: 9876
+      name: jnc-rocketmq-namesrv
+      targetPort: 9876
+      nodePort: 30876
+    - port: 10909
+      name: jnc-rocketmq-broker
+      targetPort: 10909
+      nodePort: 30909
+  selector:
+    name: jnc-rocketmq
+

@@ -44,7 +44,7 @@ data:
 
 
     [program:hana-perf-proxy]
-    command=/usr/bin/chisel client --auth EMS:Welcome1 https://chisel-perf.cfapps.sap.hana.ondemand.com 30315:10.253.67.138:30041
+    command=/usr/bin/chisel client --auth EMS:Welcome1 https://chisel-perf.cfapps.sap.hana.ondemand.com 30315:10.253.87.66:30041 
     redirect_stderr=true
     redirect_stdout=true
     environment=HTTPS_PROXY=http://proxy.wdf.sap.corp:8080,https_proxy=http://proxy.wdf.sap.corp:8080,HTTP_PROXY=http://proxy.wdf.sap.corp:8080,http_proxy=http://proxy.wdf.sap.corp:8080,all_proxy=http://proxy.wdf.sap.corp:8080

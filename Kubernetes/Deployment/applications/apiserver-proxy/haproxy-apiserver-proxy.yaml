@@ -15,8 +15,9 @@ spec:
       hostNetwork: true
       terminationGracePeriodSeconds: 60
       containers:
-      - image:  haproxy:1.7
+      - image:  haproxy
         name: haproxy-apiserver-proxy
+        command: ["haproxy","-f","/usr/local/etc/haproxy/haproxy.cfg"]
         resources:
           limits:
             memory: "1024Mi"

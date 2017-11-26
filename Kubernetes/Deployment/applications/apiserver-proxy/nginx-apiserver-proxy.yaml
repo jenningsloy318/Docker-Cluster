@@ -1,0 +1,48 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: nginx-apiserver-proxy
+  labels:
+    app: nginx-apiserver-proxy
+  namespace: kube-system
+spec:
+  template:
+    metadata:
+      labels:
+        app: nginx-apiserver-proxy
+      annotations:
+    spec:
+      hostNetwork: true
+      terminationGracePeriodSeconds: 60
+      containers:
+      - image:  nginx:stable
+        name: nginx-apiserver-proxy
+        resources:
+          limits:
+            memory: "1024Mi"
+            cpu: 1024m
+        env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+        volumeMounts:
+          - name: localtime
+            mountPath: /etc/localtime
+          - name: nginx-conf
+            mountPath: /etc/nginx.conf
+            subPath: nginx.conf
+      volumes:
+        - name: localtime
+          hostPath:
+            path: /etc/localtime
+        - name: nginx-conf
+          configMap:
+            name: nginx-apiserver-proxy-conf
+            items:
+            - key: nginx.conf
+              path: nginx.conf

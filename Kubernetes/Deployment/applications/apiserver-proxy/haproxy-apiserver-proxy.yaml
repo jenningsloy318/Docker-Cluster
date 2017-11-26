@@ -1,22 +1,22 @@
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: nginx-apiserver-proxy
+  name: haproxy-apiserver-proxy
   labels:
-    app: nginx-apiserver-proxy
+    app: haproxy-apiserver-proxy
   namespace: kube-system
 spec:
   template:
     metadata:
       labels:
-        app: nginx-apiserver-proxy
+        app: haproxy-apiserver-proxy
       annotations:
     spec:
       hostNetwork: true
       terminationGracePeriodSeconds: 60
       containers:
-      - image:  nginx:stable
-        name: nginx-apiserver-proxy
+      - image:  haproxy:1.7
+        name: haproxy-apiserver-proxy
         resources:
           limits:
             memory: "1024Mi"
@@ -24,16 +24,16 @@ spec:
         volumeMounts:
           - name: localtime
             mountPath: /etc/localtime
-          - name: nginx-conf
-            mountPath: /etc/nginx.conf
-            subPath: nginx.conf
+          - name: haproxy-conf
+            mountPath: /usr/local/etc/haproxy/haproxy.cfg
+            subPath: haproxy.cfg
       volumes:
         - name: localtime
           hostPath:
             path: /etc/localtime
-        - name: nginx-conf
+        - name: haproxy-conf
           configMap:
-            name: nginx-apiserver-proxy-conf
+            name: haproxy-apiserver-proxy-conf
             items:
-            - key: nginx.conf
-              path: nginx.conf
+            - key: haproxy.cfg
+              path: haproxy.cfg

@@ -11,7 +11,8 @@
     "tlscert": "/etc/docker/ssl/docker.pem",
     "tlskey": "/etc/docker/ssl/docker-key.pem",
     "metrics-addr" : "0.0.0.0:9323",
-    "experimental" : true
+    "experimental" : true,
+    "insecure-registries" : ["myregistrydomain.com:5000"]
   
 
 }

@@ -1,5 +1,5 @@
 kind: StorageClass
-apiVersion: storage.k8s.io/v1beta1
+apiVersion: storage.k8s.io/v1
 metadata:
   name: cscdevops-nfs
   annotations :
@@ -7,4 +7,12 @@ metadata:
 provisioner: cscdevops-nfs
 allowVolumeExpansion: true
 parameters: 
-mountOptions: "hard,intr,bg,noatime,timeo=5,retrans=5,actimeo=10,retry=5"
+mountOptions: 
+  - hard
+  - intr
+  - bg
+  - noatime
+  - timeo=5
+  - retrans=5
+  - actimeo=10
+  - retry=5

@@ -15,7 +15,7 @@ metadata:
   namespace: kube-system
 ---
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: calico-policy-controller
   namespace: kube-system
@@ -32,7 +32,7 @@ rules:
       - list
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: calico-policy-controller
 roleRef:
@@ -45,7 +45,7 @@ subjects:
   namespace: kube-system
 ---
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: calico-node
   namespace: kube-system
@@ -57,7 +57,7 @@ rules:
     verbs:
       - get
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: calico-node

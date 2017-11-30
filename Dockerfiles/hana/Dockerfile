@@ -6,7 +6,7 @@ ARG HTTPS_PROXY=http://proxy.wdf.sap.corp:8080
 ARG HTTP_PROXY=http://proxy.wdf.sap.corp:8080
 ARG NO_PROXY=localhost,sap.corp,mo.sap.corp,cc.mo.sap.corp,sap.biz,cloud.sap,sap,cc.ondemand.com,moo-repo,moo-repo.wdf.sap.corp,repo,repo.wdf.sap.corp,169.254.169.254,127.0.0.1
 COPY starthana.sh /usr/bin/
-COPY supervisord.conf /etc/
+
 RUN curl -SL $SAPCAR_SOURCE -o /usr/bin/SAPCAR && \
     chmod +x /usr/bin/SAPCAR && \
     mkdir -p /hana/shared /hana/data  /hana/log &&  \ 
@@ -19,7 +19,7 @@ RUN curl -SL $SAPCAR_SOURCE -o /usr/bin/SAPCAR && \
     pip install supervisor ordered-startup-supervisord && \
     chmod +x /usr/bin/starthana.sh && \
     mkdir /var/log/supervisor
-
+COPY supervisord.conf /etc/
 ENV SID ${SID:-SPO}
 ENV INSTANCE_NB ${INSTANCE_NB:-00}
 ENV PASSWORD ${PASSWORD:-Toor1234}

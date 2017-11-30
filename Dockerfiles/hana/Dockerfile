@@ -16,7 +16,7 @@ RUN curl -SL $SAPCAR_SOURCE -o /usr/bin/SAPCAR && \
     rm -f /hana/shared/*.SAR  && \ 
     curl -SLO https://bootstrap.pypa.io/get-pip.py && \ 
     python get-pip.py && \
-    pip install supervisor ordered-startup-supervisord && \
+    pip install supervisor  && \
     chmod +x /usr/bin/starthana.sh && \
     mkdir /var/log/supervisor
 

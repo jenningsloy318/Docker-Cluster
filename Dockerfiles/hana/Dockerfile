@@ -16,7 +16,7 @@ RUN curl -SL $SAPCAR_SOURCE -o /usr/bin/SAPCAR && \
     rm -f /hana/shared/*.SAR  && \ 
     curl -SLO https://bootstrap.pypa.io/get-pip.py && \ 
     python get-pip.py && \
-    pip install supervisor  && \
+    pip install supervisor ordered-startup-supervisord && \
     chmod +x /usr/bin/starthana.sh && \
     mkdir /var/log/supervisor
 
@@ -25,6 +25,3 @@ ENV INSTANCE_NB ${INSTANCE_NB:-00}
 ENV PASSWORD ${PASSWORD:-Toor1234}
 #EXPOSE 3${INSTANCE_NB}15 3${INSTANCE_NB}17 3${INSTANCE_NB}18 3${INSTANCE_NB}26   3${INSTANCE_NB}28  3${INSTANCE_NB}30  3${INSTANCE_NB}31 3${INSTANCE_NB}32 43${INSTANCE_NB} 80${INSTANCE_NB} 5${INSTANCE_NB}13 5${INSTANCE_NB}14 5${INSTANCE_NB}15 5${INSTANCE_NB}16
 ENTRYPOINT ["/usr/bin/supervisord"]
-
-
-

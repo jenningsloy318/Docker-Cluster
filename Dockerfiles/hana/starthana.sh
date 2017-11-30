@@ -1,5 +1,5 @@
 #!/bin/bash
-if [[ -f /hana/data/SID ]] then 
+if [[ -f /hana/data/SID ]]; then 
     su - ${SID}adm
     HDB start
 else

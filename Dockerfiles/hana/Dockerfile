@@ -17,7 +17,8 @@ RUN curl -SL $SAPCAR_SOURCE -o /usr/bin/SAPCAR && \
     curl -SLO https://bootstrap.pypa.io/get-pip.py && \ 
     python get-pip.py && \
     pip install supervisor ordered-startup-supervisord && \
-    chmod +x /usr/bin/starthana.sh
+    chmod +x /usr/bin/starthana.sh && \
+    mkdir /var/log/supervisor  
 
 ENV SID ${SID:-SPO}
 ENV INSTANCE_NB ${INSTANCE_NB:-00}

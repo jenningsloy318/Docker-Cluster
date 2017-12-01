@@ -5,7 +5,7 @@ ARG SAPCAR_SOURCE="http://moo-repo.wdf.sap.corp:8080/static/monsoon/hana/newdb/S
 ARG HTTPS_PROXY=http://proxy.wdf.sap.corp:8080
 ARG HTTP_PROXY=http://proxy.wdf.sap.corp:8080
 ARG NO_PROXY=localhost,sap.corp,mo.sap.corp,cc.mo.sap.corp,sap.biz,cloud.sap,sap,cc.ondemand.com,moo-repo,moo-repo.wdf.sap.corp,repo,repo.wdf.sap.corp,169.254.169.254,127.0.0.1
-COPY starthana.sh /usr/bin/
+COPY starthana.sh stophana.sh  /usr/bin/
 
 RUN curl -SL $SAPCAR_SOURCE -o /usr/bin/SAPCAR && \
     chmod +x /usr/bin/SAPCAR && \
@@ -17,7 +17,7 @@ RUN curl -SL $SAPCAR_SOURCE -o /usr/bin/SAPCAR && \
     curl -SLO https://bootstrap.pypa.io/get-pip.py && \ 
     python get-pip.py && \
     pip install supervisor ordered-startup-supervisord && \
-    chmod +x /usr/bin/starthana.sh && \
+    chmod +x /usr/bin/starthana.sh /usr/bin/stophana.sh && \
     mkdir /var/log/supervisor
 COPY supervisord.conf /etc/
 ENV SID ${SID:-SPO}

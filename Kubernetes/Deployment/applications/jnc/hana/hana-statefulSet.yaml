@@ -24,7 +24,7 @@ spec:
         env:
         - name: SID
           value: 'JNC'
-        - name: SYSTEM_NB
+        - name: INSTANCE_NB
           value: '01'
         ports:
         - name: ssh

@@ -9,7 +9,7 @@ GID=$(cat /usr/sap/${SID}/${SID}.Gid)
 groupadd -g ${gid} sapsys
 groupadd -g ${GID} ${group}
 useradd  -d /usr/sap/${SID}/home -u ${uid} -s /bin/sh  -gsapsys -G ${group}  ${user}
-su - ${user} 
-source /usr/sap/${SID}/.profile
-HDB stop
+su - ${user} -c " \
+source /usr/sap/${SID}/.profile && \
+HDB stop"
 

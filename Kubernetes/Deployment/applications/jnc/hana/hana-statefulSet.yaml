@@ -1,0 +1,60 @@
+apiVersion: apps/v1beta1 
+kind: StatefulSet 
+metadata:
+  namespace: jnc
+  name: jnc-hana
+spec:
+  serviceName: jnc-hana
+  replicas: 1
+  selector:
+    matchLabels:
+      name: jnc-hana
+  template:
+    metadata:
+      labels:
+        name: jnc-hana
+      annotations:
+    spec:
+      hostNetwork: true 
+      terminationGracePeriodSeconds: 10
+      containers:      	
+      - name: jnc-hana
+        image: registry.gcsc.sap.corp/hana/hana-for-s1:v122.08 
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: SID
+          value: 'JNC'
+        - name: SYSTEM_NB
+          value: '01'
+        ports:
+        - name: ssh
+          containerPort: 1022
+        - name: webdispatche1
+          containerPort: 8001
+        - name: webdispatche2
+          containerPort: 4301
+        - name: sapstartsrv1
+          containerPort: 50113
+        - name: sapstartsrv2
+          containerPort: 50114
+        - name: indexsrv
+          containerPort: 30115
+        resources:
+          limits:
+            cpu: "4"
+            memory: "32768Mi"
+        volumeMounts:
+        - mountPath: /hana/data
+          name: hana-data
+          subPath: data
+        - mountPath: /hana/log
+          name: hana-data
+          subPath: log
+        - mountPath: /usr/sap
+          name: hana-data
+          subPath: sap
+      volumes:
+        - name: hana-data
+          persistentVolumeClaim:
+            claimName: jnc-hana-pvc
+

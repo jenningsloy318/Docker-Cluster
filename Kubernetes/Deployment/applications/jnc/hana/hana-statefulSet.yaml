@@ -40,6 +40,11 @@ spec:
           containerPort: 50114
         - name: indexsrv
           containerPort: 30115
+        - name: saphostctrl
+          containerPort: 1128
+        - name: saphostctrls
+          containerPort: 1129
+
         resources:
           limits:
             cpu: "4"

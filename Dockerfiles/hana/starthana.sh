@@ -9,13 +9,15 @@ if [ -f /hana/data/SID ]; then
     groupadd -g ${gid} sapsys
     groupadd -g ${GID} ${group}
     useradd  -d /usr/sap/${SID}/home -u ${uid} -s /bin/sh  -g sapsys -G ${group}  ${user}
+    echo "export SID=${SID}" >>/etc/profile
     su - ${user} 
-    source /usr/sap/${SID}/.profile
+    source /usr/sap/${SID}/home/.profile
     HDB start
 
 else
     /hana/shared/SAP_HANA_DATABASE/hdblcm --batch --action=install --components=all --sid=${SID} --number=${INSTANCE_NB}   -password=${PASSWORD} -sapadm_password=${PASSWORD}  -system_user_password=${PASSWORD}  --sapmnt=/hana/shared --datapath=/hana/data --logpath=/hana/log 
     echo ${SID} >/hana/data/SID
+    echo "export SID=${SID}" >>/etc/profile
     user=$(echo "${SID}adm"|awk '{print tolower($0)}')
     su - ${user}
     id|awk '{print $1}'|awk -F\( '{print $1}'|awk -F\= '{print $2}' >/usr/sap/${SID}/${SID}.uid

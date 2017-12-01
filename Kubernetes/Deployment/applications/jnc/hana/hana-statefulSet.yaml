@@ -21,7 +21,7 @@ spec:
       containers:      	
       - name: jnc-hana122
         image: registry.gcsc.sap.corp/hana/hana-for-s1:v122.08 
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         env:
         - name: SID
           value: 'JNC'
@@ -59,6 +59,12 @@ spec:
         - mountPath: /usr/sap
           name: hana-data
           subPath: sap
+        lifecycle:
+          preStop:
+            exec:
+              command:
+                - /bin/bash 
+                - /usr/bin/stophana.sh
       volumes:
         - name: hana-data
           persistentVolumeClaim:

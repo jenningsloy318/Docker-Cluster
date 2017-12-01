@@ -1,7 +1,7 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: jnc-hana-pvc
+  name: jnc-hana122-pvc
   namespace: jnc
   annotations:
 spec:

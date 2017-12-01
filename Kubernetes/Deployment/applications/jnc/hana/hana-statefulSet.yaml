@@ -2,24 +2,24 @@ apiVersion: apps/v1beta1
 kind: StatefulSet 
 metadata:
   namespace: jnc
-  name: jnc-hana
+  name: jnc-hana122
 spec:
-  serviceName: jnc-hana
+  serviceName: jnc-hana122
   replicas: 1
   selector:
     matchLabels:
-      name: jnc-hana
+      name: jnc-hana122
   template:
     metadata:
       labels:
-        name: jnc-hana
+        name: jnc-hana122
       annotations:
     spec:
       nodeName: mo-9c62b5af5
       hostNetwork: true 
       terminationGracePeriodSeconds: 10
       containers:      	
-      - name: jnc-hana
+      - name: jnc-hana122
         image: registry.gcsc.sap.corp/hana/hana-for-s1:v122.08 
         imagePullPolicy: IfNotPresent
         env:
@@ -57,5 +57,5 @@ spec:
       volumes:
         - name: hana-data
           persistentVolumeClaim:
-            claimName: jnc-hana-pvc
+            claimName: jnc-hana122-pvc
 

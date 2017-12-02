@@ -18,3 +18,6 @@ wget https://storage.googleapis.com/kubernetes-release/network-plugins/cni-0799f
 sudo tar -xvf cni-0799f5732f2a11b329d9e3d51b9c8f2e3759f2ff.tar.gz -C /opt/cni
 rm cni-0799f5732f2a11b329d9e3d51b9c8f2e3759f2ff.tar.gz
 ```
+
+
+3. now we can install it via https://github.com/cilium/cilium/blob/master/examples/kubernetes/cilium.yaml, just change the etcd configuration

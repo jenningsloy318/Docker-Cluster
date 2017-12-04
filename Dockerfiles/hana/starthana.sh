@@ -21,5 +21,5 @@ else
     id -u >/usr/sap/${SID}/${SID}.uid && \
     id -g >/usr/sap/${SID}/${SID}.gid && \
     id -G |awk '{print $2}'>/usr/sap/${SID}/${SID}.Gid && \
-    chown ${SID} /usr/sap/${SID}/${SID}.uid  /usr/sap/${SID}/${SID}.gid  /usr/sap/${SID}/${SID}.Gid"
+    chown ${user} /usr/sap/${SID}/${SID}.uid  /usr/sap/${SID}/${SID}.gid  /usr/sap/${SID}/${SID}.Gid"
  fi

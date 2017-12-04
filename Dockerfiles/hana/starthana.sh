@@ -3,7 +3,7 @@ if [ -f /hana/data/SID ]; then
     SID=$(cat /hana/data/SID)
     user=$(echo "${SID}adm"|awk '{print tolower($0)}')
     group=$(echo "${SID}shm"|awk '{print tolower($0)}')
-    uid= $(cat /usr/sap/${SID}/${SID}.uid)
+    uid=$(cat /usr/sap/${SID}/${SID}.uid)
     gid=$(cat /usr/sap/${SID}/${SID}.gid)
     GID=$(cat /usr/sap/${SID}/${SID}.Gid)
     groupadd -g ${gid} sapsys

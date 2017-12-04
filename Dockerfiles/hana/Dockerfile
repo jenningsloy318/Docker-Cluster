@@ -10,15 +10,16 @@ COPY starthana.sh stophana.sh  /usr/bin/
 RUN curl -SL $SAPCAR_SOURCE -o /usr/bin/SAPCAR && \
     chmod +x /usr/bin/SAPCAR && \
     mkdir -p /hana/shared /hana/data  /hana/log &&  \ 
-    curl -SL $HANA_SOURCE -o /hana/shared/SAP_HANA_DATABASE100_122_08_Linux_on_x86_64.SAR && \
-    cd /hana/shared/ && \
+    curl -SL $HANA_SOURCE -o /mnt/SAP_HANA_DATABASE100_122_08_Linux_on_x86_64.SAR && \
+    cd /mnt/ && \
     SAPCAR -xvf SAP_HANA_DATABASE100_122_08_Linux_on_x86_64.SAR   &&  \
-    rm -f /hana/shared/*.SAR  && \ 
+    rm -f /mnt/*.SAR  && \ 
     curl -SLO https://bootstrap.pypa.io/get-pip.py && \ 
     python get-pip.py && \
     pip install supervisor ordered-startup-supervisord && \
     chmod +x /usr/bin/starthana.sh /usr/bin/stophana.sh && \
-    mkdir /var/log/supervisor
+    mkdir /var/log/supervisor && \
+    rm -f /mnt/get-pip.py
 COPY supervisord.conf /etc/
 ENV SID ${SID:-SPO}
 ENV INSTANCE_NB ${INSTANCE_NB:-00}

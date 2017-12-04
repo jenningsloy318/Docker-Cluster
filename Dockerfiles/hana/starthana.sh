@@ -14,7 +14,7 @@ if [ -f /hana/data/SID ]; then
     su - ${user} -c "  source /usr/sap/${SID}/home/.profile  &&    HDB start "
 
 else
-    /hana/shared/SAP_HANA_DATABASE/hdblcm --batch --action=install --components=all --sid=${SID} --number=${INSTANCE_NB}   -password=${PASSWORD} -sapadm_password=${PASSWORD}  -system_user_password=${PASSWORD}  --sapmnt=/hana/shared --datapath=/hana/data --logpath=/hana/log 
+    /mnt/SAP_HANA_DATABASE/hdblcm --batch --action=install --components=all --sid=${SID} --number=${INSTANCE_NB}   -password=${PASSWORD} -sapadm_password=${PASSWORD}  -system_user_password=${PASSWORD}  --sapmnt=/hana/shared --datapath=/hana/data --logpath=/hana/log 
     echo ${SID} >/hana/data/SID
     echo "export SID=${SID}" >>/etc/profile
     user=$(echo "${SID}adm"|awk '{print tolower($0)}')

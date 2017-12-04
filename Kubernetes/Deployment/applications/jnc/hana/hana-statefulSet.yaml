@@ -56,6 +56,9 @@ spec:
         - mountPath: /hana/log
           name: hana-data
           subPath: log
+        - mountPath: /hana/shared
+          name: hana-data
+          subPath: shared          
         - mountPath: /usr/sap
           name: hana-data
           subPath: sap

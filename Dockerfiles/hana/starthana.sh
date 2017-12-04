@@ -6,6 +6,7 @@ if [ -f /hana/data/SID ]; then
     uid=$(cat /usr/sap/${SID}/${SID}.uid)
     gid=$(cat /usr/sap/${SID}/${SID}.gid)
     GID=$(cat /usr/sap/${SID}/${SID}.Gid)
+
     groupadd -g ${gid} sapsys
     groupadd -g ${GID} ${group}
     useradd  -d /usr/sap/${SID}/home -u ${uid} -s /bin/sh  -g sapsys -G ${group}  ${user}
@@ -20,6 +21,6 @@ else
     su - ${user} -c " \
     id -u >/usr/sap/${SID}/${SID}.uid && \
     id -g >/usr/sap/${SID}/${SID}.gid && \
-    id -G |awk '{print $2}'>/usr/sap/${SID}/${SID}.Gid && \
+    id -G |cut -d ' ' -f 2 >/usr/sap/${SID}/${SID}.Gid && \
     chown ${user} /usr/sap/${SID}/${SID}.uid  /usr/sap/${SID}/${SID}.gid  /usr/sap/${SID}/${SID}.Gid"
  fi

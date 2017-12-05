@@ -16,7 +16,7 @@ spec:
       annotations:
     spec:
       nodeName: mo-9c62b5af5
-      hostNetwork: true 
+      #hostNetwork: true 
       terminationGracePeriodSeconds: 300
       containers:      	
       - name: jnc-hana122

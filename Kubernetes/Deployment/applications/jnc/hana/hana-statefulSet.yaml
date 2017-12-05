@@ -17,7 +17,7 @@ spec:
     spec:
       nodeName: mo-9c62b5af5
       hostNetwork: true 
-      terminationGracePeriodSeconds: 10
+      terminationGracePeriodSeconds: 300
       containers:      	
       - name: jnc-hana122
         image: registry.gcsc.sap.corp/hana/hana-for-s1:v122.08 

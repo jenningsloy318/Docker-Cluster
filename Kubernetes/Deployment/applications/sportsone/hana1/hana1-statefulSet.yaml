@@ -1,0 +1,83 @@
+apiVersion: apps/v1beta1 
+kind: StatefulSet 
+metadata:
+  namespace: sportsone
+  name: sp1-hana122
+spec:
+  serviceName: sp1-hana122
+  replicas: 1
+  selector:
+    matchLabels:
+      name: sp1-hana122
+  template:
+    metadata:
+      labels:
+        name: sp1-hana122
+      annotations:
+    spec:
+      nodeName: mo-0a7b5b084 
+      #hostNetwork: true 
+      terminationGracePeriodSeconds: 300
+      containers:      	
+      - name: sp1-hana122
+        image: registry.gcsc.sap.corp/hana/hana-for-s1:v122.08 
+        imagePullPolicy: Always
+        env:
+        - name: SID
+          value: 'SP1'
+        - name: INSTANCE_NB
+          value: '00'
+        ports:
+        - name: ssh
+          containerPort: 1022
+          hostPort: 1022
+        - name: webdispatche1
+          containerPort: 8000
+          hostPort: 8000
+        - name: webdispatche2
+          containerPort: 4300
+          hostPort: 4300
+        - name: sapstartsrv1
+          containerPort: 50013
+          hostPort: 50013
+        - name: sapstartsrv2
+          containerPort: 50014
+          hostPort: 50014
+        - name: indexsrv
+          containerPort: 30015
+          hostPort: 30015
+        - name: saphostctrl
+          containerPort: 1128
+          hostPort: 1128
+        - name: saphostctrls
+          containerPort: 1129
+          hostPort: 1129
+
+        resources:
+          limits:
+            cpu: "4"
+            memory: "65536Mi"
+        volumeMounts:
+        - mountPath: /hana/data
+          name: hana-data
+          subPath: data
+        - mountPath: /hana/log
+          name: hana-data
+          subPath: log
+        - mountPath: /hana/shared
+          name: hana-data
+          subPath: shared          
+        - mountPath: /usr/sap
+          name: hana-data
+          subPath: sap
+        lifecycle:
+          preStop:
+            exec:
+              command:
+                - /bin/bash 
+                - /usr/bin/stophana.sh
+      volumes:
+        - name: hana-data
+          persistentVolumeClaim:
+            claimName: sp1-hana122-pvc
+

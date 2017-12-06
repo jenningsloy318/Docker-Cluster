@@ -13,7 +13,7 @@ RUN mv /root/.ssh/SAPNetCA_G2.crt /etc/pki/ca-trust/source/anchors && \
     unzip /tools/artifactimporter/com.sap.prd.commonrepo.artifactimporter.dist.cli-0.8.zip -d /tools/artifactimporter && \
     rm /tools/artifactimporter/com.sap.prd.commonrepo.artifactimporter.dist.cli-0.8.zip && \
     yum -y install java-1.7.0-openjdk.x86_64 java-1.7.0-openjdk-devel.x86_64; yum clean all && \
-    echo "root:Toor1234"|chpasswd
+    echo "root:Toor1234"|chpasswd && ssh-keygen -A 
 
 
 ENV PATH /usr/lib/jvm/java/jre/bin:$PATH

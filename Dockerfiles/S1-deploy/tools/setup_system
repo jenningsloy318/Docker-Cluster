@@ -1,0 +1,341 @@
+#!/bin/bash -x
+
+########################################
+#
+####	Environment Variables
+#
+########################################
+
+export USER=${USER:=SYSTEM}
+export HOST=${HOST:=localhost}
+export PORT=${PORT:=8000}
+export IMPORT_OPTION=${IMPORT_OPTION:=ALLOW_DU_VERSION_UPDATE}
+export SKIP_INSTALLATION=${SKIP_INSTALLATION:=false}
+export SKIP_SETUP=${SKIP_SETUP:=false}
+export DEBUG_MODE=${DEBUG_MODE:=false}
+export EXPLICIT_SNAPSHOT=${EXPLICIT_SNAPSHOT:=false}
+export BATCH_MODE=${BATCH_MODE:=false}
+export DAEMON_MODE=${DAEMON_MODE:=false}
+export STOP_JOBS=${STOP_JOBS:=true}
+export SYSTEM_SETTINGS=${SYSTEM_SETTINGS:="{}"}
+export USERS=${USERS:="{users:[]}"}
+export HANA_TEST_TOOLS_VERSION=${HANA_TEST_TOOLS_VERSION:="1.12.1"}
+export ADDITIONAL_DUS=${ADDITIONAL_DUS:=""}
+export TRUST_STORE_NAME=SAPSPORTS
+export CERTIFICATES=/tools/certificates/*
+
+export IS_CLOUD=$(echo $HOST | grep 'hana.ondemand.com')
+if [ -z "$IS_CLOUD" ]; then
+	export IS_CLOUD=$(echo $HOST | grep 'itc.sap.com')
+fi
+
+export IS_SNAPSHOT=$(echo $VERSION | grep 'SNAPSHOT')
+
+if [ $EXPLICIT_SNAPSHOT = true ]; then
+	export IS_SNAPSHOT="SNAPSHOT"
+fi
+
+export XMAKE_GENDIR=/gen
+export COOKIE_PATH=/tools/cookies
+
+if [ $PORT == "443" ]; then
+	export INSTANCE=00
+	export PROTOCOL=https
+else
+	export INSTANCE=${PORT: -2:2}
+	if [ $PORT == $INSTANCE ]; then
+		export INSTANCE=00 #fallback if port has just 2 chars
+	fi
+	export PROTOCOL=http
+fi
+
+if [ -n "$SYSTEM_SETTINGS_PATH" ] && [ -f $SYSTEM_SETTINGS_PATH ]; then
+	export SYSTEM_SETTINGS=$(cat $SYSTEM_SETTINGS_PATH)
+fi
+
+export USER=$(echo $USER | awk '{print toupper($0)}')
+
+if [ -z "$PASSWORD" ] && [ $BATCH_MODE == "false" ]; then
+	echo
+	read -s -p "Enter Password: " PASSWORD
+	echo
+	export PASSWORD
+fi
+
+if [ -z "$PASSWORD" ]; then
+	export PASSWORD=Toor1234
+fi
+
+########################################
+#
+####	System Preparation
+#
+########################################
+
+if [ $HOST == "localhost" ]; then
+	sh /tools/start_hana
+fi
+
+if [ -z "$IS_CLOUD" ]; then
+	/usr/sap/hdbclient/hdbsql -u "${USER}" -p "${PASSWORD}" -n "${HOST}" -i "${INSTANCE}" "call _SYS_REPO.GRANT_ACTIVATED_ROLE ('sap.hana.ide.roles::Developer','${USER}')"
+fi
+
+function login {
+	#returns "unsafe" token
+	token_string=$(curl -s -D - -H "x-csrf-token: Fetch" "${PROTOCOL}://${HOST}:${PORT}/sap/hana/xs/formLogin/token.xsjs" | grep "x-csrf-token")
+	TOKEN=${token_string: 14:-1}
+	
+	#do form based login
+	curl -X POST -s -c $COOKIE_PATH -H "x-csrf-token: $TOKEN" --data "xs-username=$USER&xs-password=$PASSWORD" "${PROTOCOL}://${HOST}:${PORT}/sap/hana/xs/formLogin/login.xscfunc"
+	
+	#get real csrf-token
+	token_string=$(curl -u $USER:$PASSWORD -b $COOKIE_PATH -s -D - -H "x-csrf-token: Fetch" "${PROTOCOL}://${HOST}:${PORT}/sap/hana/xs/formLogin/token.xsjs" | grep "x-csrf-token")
+	export TOKEN=${token_string: 14:-1}
+	echo
+	echo "x-csrf-token: $TOKEN"
+	echo
+}
+
+login
+
+# admin authorization for user
+echo "Admin authorization for ${USER} user"
+sh /tools/execute_sql "call _SYS_REPO.GRANT_ACTIVATED_ROLE ('sap.hana.xs.lm.roles::Administrator','${USER}')" "CALL"
+echo
+
+########################################
+#
+####	Debug Mode
+#
+########################################
+
+if [ "$DEBUG_MODE" == "true" ]; then
+	echo
+	echo "Setup Debug Mode..."
+	echo
+	sh /tools/setup_debug_mode
+fi
+
+########################################
+#
+####	Preparation Steps
+#
+########################################
+
+if [ "$STOP_JOBS" == "true" ] && [ $SKIP_INSTALLATION != "true" ]; then
+	echo
+	echo "Stop running Jobs..."
+	echo
+	sh /tools/stop_jobs
+fi
+
+########################################
+#
+####	Product Installation
+#
+########################################
+
+if [ -n "$IS_SNAPSHOT" ]; then
+	REPO="https://nexus.wdf.sap.corp:8443/nexus/content/repositories/deploy.snapshots/"
+else
+	REPO="https://nexus.wdf.sap.corp:8443/nexus/content/repositories/deploy.milestones.xmake/"
+fi
+if [ -n "$VERSION" ] && [ $SKIP_INSTALLATION != "true" ]; then
+	echo
+	echo "Installing product..."
+	echo
+	export HDBALM_HOST=$HOST
+	export HDBALM_PORT=$PORT
+	export HDBALM_USER=$USER
+	export HDBALM_PASSWD=$PASSWORD
+	sh /tools/install_product "com.sap.sports:SAP_SPORTS_ONE_OD:zip:${VERSION}" "${REPO}"
+	install_result=$?
+
+	if [ ! ${install_result} -eq 0 ]; then
+		if [ $DAEMON_MODE == "true" ]; then
+			echo
+			echo "    The product could not be installed."
+			echo
+		else
+			echo
+			echo "    Stop system setup because installation was not successful."
+			echo
+			exit ${install_result}
+		fi
+	fi
+fi
+
+########################################
+#
+####	Install Additional DUs
+#
+########################################
+
+if [ -n "$ADDITIONAL_DUS" ]; then
+	login
+
+	echo
+	echo "Installing additional DUs..."
+	echo
+	export HDBALM_HOST=$HOST
+	export HDBALM_PORT=$PORT
+	export HDBALM_USER=$USER
+	export HDBALM_PASSWD=$PASSWORD
+
+	sh /tools/install_du "$ADDITIONAL_DUS" "${REPO}" "true"
+	install_du_result=$?
+
+	if [ ! ${install_du_result} -eq 0 ]; then
+		if [ $DAEMON_MODE == "true" ]; then
+			echo
+			echo "    The additional DUs could not be installed."
+			echo
+		else
+			echo
+			echo "    Stop system setup because installation of additional DUs was not successful."
+			echo
+			exit ${install_result}
+		fi
+	fi
+fi
+
+########################################
+#
+####	Post Installation Actions
+#
+########################################
+
+echo
+echo "Create Trust Store: $TRUST_STORE_NAME"
+echo
+
+login
+
+echo "    Trust Store authorization for ${USER} user"
+sh /tools/execute_sql "call _SYS_REPO.GRANT_ACTIVATED_ROLE ('sap.hana.xs.admin.roles::TrustStoreAdministrator','${USER}')" "CALL"
+
+echo "    Create new Trust Store"
+curl -X PUT -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "x-csrf-token: $TOKEN" "${PROTOCOL}://${HOST}:${PORT}/sap/hana/xs/admin/server/trustManager/store.xscfunc?action=createAnonymous&name=$TRUST_STORE_NAME"
+
+echo "    Delete existing certificates from Trust Store"
+store=$(curl -X GET -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "x-csrf-token: $TOKEN" "${PROTOCOL}://${HOST}:${PORT}/sap/hana/xs/admin/server/trustManager/cert.xscfunc?action=list&store=$TRUST_STORE_NAME")
+certs=$(echo $store | python -c 'import json,sys,codecs;obj=json.load(sys.stdin);print "\n".join([x["serialNo"] for x in obj]);')
+certs_array=($certs)
+for cert in "${certs_array[@]}" ; do
+	echo "    Remove old Certificate from Trust Store: $cert"
+	curl -X DELETE -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "x-csrf-token: $TOKEN" "${PROTOCOL}://${HOST}:${PORT}/sap/hana/xs/admin/server/trustManager/cert.xscfunc?action=delete&store=$TRUST_STORE_NAME&serial=$cert"
+done
+
+for f in $CERTIFICATES
+do
+	echo "    Add Certificates to Trust Store: $f"
+	curl -X POST -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "x-csrf-token: $TOKEN" -H "Content-Type: application/x-x509-ca-cert" --data-binary "@$f" "${PROTOCOL}://${HOST}:${PORT}/sap/hana/xs/admin/server/trustManager/cert.xscfunc?action=import&store=$TRUST_STORE_NAME"
+	echo
+done
+
+########################################
+#
+####	Execute Setup
+#
+########################################
+
+if [ $SKIP_SETUP != "true" ]; then
+	login
+
+	echo
+	echo "Setup authorization for ${USER} user"
+	sh /tools/execute_sql "call _SYS_REPO.GRANT_ACTIVATED_ROLE ('sap.sports.fnd.appsvc.setup.role::Setup','${USER}')" "CALL"
+	
+	echo
+	echo "Call HTTPDest func"
+	echo
+	content="{\"action\":\"change\",\"package\":\"sap.sports.fnd.module.setup.public.lib\",\"name\":\"localhost\",\"basicAuthUser\":\"$USER\",\"basicAuthPassword\":\"$PASSWORD\"}"
+	dest_status=$(curl -X POST -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "x-csrf-token: $TOKEN" -o /dev/null -w "%{http_code}" -d "$content" "${PROTOCOL}://${HOST}:${PORT}/sap/hana/xs/admin/server/httpDestination/httpDestSecStore.xscfunc")
+	echo "Destination Call Response Status: $dest_status"
+	if [ "$dest_status" != '200' ]; then
+		echo
+		echo "    Could not set localhost destination!"
+		echo
+	fi
+
+	echo
+	echo "Setting up the system..."
+	echo
+	setup_response=$(curl -X POST -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "Content-Type: application/json" -H "x-csrf-token: $TOKEN" -d "$SYSTEM_SETTINGS" "${PROTOCOL}://${HOST}:${PORT}/sap/sports/fnd/appsvc/setup/service/setup.xsjs")
+	echo $setup_response | python -mjson.tool
+
+	setup_result=$?
+	setup_success=$(echo $setup_response | grep -Po '"result":.*?[^\\]"')
+	if [ ! ${setup_result} -eq 0 ] || [ "$setup_success" != '"result":"OK"' ]; then
+		if [ ! ${setup_result} -eq 0 ]; then
+			echo "Response: $setup_response"
+		fi
+
+		echo
+		echo "The setup was not successful!"
+		echo
+
+		if [ $DAEMON_MODE != "true" ]; then
+			exit 1
+		fi
+	else
+		echo "The setup was successful!"
+		echo
+	fi
+fi
+
+########################################
+#
+####	Post Setup Actions
+#
+########################################
+
+if [ "$DEBUG_MODE" == "true" ]; then
+	login
+
+	echo
+	echo "Post Installation Debug-Mode steps"
+	echo
+	echo "    Delete Component-preload.js files"
+	echo
+	sh /tools/execute_sql "delete from _SYS_REPO.ACTIVE_OBJECT where OBJECT_NAME = 'Component-preload' and OBJECT_SUFFIX = 'js' and PACKAGE_ID like 'sap.sports%'" "UPDATE"
+	echo
+	echo "    Delete library-preload.json files"
+	echo
+	sh /tools/execute_sql "delete from _SYS_REPO.ACTIVE_OBJECT where OBJECT_NAME = 'library-preload' and OBJECT_SUFFIX = 'json' and PACKAGE_ID like 'sap.sports%'" "UPDATE"
+
+	if [ $HOST == "localhost" ]; then
+		sh /tools/execute_sql "CALL _SYS_REPO.GRANT_ACTIVATED_ROLE ('sap.sports.fnd.db.roles::Admin','${USER}')" "CALL"
+		sh /tools/execute_sql "CALL \"sap.sports.fnd.db.schema.authorization::updateUserPrivileges\" ('${USER}')" "CALL"
+	fi
+
+	echo
+	echo "Trigger initial import..."
+	echo
+	import_response=$(curl -X POST -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "Content-Type: application/json" -H "x-csrf-token: $TOKEN" -d "{}" "${PROTOCOL}://${HOST}:${PORT}/sap/sports/fnd/appsvc/init/services/init/check")
+	echo $import_response | python -mjson.tool
+	echo
+
+	echo
+	echo "Trigger user creation..."
+	echo
+	user_response=$(curl -X POST -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "Content-Type: application/json" -H "x-csrf-token: $TOKEN" -d "$USERS" "${PROTOCOL}://${HOST}:${PORT}/sap/sports/fnd_test/appsvc/dev/service/users.xsjs")
+	echo $user_response | python -mjson.tool
+	echo
+fi
+
+########################################
+#
+####	Daemon Mode
+#
+########################################
+
+echo
+echo
+echo "System setup finished"
+echo
+echo
+
+if [ $DAEMON_MODE == "true" ]; then
+	while true; do sleep 10; done
+fi

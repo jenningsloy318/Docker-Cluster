@@ -1,0 +1,36 @@
+#!/bin/bash
+
+artifactFile=$1
+repo=$2
+
+if [ ! -d "/gen/artifacts" ]; then
+	mkdir -p /gen/artifacts
+fi
+rm -rf /gen/artifacts/*
+
+artifactimporter deploy -C root.default=/gen/artifacts -f /tools/import.ais -D artifactFile=$artifactFile --repo-url $repo
+
+download_result=$?
+if [ ${download_result} -eq 0 ]; then
+	echo
+	echo "Downloading of product artifact finished successfully"
+	echo "MD5: $(cat /gen/artifacts/*.md5)"
+	echo "SHA1: $(cat /gen/artifacts/*.sha1)"
+	echo
+fi
+
+HTTPS=""
+if [ "${HDBALM_PORT}" == "443" ]; then
+    HTTPS="-s"
+fi
+
+IMPORT_OPTION_PARAM=""
+if [ -n "${IMPORT_OPTION}" ]; then
+    IMPORT_OPTION_PARAM="-o ${IMPORT_OPTION}"
+fi
+
+cd /gen/artifacts
+files="$(ls | egrep '^.*\.zip$' | xargs)"
+
+touch "/gen/hdbalm.log"
+/usr/sap/hdbclient/hdbalm --certs=/root/.ssh/hana_ondemand_com.crt ${HTTPS} -y -v install -l "/gen/hdbalm.log" ${IMPORT_OPTION_PARAM} $files

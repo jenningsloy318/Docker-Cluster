@@ -1,0 +1,21 @@
+#!/bin/bash
+
+statement=$1
+type=$2
+
+echo "Execute statement: ${statement}"
+
+# decodeURI statement
+statement=$(python -c "import sys, urllib as ul; \
+    print ul.quote(sys.argv[1], safe='~@#$&()*!+=:;,.?/\'')" "$statement")
+
+statements="{\"statement\":\"${statement}\",\"type\":\"${type}\"}"
+execute_sql=$(cat /tools/execute_sql.json)
+content=$(echo ${execute_sql/\%\%STATEMENTS\%\%/$statements})
+
+# decodeURI content
+content=$(python -c "import sys, urllib as ul; \
+    print ul.quote(sys.argv[1], safe='~@#$&()*!+=:;,.?/\'')" "$content")
+
+curl -X POST -u $USER:$PASSWORD -b $COOKIE_PATH -s -H "Content-Type: application/json" -H "x-csrf-token: $TOKEN" --data "$content" "${PROTOCOL}://${HOST}:${PORT}/sap/hana/ide/common/remote/server/net.xsjs"
+echo

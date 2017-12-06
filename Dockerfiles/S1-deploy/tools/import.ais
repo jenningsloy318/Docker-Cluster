@@ -1,0 +1,10 @@
+imports dslVersion:"1.2",{
+	targetRootDir id:"default",{
+		artifactFile "$artifactFile"
+
+		if (!"$artifactFile".contains("SNAPSHOT")) {
+			artifactFile "$artifactFile".replaceAll(":zip:", ":zip.sha1:").replaceAll(":tgz:", ":tgz.sha1:")
+			artifactFile "$artifactFile".replaceAll(":zip:", ":zip.md5:").replaceAll(":tgz:", ":tgz.md5:")
+		}
+	}
+}

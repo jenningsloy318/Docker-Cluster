@@ -1,0 +1,56 @@
+#!${bin_dir}/bin/sh
+
+# xs catalog authorization for user
+echo "Catalog Developer for ${USER} user"
+sh /tools/execute_sql "call _SYS_REPO.GRANT_ACTIVATED_ROLE ('sap.hana.ide.roles::CatalogDeveloper','${USER}')" "CALL"
+
+# xs security authorization for user
+echo "Security Admin authorization for ${USER} user"
+sh /tools/execute_sql "call _SYS_REPO.GRANT_ACTIVATED_ROLE ('sap.hana.xs.ide.roles::SecurityAdmin','${USER}')" "CALL"
+
+# xs trace viewer authorization for user
+echo "Trace viewer authorization for ${USER} user"
+sh /tools/execute_sql "call _SYS_REPO.GRANT_ACTIVATED_ROLE ('sap.hana.xs.ide.roles::TraceViewer','${USER}')" "CALL"
+
+# xs Editor authorization for user
+echo "Editor authorization for ${USER} user"
+sh /tools/execute_sql "call _SYS_REPO.GRANT_ACTIVATED_ROLE ('sap.hana.xs.ide.roles::EditorDeveloper','${USER}')" "CALL"
+
+# xs Job Admin Authorization for user
+echo "xs Job Admin Authorization for ${USER} user"
+sh /tools/execute_sql "call _SYS_REPO.GRANT_ACTIVATED_ROLE ('sap.hana.xs.admin.roles::JobAdministrator','${USER}')" "CALL"
+sh /tools/execute_sql "call _SYS_REPO.GRANT_ACTIVATED_ROLE ('sap.hana.xs.admin.roles::JobSchedulerAdministrator','${USER}')" "CALL"
+
+# xs Runtime Conf Administrator for user
+echo "xs Runtime Conf Administrator for ${USER} user"
+sh /tools/execute_sql "call _SYS_REPO.GRANT_ACTIVATED_ROLE('sap.hana.xs.admin.roles::RuntimeConfAdministrator', '${USER}')" "CALL"
+
+echo
+echo "Installing Hana Test Tools (${HANA_TEST_TOOLS_VERSION})..."
+echo
+export HDBALM_HOST=$HOST
+export HDBALM_PORT=$PORT
+export HDBALM_USER=$USER
+export HDBALM_PASSWD=$PASSWORD
+sh /tools/install_du "com.sap.hanacontent:HANA_TEST_TOOLS:tgz:${HANA_TEST_TOOLS_VERSION}" "http://nexus.wdf.sap.corp:8081/nexus/content/repositories/deploy.milestones.hana-applications/"
+
+echo
+echo "Enable developer mode on HANA..."
+echo
+sh /tools/execute_sql "ALTER SYSTEM ALTER CONFIGURATION ('xsengine.ini', 'SYSTEM') SET ('httpserver', 'developer_mode') = 'true' WITH RECONFIGURE" "UPDATE"
+sh /tools/execute_sql "ALTER SYSTEM ALTER CONFIGURATION ('xsengine.ini', 'SYSTEM') SET ('debugger', 'enabled') = 'true' WITH RECONFIGURE" "UPDATE"
+
+echo
+echo "Set convenience settings for passwords and session lengths..."
+echo
+sh /tools/execute_sql "ALTER SYSTEM ALTER CONFIGURATION ('indexserver.ini', 'SYSTEM') SET ('password policy', 'force_first_password_change') = 'false' WITH RECONFIGURE" "UPDATE"
+sh /tools/execute_sql "ALTER SYSTEM ALTER CONFIGURATION ('indexserver.ini', 'SYSTEM') SET ('password policy', 'last_used_passwords') = '0' WITH RECONFIGURE" "UPDATE"
+sh /tools/execute_sql "ALTER SYSTEM ALTER CONFIGURATION ('xsengine.ini', 'SYSTEM') SET ('httpserver', 'sessiontimeout') = '3600' WITH RECONFIGURE" "UPDATE"
+
+echo
+echo "Enable basic auth for jXSSync..."
+echo
+content="{\"package\":\"sap.hana.xs.dt\",\"configuration\":\"{\\\"authentication\\\":[{\\\"method\\\":\\\"Basic\\\"}]}\"}"
+status=$(curl -X POST -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "x-csrf-token: $TOKEN" -H "Content-Type: application/x-www-form-urlencoded; charset=UTF-8" -o /dev/null -w "%{http_code}" -d "$content" "${PROTOCOL}://${HOST}:${PORT}/sap/hana/xs/admin/server/runtimeConfig/config.xscfunc")
+echo "Call Response Status: $status"
+echo

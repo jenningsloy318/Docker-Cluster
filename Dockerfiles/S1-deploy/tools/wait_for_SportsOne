@@ -1,0 +1,49 @@
+#!/bin/sh
+
+export USER=${USER:=SYSTEM}
+export PASSWORD=Toor1234
+export HOST=${HOST:=sports-hana.mo.sap.corp}
+export PORT=${PORT:=30827}
+export CHECK="#0"
+export MAXTIME=${MAXTIME:=3600}
+export SLEEPTIME=${SLEEPTIME:=10}
+
+export IS_CLOUD=$(echo $HOST | grep 'hana.ondemand.com')
+if [ -z "$IS_CLOUD" ]; then
+	export IS_CLOUD=$(echo $HOST | grep 'itc.sap.com')
+fi
+
+if [ $PORT == "443" ]; then
+	export INSTANCE=00
+	export PROTOCOL=https
+else
+	export INSTANCE=${PORT: -2:2}
+	if [ $PORT == $INSTANCE ]; then
+		export INSTANCE=00 #fallback if port has just 2 chars
+	fi
+	export PROTOCOL=http
+fi
+
+echo "Waiting till SportsOne is launched..."
+
+num_try=0
+nb_try=`expr $MAXTIME / $SLEEPTIME`
+
+while [ $num_try -lt $nb_try ]
+do
+export SportsOne=`curl -u ${USER:=SYSTEM}:${PASSWORD:=Toor1234} -s  -L -w "%{http_code}" "${PROTOCOL:=http}://${HOST:=sports-hana.mo.sap.corp}:${PORT:=30827}" | grep 'name: "ui.login"' | sed -e s/^[[:space:]]*// | cut -c 1-5`
+if [ "$SportsOne" == "name:" ]; then
+		echo "SportsOne is launched"
+		break
+	else
+		echo $num_try "0   seconds"
+		num_try=`expr $num_try + 1`
+		sleep $SLEEPTIME
+	fi
+	echo "SportsOne is launching..."
+done
+if [ $num_try -ge $nb_try ]; then
+	echo "SportsOne not respond after timeout, stop!"
+	sh /tools/export_hana_logs
+	exit 1
+fi

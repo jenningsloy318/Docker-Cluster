@@ -1,0 +1,12 @@
+#!${bin_dir}/bin/sh
+
+echo "Job Admin authorization for ${USER} user"
+sh /tools/execute_sql "call _SYS_REPO.GRANT_ACTIVATED_ROLE ('sap.hana.xs.admin.roles::JobAdministrator','${USER}')" "CALL"
+echo
+
+echo
+echo "Stop XS Jobs..."
+echo
+sed -e 's/#HttpOnly_//g' "${COOKIE_PATH}" > "${COOKIE_PATH}_python"
+
+python /tools/stop_jobs.py "${PROTOCOL}" "${HOST}" "${PORT}" "${TOKEN}" "${COOKIE_PATH}_python"

@@ -1,0 +1,34 @@
+#!/bin/bash
+
+artifactFiles=$1
+repo=$2
+
+if [ ! -d "/gen/artifacts" ]; then
+	mkdir -p /gen/artifacts
+fi
+rm -rf /gen/artifacts/*
+
+array=($artifactFiles)
+for f in "${array[@]}" ; do
+	artifactimporter deploy -C root.default=/gen/artifacts -f /tools/import.ais -D artifactFile=$f --repo-url $repo 
+done
+
+download_result=$?
+if [ ${download_result} -eq 0 ]; then
+	echo
+	echo "Downloading of DU finished successfully"
+	echo "MD5: $(cat /gen/artifacts/*.md5)"
+	echo "SHA1: $(cat /gen/artifacts/*.sha1)"
+	echo
+fi
+
+HTTPS=""
+if [ "${HDBALM_PORT}" == "443" ]; then
+    HTTPS="-s"
+fi
+
+cd /gen/artifacts
+files="$(ls | egrep '^.*\.tgz$' | xargs)"
+
+touch "/gen/hdbalm.log"
+/usr/sap/hdbclient/hdbalm --certs=/root/.ssh/hana_ondemand_com.crt ${HTTPS} -y -v import -l "/gen/hdbalm.log" $files

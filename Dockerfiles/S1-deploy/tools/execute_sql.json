@@ -1,0 +1,12 @@
+{
+	"absoluteFunctionName":"sap.hana.ide.common.plugin.catalogsystem.server.common.sqlMultiExecute",
+	"inputObject":{
+		"statements":[
+			%%STATEMENTS%%
+		],
+		"maxResultSize":1000,
+		"limitLOBColumnSize":1024,
+		"includePosColumn":true,
+		"measurePerformance":false
+	}
+}

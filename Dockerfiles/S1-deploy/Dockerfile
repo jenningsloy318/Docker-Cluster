@@ -23,4 +23,5 @@ VOLUME /gen
 ADD tools/* /tools/
 ADD certificates /tools/certificates
 
-CMD ["/usr/sbin/sshd"," -D"]
+CMD ["/usr/sbin/sshd", "-D"]
+

@@ -7,7 +7,7 @@ ADD ssh/* /root/.ssh/
 RUN mv /root/.ssh/SAPNetCA_G2.crt /etc/pki/ca-trust/source/anchors && \
     update-ca-trust extract &&  \
     yum -y upgrade nss  && \
-    yum install unzip -y && \
+    yum install unzip openssh-server -y && \
     mkdir -p /tools/artifactimporter && \
     curl "https://nexus.wdf.sap.corp:8443/nexus/service/local/repositories/deploy.milestones/content/com/sap/prd/commonrepo/artifactimporter/com.sap.prd.commonrepo.artifactimporter.dist.cli/0.8/com.sap.prd.commonrepo.artifactimporter.dist.cli-0.8.zip" -o /tools/artifactimporter/com.sap.prd.commonrepo.artifactimporter.dist.cli-0.8.zip && \
     unzip /tools/artifactimporter/com.sap.prd.commonrepo.artifactimporter.dist.cli-0.8.zip -d /tools/artifactimporter && \

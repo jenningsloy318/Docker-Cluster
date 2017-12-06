@@ -12,13 +12,15 @@ RUN mv /root/.ssh/SAPNetCA_G2.crt /etc/pki/ca-trust/source/anchors && \
     unzip /tools/artifactimporter/com.sap.prd.commonrepo.artifactimporter.dist.cli-0.8.zip -d /tools/artifactimporter && \
     rm /tools/artifactimporter/com.sap.prd.commonrepo.artifactimporter.dist.cli-0.8.zip && \
 
-    yum -y install java-1.7.0-openjdk.x86_64 java-1.7.0-openjdk-devel.x86_64; yum clean all
+    yum -y install java-1.7.0-openjdk.x86_64 java-1.7.0-openjdk-devel.x86_64; yum clean all && \
+    echo "root:Toor1234"|chpasswd
+
 
 ENV PATH /usr/lib/jvm/java/jre/bin:$PATH
 ENV JAVA_HOME /usr/lib/jvm/java/jre
 
 VOLUME /gen
-
-CMD /bin/bash /tools/setup_system
 ADD tools/* /tools/
 ADD certificates /tools/certificates
+
+CMD ["/usr/sbin/sshd"," -D"]

@@ -1,0 +1,83 @@
+apiVersion: apps/v1beta1 
+kind: StatefulSet 
+metadata:
+  namespace: jnc
+  name: jnc-hana122
+spec:
+  serviceName: jnc-hana122
+  replicas: 1
+  selector:
+    matchLabels:
+      name: jnc-hana122
+  template:
+    metadata:
+      labels:
+        name: jnc-hana122
+      annotations:
+    spec:
+      nodeName: mo-fb3741189
+      hostNetwork: true 
+      terminationGracePeriodSeconds: 300
+      containers:      	
+      - name: jnc-hana122
+        image: registry.gcsc.sap.corp/hana/hana-for-s1:v122.08 
+        imagePullPolicy: Always
+        env:
+        - name: SID
+          value: 'JNC'
+        - name: INSTANCE_NB
+          value: '00'
+        ports:
+        - name: ssh
+          containerPort: 1022
+        - name: webdispatche1
+          containerPort: 8000
+        - name: webdispatche2
+          containerPort: 4300
+        - name: sapstartsrv1
+          containerPort: 50013
+        - name: sapstartsrv2
+          containerPort: 50014
+        - name: indexsrv
+          containerPort: 30015
+        - name: saphostctrl
+          containerPort: 1128
+        - name: saphostctrls
+          containerPort: 1129
+        - name: javaport1
+          containerPort: 80
+        - name: javaport2
+          containerPort: 8081
+        - name: port3
+          containerPort: 443
+        - name: port4
+          containerPort: 8443
+
+        resources:
+          limits:
+            cpu: "4"
+            memory: "65536Mi"
+        volumeMounts:
+        - mountPath: /hana/data
+          name: hana-data
+          subPath: data
+        - mountPath: /hana/log
+          name: hana-data
+          subPath: log
+        - mountPath: /hana/shared
+          name: hana-data
+          subPath: shared          
+        - mountPath: /usr/sap
+          name: hana-data
+          subPath: sap
+        lifecycle:
+          preStop:
+            exec:
+              command:
+                - /bin/bash 
+                - /usr/bin/stophana.sh
+      volumes:
+        - name: hana-data
+          persistentVolumeClaim:
+            claimName: jnc-hana122-pvc
+

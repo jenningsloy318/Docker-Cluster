@@ -205,44 +205,52 @@
 
 10. when started, we may got some errors show that `system:node:cnpvgl56588417 don't have permission to update node status ...., permission DENY....`. Here we need to update the rolebinding for this account, refer to [kube-node-binding](./RBAC/kube-node-binding.yaml)
 
-11. install network plugin, here I use [calico](./network/calico), here calico use etcd for storage, I prefer share etcd with k8s, so also need to configure the etcd keys in calico conf.
+11. install network plugin, two types of network plugins are taken into consideration. one is  [calico](./network/calico), here calico use etcd for storage, I prefer share etcd with k8s, so also need to configure the etcd keys in calico conf, the iother one is [cilium](./network/cilium).
 
-    11.1 create configmap to storate the etcd TLS certs and ca certs, describe in [calico](./network/calico/readme.md)
+    *if we need to append certs in the secret, just  base64 -w 0 ./ca.pem then add the result to the secret value if neccessary both in calico and cilium*
 
-    11.2 modify [calico.yaml](./network/calico/calico.yaml)
-    - calico-config
-
-    ```
-    etcd_endpoints: "https://10.58.137.243:2379"
-    ```
-
-    and 
-
-    ```
-    etcd_ca: "/calico-secrets/etcd-ca"
-    etcd_cert: "/calico-secrets/etcd-cert"
-    etcd_key: "/calico-secrets/etcd-key"
-    ```
-    - calico-node
-    ```
-     - name: CALICO_IPV4POOL_CIDR
-       value: "192.188.0.0/16"
-
-     and other domain related fileds.
-    ```
+    - Calico
     
+        1. create configmap to storate the etcd TLS certs and ca certs, describe in [calico](./network/calico/readme.md)
 
-    - remove the configmap for creating calico-etcd-secrets, since we created it manually.
+        2. modify [calico.yaml](./network/calico/calico.yaml)
+        - calico-config
 
-    11.3 create role and rolebinding for calico via [calico-rbac.yaml](./network/calico/calico-rbac.yaml)
+        ```
+        etcd_endpoints: "https://10.58.137.243:2379"
+        ```
 
-    11.4 create calico via [calico.yaml](./network/calico/calico.yaml)
+        and 
+
+        ```
+        etcd_ca: "/calico-secrets/etcd-ca"
+        etcd_cert: "/calico-secrets/etcd-cert"
+        etcd_key: "/calico-secrets/etcd-key"
+        ```
+        - calico-node
+        ```
+         - name: CALICO_IPV4POOL_CIDR
+           value: "192.188.0.0/16"
+
+         and other domain related fileds.
+        ```
 
 
-    we will still consider using [cilium](https://github.com/cilium/cilium), it has many advanced features, it will implement kube-proxy function, and use bpf to replace iptables thus has higher performance, but now it lacks some functionality, such as NodePort, ingress,..etcd.
+        - remove the configmap for creating calico-etcd-secrets, since  we created it manually.
+
+        3. create role and rolebinding for calico via     [calico-rbac.yaml](./network/calico/calico-rbac.yaml)
+
+        4. create calico via [calico.yaml]    (./network/calico/calico.yaml)
+
+    - Cilium
+
+        we will still consider using [cilium]   (https://github.com/cilium/cilium), it has many advanced   features, it will implement kube-proxy function, and use bpf to   replace iptables thus has higher performance, but now it lacks    some functionality, such as NodePort, ingress,..etcd.
+
+        full deployment of cilium, refer to [cilium deployment](./network/cilium).
 
 
-12. install [kube-proxy](./addons/kube-proxy/kube-proxy.yaml) via daemonset, but before that created a configmap to store `kube-proxy.kubeconfig`, and then mount in the kube-proxy pods.
+
+12. install [kube-proxy](./addons/kube-proxy/kube-proxy.yaml) via daemonset, but before that created a configmap to store `kube-proxy.kubeconfig`, and then mount in the kube-proxy pods. or we can start it as a static pod 
 
 13. install [kube-dns](./addons/kube-dns/kube-dns.yaml), this file contains a configmap to store some addtional config of `upstreamNameservers`, and modify the DNS domains and DNS  service IP `clusterIP: 192.168.0.10`, also enable prometheus monitoring on service and exposes coresponding ports.
 ```
@@ -288,6 +296,8 @@
     17.1  [local storage provisioner](./storage/local-storage), now it doesn't support **Dynamic provisioning**, so we don't use it at this moment, consider it in future.
     17.2  [nfs provisioner](./storage/nfs-provisioner), here we deploy on nodes, not in of kubernetes, this makes the storage system more robust.
 
+    17.3 [nfs client](./storage/nfs-client), if we already have setup nfs server, we can start a nfs-client to reference this nfs server, then provision the staorage to the cluster.
+
 18. Install [Monitoring and Logging](./monitoring), 
 
     18.1 Totally we use influxdb as the overall storage backend, save logs from fluentbit, save prometheus metrics and heapster data.
@@ -306,10 +316,19 @@
 
     18.8 visulization via in-cluster [grafana](./monitoring/In-Cluster/grafana) or out-cluster [grafana](./monitoring/Out-Cluster/grafana)  , we still need to customizing the dashboards
 
+    18.9 deploying prometheus/altermanager/kibana both in and out of cluster is possible. 
+
+
 19. Create default [ResourceLimt and Quota](./ResourceLimitQuota).
 
-20. deploy multiple [applications](./applications).
+20. deploy multiple [applications](./applications) and [kubernetes addons](./addons)
     
-21. define some [autoscaler](./Autoscaler) rules.
+21. define some [autoscaler](./Autoscaler) rules, details refer to [AutoScaler](https://github.com/kubernetes/autoscaler), there are four types of autoscaler
+    - [Cluster Autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler)
+    - [Vertical Pod Autoscaler ](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler)
+    - [Addon Resizer](https://github.com/kubernetes/autoscaler/tree/master/addon-resizer)
+    - [HPA (Horizontal Pod Autoscaler)](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
 
-22. [Network policy](./NetworkPolicy) is another considerations.
+22. [Network policy](./NetworkPolicy) is another considerations. kubernetes has [built-in networkpolicy](https://kubernetes.io/docs/concepts/services-networking/network-policies/) and also some third-parties also implement this via [CRD](https://kubernetes.io/docs/concepts/api-extension/custom-resources/), for example cilium or calico. 
+
+24. [External loadbalancer](./LoadBalancer), if we don't deploy kubernetes cluster in cloud provider, we can't leverage loadbalancer service(Service objects with `spec.type=LoadBalancer`), so there is a project [metalLB](https://github.com/google/metallb), which can address this problem if we deploy it in bare metal environment. 

@@ -5,6 +5,10 @@ global:
   smtp_require_tls: false
   # the slack Incoming WebHooks url
   slack_api_url: 'https://hooks.slack.com/services/xxxx'  
+
+  wechat_api_url: 'https://qyapi.weixin.qq.com/cgi-bin/'
+  wechat_api_secret: 'xxxx'   #application secret created for the receving the alert
+  wechat_api_corp_id: 'xxxx'  # corp ID 
 # The root route on which each incoming alert enters.
 route:
   # The root route must not have any matchers as it is the entry point for
@@ -49,3 +53,11 @@ receivers:
     channel: '#monitoring'
     title: "{{ .Status | toUpper }}: {{ .CommonAnnotations.summary }}\n"
     text: "{{range .Alerts }}\nDescription: {{ .Annotations.description }}\n{{ range .Labels.SortedPairs }} {{ .Name }}: {{ .Value }}\n{{end}}Metrics: <{{ .GeneratorURL}}| Click here>\n{{ end }}"
+- name: "wechat-reciever"
+  wechat_configs:
+  - send_resolved: true
+    to_user: "" # send to the IDs of the users,refer to https://work.weixin.qq.com/api/doc#10167
+    to_party: "" #send to department ID of the contact,  refer to https://work.weixin.qq.com/api/doc#10167, here we create a new department which includes some users.
+    to_tag: ""  # send to the IDs of the tags,refer to https://work.weixin.qq.com/api/doc#10167
+    agent_id: "1000002" # the application agentID, you need to use existing or create new application in wechat
+    corp_id: "wxd6c3b48a11938c18" # corp ID

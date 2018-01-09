@@ -7,17 +7,21 @@ data:
   alertmanager.yml: |-
     global:
       # The smarthost and SMTP sender used for mail notifications.
-      smtp_smarthost: 'mail.sap.corp:25'
-      smtp_from: 'DL_57BA68805F99B710F600001A@exchange.sap.corp'
+      smtp_smarthost: 'mail.lmy.com:25'
+      smtp_from: 'admin@lmy.com'
       smtp_require_tls: false
-    templates:
-    - '/etc/alertmanager-templates/*.tmpl'
+      # the slack Incoming WebHooks url
+      slack_api_url: 'https://hooks.slack.com/services/xxxx'  
+
+      wechat_api_url: 'https://qyapi.weixin.qq.com/cgi-bin/'
+      wechat_api_secret: 'xxxx'   #application secret created for the receving the alert
+      wechat_api_corp_id: 'xxxx'  # corp ID 
     # The root route on which each incoming alert enters.
     route:
       # The root route must not have any matchers as it is the entry point for
       # all alerts. It needs to have a receiver configured so alerts that do not
       # match any of the sub-routes are sent to someone.
-      receiver: 'default-email-receiver'
+      receiver: 'default-slack-receiver'
       # The labels by which incoming alerts are grouped together. For example,
       # multiple alerts coming in for cluster=A and alertname=LatencyHigh would
       # be batched into a single group.
@@ -39,15 +43,28 @@ data:
       # All alerts with job=ems
       # are dispatched to the ems-email-receiver pager.
       routes:
-      - receiver: 'ems-email-receiver'
-        match:
-           job: ems
+    #  - receiver: 'ems-email-receiver'
+    #    match:
+    #       job: ems
     receivers:
-    - name: 'ems-email-receiver'
-      email_configs:
-      - send_resolved: true
-        to:  'jennings.liu@sap.com'
     - name: 'default-email-receiver'
       email_configs:
       - send_resolved: true
-        to:  'jennings.liu@sap.com'
+        to:  'mail@lmy.com'
+        headers:
+          From: DL_57BA68805F99B710F600001A@exchange.sap.corp
+          Subject: 'Alert: {{ template "email.default.subject" . }}'
+    - name: 'default-slack-receiver'
+      slack_configs:
+      - send_resolved: true
+        channel: '#monitoring'
+        title: "{{ .Status | toUpper }}: {{ .CommonAnnotations.summary }}\n"
+        text: "{{range .Alerts }}\nDescription: {{ .Annotations.description }}\n{{ range .Labels.SortedPairs }} {{ .Name }}: {{ .Value }}\n{{end}}Metrics:    <{{ .GeneratorURL}}| Click here>\n{{ end }}"
+    - name: "default-wechat-reciever"
+      wechat_configs:
+      - send_resolved: true
+        to_user: "" # send to the IDs of the users,refer to https://work.weixin.qq.com/api/doc#10167
+        to_party: "" #send to department ID of the contact,  refer to https://work.weixin.qq.com/api/doc#10167, here we create a new department which     includes some users.
+        to_tag: ""  # send to the IDs of the tags,refer to https://work.weixin.qq.com/api/doc#10167
+        agent_id: "1000002" # the application agentID, you need to use existing or create new application in wechat
+        corp_id: "wxd6c3b48a11938c18" # corp ID

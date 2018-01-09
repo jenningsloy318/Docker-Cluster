@@ -2,7 +2,6 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
  annotations:
-  ingress.kubernetes.io/ssl-passthrough: "true"
  name: kubernetes-dashboard-ingress
  namespace: kube-system
 spec:
@@ -17,4 +16,4 @@ spec:
          - path: /
            backend:
              serviceName: kubernetes-dashboard
-             servicePort: 443
+             servicePort: 9090

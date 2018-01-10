@@ -13,7 +13,7 @@
     ```
     2.3 save the cert to dashboard-cert.pem
 
-    2.4 create secret for dashboard deployment
+    2.4 create secret for dashboard deployment -- if we  set `--enable-insecure-login=true` in controller, we don't need to create this one. 
 
     ```
     kubectl create secret generic kubernetes-dashboard-certs --from-file=certs/ -n kube-system

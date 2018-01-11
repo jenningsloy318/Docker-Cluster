@@ -114,9 +114,6 @@ spec:
           # to it. Uncomment only if the default does not work.
           # - --apiserver-host=http://my-address:port
         volumeMounts:
-        - name: kubernetes-dashboard-certs
-          mountPath: /certs
-          readOnly: true
           # Create on-disk volume to store exec logs
         - mountPath: /tmp
           name: tmp-volume
@@ -128,9 +125,6 @@ spec:
           initialDelaySeconds: 30
           timeoutSeconds: 30
       volumes:
-      - name: kubernetes-dashboard-certs
-        secret:
-          secretName: kubernetes-dashboard-certs
       - name: tmp-volume
         emptyDir: {}
       serviceAccountName: kubernetes-dashboard
@@ -155,3 +149,23 @@ spec:
       targetPort: 9090
   selector:
     k8s-app: kubernetes-dashboard
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ annotations:
+ name: kubernetes-dashboard-ingress
+ namespace: kube-system
+spec:
+ tls:
+ - hosts:
+   - k8s.gcsc.sap.corp
+   secretName: dashboard-ingress-secret
+ rules: 
+   - host: k8s.gcsc.sap.corp
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: kubernetes-dashboard
+             servicePort: 9090

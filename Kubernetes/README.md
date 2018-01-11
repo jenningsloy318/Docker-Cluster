@@ -177,6 +177,8 @@
 
 4. create SSL keys for etcd, docker and kubernetes, details in [SSL](./SSL); here etcd and docker certs can share same certs, so create once and used in both etcd and docker. for k8s, for enabled RBAC, thus for each kubelet cert with its individual cert. 
 
+    NOTE: we can also use TLS bootstraping for kubelet, thus we don't need to create certificates for each node when joining into the cluster, details steps in [TLS Booststraping](./TLS_Bootstrapping)
+
 5. create [kubeconfig](./kubeconfig) for different components and roles, this is due to RBAC roles used. 
 
 6. prepare [kubelet.service](./systemd/kubelet.service).

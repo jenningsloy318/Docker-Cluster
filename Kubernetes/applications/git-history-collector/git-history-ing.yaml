@@ -5,7 +5,7 @@ metadata:
   namespace: git
 spec:
   rules:
-  - host: devops-git-collector.mo.sap.corp
+  - host: devops-git-collector.mo.lmy.corp
     http:
       paths:
       - path: /

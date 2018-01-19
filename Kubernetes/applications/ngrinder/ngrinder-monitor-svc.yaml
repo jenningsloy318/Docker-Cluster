@@ -23,7 +23,7 @@ spec:
      #ingress.kubernetes.io/ssl-passthrough: "true"
  spec:
    rules:
-   - host: ngrinder-mon.gcsc.sap.corp
+   - host: ngrinder-mon.gcsc.lmy.corp
      http:
        paths:
        - path: /

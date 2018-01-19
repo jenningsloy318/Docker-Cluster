@@ -21,13 +21,13 @@ subjectAltName = @alternate_names
 IP.1=10.58.137.243
 IP.2=10.58.137.244
 IP.3=127.0.0.1
-DNS.1=cnpvgl56588418.pvg.global.corp.sap
-DNS.2=cnpvgl56588417.pvg.global.corp.sap
+DNS.1=cnpvgl56588418.pvg.global.corp.lmy
+DNS.2=cnpvgl56588417.pvg.global.corp.lmy
 ```
 
 
 ```
-openssl req -new -key docker-key.pem -out docker.csr  -subj "/CN=cnpvgl56588417.pvg.global.corp.sap" -config openssl-docker.conf
+openssl req -new -key docker-key.pem -out docker.csr  -subj "/CN=cnpvgl56588417.pvg.global.corp.lmy" -config openssl-docker.conf
 ```
 3. verify the csr 
 ```
@@ -73,7 +73,7 @@ openssl x509 -req -in dockerclient.csr -CA ../CA/ca.pem -CAkey ../CA/ca-key.pem 
 
 ## verify the connection
 ```
-docker --tlsverify --tlscacert=../CA/ca.pem  --tlscert=dockerclient.pem  --tlskey=dockerclient-key.pem -H=cnpvgl56588417.pvg.global.corp.sap:2376 version
+docker --tlsverify --tlscacert=../CA/ca.pem  --tlscert=dockerclient.pem  --tlskey=dockerclient-key.pem -H=cnpvgl56588417.pvg.global.corp.lmy:2376 version
 
 Client:
  Version:      1.12.6

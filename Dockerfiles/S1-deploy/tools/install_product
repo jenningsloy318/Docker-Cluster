@@ -33,4 +33,4 @@ cd /gen/artifacts
 files="$(ls | egrep '^.*\.zip$' | xargs)"
 
 touch "/gen/hdbalm.log"
-/usr/sap/hdbclient/hdbalm --certs=/root/.ssh/hana_ondemand_com.crt ${HTTPS} -y -v install -l "/gen/hdbalm.log" ${IMPORT_OPTION_PARAM} $files
+/usr/lmy/hdbclient/hdbalm --certs=/root/.ssh/hana_ondemand_com.crt ${HTTPS} -y -v install -l "/gen/hdbalm.log" ${IMPORT_OPTION_PARAM} $files

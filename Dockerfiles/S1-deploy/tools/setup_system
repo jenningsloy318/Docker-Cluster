@@ -26,7 +26,7 @@ export CERTIFICATES=/tools/certificates/*
 
 export IS_CLOUD=$(echo $HOST | grep 'hana.ondemand.com')
 if [ -z "$IS_CLOUD" ]; then
-	export IS_CLOUD=$(echo $HOST | grep 'itc.sap.com')
+	export IS_CLOUD=$(echo $HOST | grep 'itc.lmy.com')
 fi
 
 export IS_SNAPSHOT=$(echo $VERSION | grep 'SNAPSHOT')
@@ -77,19 +77,19 @@ if [ $HOST == "localhost" ]; then
 fi
 
 if [ -z "$IS_CLOUD" ]; then
-	/usr/sap/hdbclient/hdbsql -u "${USER}" -p "${PASSWORD}" -n "${HOST}" -i "${INSTANCE}" "call _SYS_REPO.GRANT_ACTIVATED_ROLE ('sap.hana.ide.roles::Developer','${USER}')"
+	/usr/lmy/hdbclient/hdbsql -u "${USER}" -p "${PASSWORD}" -n "${HOST}" -i "${INSTANCE}" "call _SYS_REPO.GRANT_ACTIVATED_ROLE ('lmy.hana.ide.roles::Developer','${USER}')"
 fi
 
 function login {
 	#returns "unsafe" token
-	token_string=$(curl -s -D - -H "x-csrf-token: Fetch" "${PROTOCOL}://${HOST}:${PORT}/sap/hana/xs/formLogin/token.xsjs" | grep "x-csrf-token")
+	token_string=$(curl -s -D - -H "x-csrf-token: Fetch" "${PROTOCOL}://${HOST}:${PORT}/lmy/hana/xs/formLogin/token.xsjs" | grep "x-csrf-token")
 	TOKEN=${token_string: 14:-1}
 	
 	#do form based login
-	curl -X POST -s -c $COOKIE_PATH -H "x-csrf-token: $TOKEN" --data "xs-username=$USER&xs-password=$PASSWORD" "${PROTOCOL}://${HOST}:${PORT}/sap/hana/xs/formLogin/login.xscfunc"
+	curl -X POST -s -c $COOKIE_PATH -H "x-csrf-token: $TOKEN" --data "xs-username=$USER&xs-password=$PASSWORD" "${PROTOCOL}://${HOST}:${PORT}/lmy/hana/xs/formLogin/login.xscfunc"
 	
 	#get real csrf-token
-	token_string=$(curl -u $USER:$PASSWORD -b $COOKIE_PATH -s -D - -H "x-csrf-token: Fetch" "${PROTOCOL}://${HOST}:${PORT}/sap/hana/xs/formLogin/token.xsjs" | grep "x-csrf-token")
+	token_string=$(curl -u $USER:$PASSWORD -b $COOKIE_PATH -s -D - -H "x-csrf-token: Fetch" "${PROTOCOL}://${HOST}:${PORT}/lmy/hana/xs/formLogin/token.xsjs" | grep "x-csrf-token")
 	export TOKEN=${token_string: 14:-1}
 	echo
 	echo "x-csrf-token: $TOKEN"
@@ -100,7 +100,7 @@ login
 
 # admin authorization for user
 echo "Admin authorization for ${USER} user"
-sh /tools/execute_sql "call _SYS_REPO.GRANT_ACTIVATED_ROLE ('sap.hana.xs.lm.roles::Administrator','${USER}')" "CALL"
+sh /tools/execute_sql "call _SYS_REPO.GRANT_ACTIVATED_ROLE ('lmy.hana.xs.lm.roles::Administrator','${USER}')" "CALL"
 echo
 
 ########################################
@@ -136,9 +136,9 @@ fi
 ########################################
 
 if [ -n "$IS_SNAPSHOT" ]; then
-	REPO="https://nexus.wdf.sap.corp:8443/nexus/content/repositories/deploy.snapshots/"
+	REPO="https://nexus.wdf.lmy.corp:8443/nexus/content/repositories/deploy.snapshots/"
 else
-	REPO="https://nexus.wdf.sap.corp:8443/nexus/content/repositories/deploy.milestones.xmake/"
+	REPO="https://nexus.wdf.lmy.corp:8443/nexus/content/repositories/deploy.milestones.xmake/"
 fi
 if [ -n "$VERSION" ] && [ $SKIP_INSTALLATION != "true" ]; then
 	echo
@@ -148,7 +148,7 @@ if [ -n "$VERSION" ] && [ $SKIP_INSTALLATION != "true" ]; then
 	export HDBALM_PORT=$PORT
 	export HDBALM_USER=$USER
 	export HDBALM_PASSWD=$PASSWORD
-	sh /tools/install_product "com.sap.sports:SAP_SPORTS_ONE_OD:zip:${VERSION}" "${REPO}"
+	sh /tools/install_product "com.lmy.sports:SAP_SPORTS_ONE_OD:zip:${VERSION}" "${REPO}"
 	install_result=$?
 
 	if [ ! ${install_result} -eq 0 ]; then
@@ -212,24 +212,24 @@ echo
 login
 
 echo "    Trust Store authorization for ${USER} user"
-sh /tools/execute_sql "call _SYS_REPO.GRANT_ACTIVATED_ROLE ('sap.hana.xs.admin.roles::TrustStoreAdministrator','${USER}')" "CALL"
+sh /tools/execute_sql "call _SYS_REPO.GRANT_ACTIVATED_ROLE ('lmy.hana.xs.admin.roles::TrustStoreAdministrator','${USER}')" "CALL"
 
 echo "    Create new Trust Store"
-curl -X PUT -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "x-csrf-token: $TOKEN" "${PROTOCOL}://${HOST}:${PORT}/sap/hana/xs/admin/server/trustManager/store.xscfunc?action=createAnonymous&name=$TRUST_STORE_NAME"
+curl -X PUT -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "x-csrf-token: $TOKEN" "${PROTOCOL}://${HOST}:${PORT}/lmy/hana/xs/admin/server/trustManager/store.xscfunc?action=createAnonymous&name=$TRUST_STORE_NAME"
 
 echo "    Delete existing certificates from Trust Store"
-store=$(curl -X GET -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "x-csrf-token: $TOKEN" "${PROTOCOL}://${HOST}:${PORT}/sap/hana/xs/admin/server/trustManager/cert.xscfunc?action=list&store=$TRUST_STORE_NAME")
+store=$(curl -X GET -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "x-csrf-token: $TOKEN" "${PROTOCOL}://${HOST}:${PORT}/lmy/hana/xs/admin/server/trustManager/cert.xscfunc?action=list&store=$TRUST_STORE_NAME")
 certs=$(echo $store | python -c 'import json,sys,codecs;obj=json.load(sys.stdin);print "\n".join([x["serialNo"] for x in obj]);')
 certs_array=($certs)
 for cert in "${certs_array[@]}" ; do
 	echo "    Remove old Certificate from Trust Store: $cert"
-	curl -X DELETE -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "x-csrf-token: $TOKEN" "${PROTOCOL}://${HOST}:${PORT}/sap/hana/xs/admin/server/trustManager/cert.xscfunc?action=delete&store=$TRUST_STORE_NAME&serial=$cert"
+	curl -X DELETE -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "x-csrf-token: $TOKEN" "${PROTOCOL}://${HOST}:${PORT}/lmy/hana/xs/admin/server/trustManager/cert.xscfunc?action=delete&store=$TRUST_STORE_NAME&serial=$cert"
 done
 
 for f in $CERTIFICATES
 do
 	echo "    Add Certificates to Trust Store: $f"
-	curl -X POST -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "x-csrf-token: $TOKEN" -H "Content-Type: application/x-x509-ca-cert" --data-binary "@$f" "${PROTOCOL}://${HOST}:${PORT}/sap/hana/xs/admin/server/trustManager/cert.xscfunc?action=import&store=$TRUST_STORE_NAME"
+	curl -X POST -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "x-csrf-token: $TOKEN" -H "Content-Type: application/x-x509-ca-cert" --data-binary "@$f" "${PROTOCOL}://${HOST}:${PORT}/lmy/hana/xs/admin/server/trustManager/cert.xscfunc?action=import&store=$TRUST_STORE_NAME"
 	echo
 done
 
@@ -244,13 +244,13 @@ if [ $SKIP_SETUP != "true" ]; then
 
 	echo
 	echo "Setup authorization for ${USER} user"
-	sh /tools/execute_sql "call _SYS_REPO.GRANT_ACTIVATED_ROLE ('sap.sports.fnd.appsvc.setup.role::Setup','${USER}')" "CALL"
+	sh /tools/execute_sql "call _SYS_REPO.GRANT_ACTIVATED_ROLE ('lmy.sports.fnd.appsvc.setup.role::Setup','${USER}')" "CALL"
 	
 	echo
 	echo "Call HTTPDest func"
 	echo
-	content="{\"action\":\"change\",\"package\":\"sap.sports.fnd.module.setup.public.lib\",\"name\":\"localhost\",\"basicAuthUser\":\"$USER\",\"basicAuthPassword\":\"$PASSWORD\"}"
-	dest_status=$(curl -X POST -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "x-csrf-token: $TOKEN" -o /dev/null -w "%{http_code}" -d "$content" "${PROTOCOL}://${HOST}:${PORT}/sap/hana/xs/admin/server/httpDestination/httpDestSecStore.xscfunc")
+	content="{\"action\":\"change\",\"package\":\"lmy.sports.fnd.module.setup.public.lib\",\"name\":\"localhost\",\"basicAuthUser\":\"$USER\",\"basicAuthPassword\":\"$PASSWORD\"}"
+	dest_status=$(curl -X POST -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "x-csrf-token: $TOKEN" -o /dev/null -w "%{http_code}" -d "$content" "${PROTOCOL}://${HOST}:${PORT}/lmy/hana/xs/admin/server/httpDestination/httpDestSecStore.xscfunc")
 	echo "Destination Call Response Status: $dest_status"
 	if [ "$dest_status" != '200' ]; then
 		echo
@@ -261,7 +261,7 @@ if [ $SKIP_SETUP != "true" ]; then
 	echo
 	echo "Setting up the system..."
 	echo
-	setup_response=$(curl -X POST -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "Content-Type: application/json" -H "x-csrf-token: $TOKEN" -d "$SYSTEM_SETTINGS" "${PROTOCOL}://${HOST}:${PORT}/sap/sports/fnd/appsvc/setup/service/setup.xsjs")
+	setup_response=$(curl -X POST -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "Content-Type: application/json" -H "x-csrf-token: $TOKEN" -d "$SYSTEM_SETTINGS" "${PROTOCOL}://${HOST}:${PORT}/lmy/sports/fnd/appsvc/setup/service/setup.xsjs")
 	echo $setup_response | python -mjson.tool
 
 	setup_result=$?
@@ -298,28 +298,28 @@ if [ "$DEBUG_MODE" == "true" ]; then
 	echo
 	echo "    Delete Component-preload.js files"
 	echo
-	sh /tools/execute_sql "delete from _SYS_REPO.ACTIVE_OBJECT where OBJECT_NAME = 'Component-preload' and OBJECT_SUFFIX = 'js' and PACKAGE_ID like 'sap.sports%'" "UPDATE"
+	sh /tools/execute_sql "delete from _SYS_REPO.ACTIVE_OBJECT where OBJECT_NAME = 'Component-preload' and OBJECT_SUFFIX = 'js' and PACKAGE_ID like 'lmy.sports%'" "UPDATE"
 	echo
 	echo "    Delete library-preload.json files"
 	echo
-	sh /tools/execute_sql "delete from _SYS_REPO.ACTIVE_OBJECT where OBJECT_NAME = 'library-preload' and OBJECT_SUFFIX = 'json' and PACKAGE_ID like 'sap.sports%'" "UPDATE"
+	sh /tools/execute_sql "delete from _SYS_REPO.ACTIVE_OBJECT where OBJECT_NAME = 'library-preload' and OBJECT_SUFFIX = 'json' and PACKAGE_ID like 'lmy.sports%'" "UPDATE"
 
 	if [ $HOST == "localhost" ]; then
-		sh /tools/execute_sql "CALL _SYS_REPO.GRANT_ACTIVATED_ROLE ('sap.sports.fnd.db.roles::Admin','${USER}')" "CALL"
-		sh /tools/execute_sql "CALL \"sap.sports.fnd.db.schema.authorization::updateUserPrivileges\" ('${USER}')" "CALL"
+		sh /tools/execute_sql "CALL _SYS_REPO.GRANT_ACTIVATED_ROLE ('lmy.sports.fnd.db.roles::Admin','${USER}')" "CALL"
+		sh /tools/execute_sql "CALL \"lmy.sports.fnd.db.schema.authorization::updateUserPrivileges\" ('${USER}')" "CALL"
 	fi
 
 	echo
 	echo "Trigger initial import..."
 	echo
-	import_response=$(curl -X POST -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "Content-Type: application/json" -H "x-csrf-token: $TOKEN" -d "{}" "${PROTOCOL}://${HOST}:${PORT}/sap/sports/fnd/appsvc/init/services/init/check")
+	import_response=$(curl -X POST -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "Content-Type: application/json" -H "x-csrf-token: $TOKEN" -d "{}" "${PROTOCOL}://${HOST}:${PORT}/lmy/sports/fnd/appsvc/init/services/init/check")
 	echo $import_response | python -mjson.tool
 	echo
 
 	echo
 	echo "Trigger user creation..."
 	echo
-	user_response=$(curl -X POST -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "Content-Type: application/json" -H "x-csrf-token: $TOKEN" -d "$USERS" "${PROTOCOL}://${HOST}:${PORT}/sap/sports/fnd_test/appsvc/dev/service/users.xsjs")
+	user_response=$(curl -X POST -u $USER:$PASSWORD -s -b $COOKIE_PATH -H "Content-Type: application/json" -H "x-csrf-token: $TOKEN" -d "$USERS" "${PROTOCOL}://${HOST}:${PORT}/lmy/sports/fnd_test/appsvc/dev/service/users.xsjs")
 	echo $user_response | python -mjson.tool
 	echo
 fi

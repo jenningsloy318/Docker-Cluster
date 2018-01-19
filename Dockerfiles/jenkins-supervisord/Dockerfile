@@ -53,10 +53,10 @@ RUN mkdir -p /usr/share/jenkins /var/run/sshd && \
     curl -SLO https://github.infra.hana.ondemand.com/cloudfoundry/cf-cli-mta-plugin/releases/download/v0.7.0/mta_plugin_linux_amd64 &&\
     chmod +x mta_plugin_linux_amd64 &&\
     cf install-plugin mta_plugin_linux_amd64 -f && rm -f mta_plugin_linux_amd64 && \
-    curl -SL  -k http://aia.pki.co.sap.com/aia/SAPNetCA_G2.crt -o /usr/local/share/ca-certificates/SAPNetCA_G2.crt && \
-    curl -SL  -k http://aia.pki.co.sap.com/aia/SAP%20Global%20Root%20CA.crt -o /usr/local/share/ca-certificates/SAP%20Global%20Root%20CA.crt && \
-    keytool -noprompt -import -alias sapglobalrootca -file /usr/local/share/ca-certificates/SAP%20Global%20Root%20CA.crt -keystore /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts -storepass changeit && \
-    keytool -noprompt -import -alias sapnetcag2 -file /usr/local/share/ca-certificates/SAPNetCA_G2.crt  -keystore /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts -storepass changeit && \
+    curl -SL  -k http://aia.pki.co.lmy.com/aia/SAPNetCA_G2.crt -o /usr/local/share/ca-certificates/SAPNetCA_G2.crt && \
+    curl -SL  -k http://aia.pki.co.lmy.com/aia/SAP%20Global%20Root%20CA.crt -o /usr/local/share/ca-certificates/SAP%20Global%20Root%20CA.crt && \
+    keytool -noprompt -import -alias lmyglobalrootca -file /usr/local/share/ca-certificates/SAP%20Global%20Root%20CA.crt -keystore /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts -storepass changeit && \
+    keytool -noprompt -import -alias lmynetcag2 -file /usr/local/share/ca-certificates/SAPNetCA_G2.crt  -keystore /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts -storepass changeit && \
 	  keytool -trustcacerts -noprompt -keystore /etc/ssl/certs/java/cacerts -importcert -alias SAP_Global_Root_CA.crt -file  /usr/local/share/ca-certificates/SAP%20Global%20Root%20CA.crt  -storepass changeit && \
 	  keytool -trustcacerts -noprompt -keystore /etc/ssl/certs/java/cacerts -importcert -alias SAPNetCA_G2 -file  /usr/local/share/ca-certificates/SAPNetCA_G2.crt  -storepass changeit && \
     update-ca-certificates &&\

@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: ngrinder-agent
-        image: registry.gcsc.sap.corp/ngrinder/ngrinder-agent:3.4
+        image: registry.gcsc.lmy.corp/ngrinder/ngrinder-agent:3.4
         imagePullPolicy: IfNotPresent
         args:
         - "ngrinder-controller.ngrinder.svc.cluster.local"

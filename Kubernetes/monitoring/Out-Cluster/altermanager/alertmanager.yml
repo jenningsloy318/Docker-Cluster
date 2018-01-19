@@ -45,7 +45,7 @@ receivers:
   - send_resolved: true
     to:  'mail@lmy.com'
     headers:
-      From: DL_57BA68805F99B710F600001A@exchange.sap.corp
+      From: DL_57BA68805F99B710F600001A@exchange.lmy.corp
       Subject: 'Alert: {{ template "email.default.subject" . }}'
 - name: 'default-slack-receiver'
   slack_configs:

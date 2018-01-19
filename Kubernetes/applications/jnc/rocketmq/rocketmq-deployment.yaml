@@ -21,7 +21,7 @@ spec:
       #hostNetwork: true
       containers:
       - name: jnc-rocketmq-namesrv
-        image: registry.gcsc.sap.corp/jnc/apache-rocketmq-namesrv:4.0.0 
+        image: registry.gcsc.lmy.corp/jnc/apache-rocketmq-namesrv:4.0.0 
         imagePullPolicy: IfNotPresent
         env:
         - name: JAVA_OPT
@@ -35,7 +35,7 @@ spec:
         #    memory: 8192Mi
       
       - name: jnc-rocketmq-broker
-        image: registry.gcsc.sap.corp/jnc/apache-rocketmq-broker:4.0.0
+        image: registry.gcsc.lmy.corp/jnc/apache-rocketmq-broker:4.0.0
         imagePullPolicy: IfNotPresent
         env:
         - name: JAVA_OPT

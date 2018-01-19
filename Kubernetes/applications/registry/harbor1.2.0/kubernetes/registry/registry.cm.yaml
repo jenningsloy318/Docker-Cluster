@@ -27,7 +27,7 @@ data:
     auth:
       token:
         issuer: harbor-token-issuer
-        realm: https://registry.gcsc.sap.corp/service/token
+        realm: https://registry.gcsc.lmy.corp/service/token
         rootcertbundle: /etc/docker/registry/root.crt
         service: harbor-registry
     notifications:

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: jenkins-slave-jdk8-2
-        image: registry.gcsc.sap.corp/maven/maven3-jdk8:latest
+        image: registry.gcsc.lmy.corp/maven/maven3-jdk8:latest
         imagePullPolicy: Always
         args:
         resources:
@@ -47,13 +47,13 @@ spec:
         - name: DOCKER_TLS_VERIFY
           value: "1"  
         - name: HTTPS_PROXY
-          value: http://proxy.pvgl.sap.corp:8080
+          value: http://proxy.pvgl.lmy.corp:8080
         - name: HTTP_PROXY
-          value: http://proxy.pvgl.sap.corp:8080
+          value: http://proxy.pvgl.lmy.corp:8080
         - name: https_proxy
-          value: http://proxy.pvgl.sap.corp:8080
+          value: http://proxy.pvgl.lmy.corp:8080
         - name: http_proxy
-          value: http://proxy.pvgl.sap.corp:8080          
+          value: http://proxy.pvgl.lmy.corp:8080          
         - name: NO_PROXY
           value: "10.58.137.243,10.58.137.244"          
         - name: no_proxy

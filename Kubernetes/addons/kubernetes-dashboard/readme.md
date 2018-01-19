@@ -9,7 +9,7 @@
     ```
     2.2  create dashboard.csr
     ```
-    openssl req -new -key dashboard-key.pem -out dashboard.csr  -subj "/CN=k8s.gcsc.sap.corp" -config openssl-dashboard.conf
+    openssl req -new -key dashboard-key.pem -out dashboard.csr  -subj "/CN=k8s.gcsc.lmy.corp" -config openssl-dashboard.conf
     ```
     2.3 save the cert to dashboard-cert.pem
 

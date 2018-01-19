@@ -5,7 +5,7 @@ metadata:
   namespace: redis
 spec:
   rules:
-  - host: redis.gcsc.sap.corp
+  - host: redis.gcsc.lmy.corp
     http:
       paths:
       - path: /

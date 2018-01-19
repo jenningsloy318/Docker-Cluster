@@ -1,10 +1,10 @@
-FROM docker.wdf.sap.corp:50000/hana/sles12-for-hana:latest
+FROM docker.wdf.lmy.corp:50000/hana/sles12-for-hana:latest
 
-ARG HANA_SOURCE=http://moo-repo.wdf.sap.corp:8080/static/monsoon/hana/newdb/1.0.122_08/SAP_HANA_DATABASE100_122_08_Linux_on_x86_64.SAR 
-ARG SAPCAR_SOURCE="http://moo-repo.wdf.sap.corp:8080/static/monsoon/hana/newdb/SAPCAR"
-ARG HTTPS_PROXY=http://proxy.wdf.sap.corp:8080
-ARG HTTP_PROXY=http://proxy.wdf.sap.corp:8080
-ARG NO_PROXY=localhost,sap.corp,mo.sap.corp,cc.mo.sap.corp,sap.biz,cloud.sap,sap,cc.ondemand.com,moo-repo,moo-repo.wdf.sap.corp,repo,repo.wdf.sap.corp,169.254.169.254,127.0.0.1
+ARG HANA_SOURCE=http://moo-repo.wdf.lmy.corp:8080/static/monsoon/hana/newdb/1.0.122_08/SAP_HANA_DATABASE100_122_08_Linux_on_x86_64.SAR 
+ARG SAPCAR_SOURCE="http://moo-repo.wdf.lmy.corp:8080/static/monsoon/hana/newdb/SAPCAR"
+ARG HTTPS_PROXY=http://proxy.wdf.lmy.corp:8080
+ARG HTTP_PROXY=http://proxy.wdf.lmy.corp:8080
+ARG NO_PROXY=localhost,lmy.corp,mo.lmy.corp,cc.mo.lmy.corp,lmy.biz,cloud.lmy,lmy,cc.ondemand.com,moo-repo,moo-repo.wdf.lmy.corp,repo,repo.wdf.lmy.corp,169.254.169.254,127.0.0.1
 COPY starthana.sh stophana.sh  /usr/bin/
 
 RUN curl -SL $SAPCAR_SOURCE -o /usr/bin/SAPCAR && \

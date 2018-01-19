@@ -1,4 +1,4 @@
-FROM         registry.gcsc.sap.corp/base/debian:stretch
+FROM         registry.gcsc.lmy.corp/base/debian:stretch
 
 COPY mongodb_exporter-linux-amd64 /bin/mongodb_exporter
 

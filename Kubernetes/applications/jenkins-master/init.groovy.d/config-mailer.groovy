@@ -1,9 +1,9 @@
 import jenkins.model.*
 def instance = Jenkins.getInstance()
 def desc = instance.getDescriptor("hudson.tasks.Mailer")
-desc.setReplyToAddress("jennings.liu@sap.com")
-desc.setSmtpHost("mailsin.sap.corp")
-desc.setDefaultSuffix("@sap.com")
+desc.setReplyToAddress("jennings.liu@lmy.com")
+desc.setSmtpHost("mailsin.lmy.corp")
+desc.setDefaultSuffix("@lmy.com")
 desc.setUseSsl(false)
 desc.setSmtpPort("25")
 desc.setCharset("UTF-8")

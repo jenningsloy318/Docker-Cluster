@@ -1,7 +1,7 @@
 #!${bin_dir}/bin/sh
 
 echo "Job Admin authorization for ${USER} user"
-sh /tools/execute_sql "call _SYS_REPO.GRANT_ACTIVATED_ROLE ('sap.hana.xs.admin.roles::JobAdministrator','${USER}')" "CALL"
+sh /tools/execute_sql "call _SYS_REPO.GRANT_ACTIVATED_ROLE ('lmy.hana.xs.admin.roles::JobAdministrator','${USER}')" "CALL"
 echo
 
 echo

@@ -16,7 +16,7 @@ spec:
       serviceAccountName: redis-sa
       containers:
       - name: redis-commander
-        image: registry.gcsc.sap.corp/redis/redis-commander:v2 
+        image: registry.gcsc.lmy.corp/redis/redis-commander:v2 
         imagePullPolicy: IfNotPresent
         resources:
           limits:

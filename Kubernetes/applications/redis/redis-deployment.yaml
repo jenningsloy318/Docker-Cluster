@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: redis-master
-        image: registry.gcsc.sap.corp/redis/redis:v1
+        image: registry.gcsc.lmy.corp/redis/redis:v1
         imagePullPolicy: IfNotPresent 
         env:
         - name: MASTER
@@ -44,7 +44,7 @@ spec:
         - mountPath: /redis-master/
           name: redis-config
       - name: redis-commander
-        image: registry.gcsc.sap.corp/redis/redis-commander
+        image: registry.gcsc.lmy.corp/redis/redis-commander
         imagePullPolicy: IfNotPresent
         env:
         - name: POD_IP

@@ -1,4 +1,4 @@
-FROM registry.gcsc.sap.corp/base/openjdk:8-jdk
+FROM registry.gcsc.lmy.corp/base/openjdk:8-jdk
 
 ENV CATALINA_HOME /usr/local/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
@@ -6,8 +6,8 @@ RUN mkdir -p "$CATALINA_HOME"
 WORKDIR $CATALINA_HOME
 
 
-ARG HTTPS_PROXY=http://proxy.pvgl.sap.corp:8080
-ARG HTTP_PROXY=http://proxy.pvgl.sap.corp:8080
+ARG HTTPS_PROXY=http://proxy.pvgl.lmy.corp:8080
+ARG HTTP_PROXY=http://proxy.pvgl.lmy.corp:8080
 ARG uid=1000
 ARG gid=1000
 ARG user=tomcat

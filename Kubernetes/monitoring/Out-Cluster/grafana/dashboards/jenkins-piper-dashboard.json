@@ -74,7 +74,7 @@
             {
               "title": "Details",
               "type": "absolute",
-              "url": "https://mo-9170ae8ec.mo.sap.corp:30191/job/CPQEngine/job/PricingService/job/master/"
+              "url": "https://mo-9170ae8ec.mo.lmy.corp:30191/job/CPQEngine/job/PricingService/job/master/"
             }
           ],
           "nullPointMode": "connected",
@@ -596,7 +596,7 @@
             {
               "title": "Details",
               "type": "absolute",
-              "url": "https://mo-9170ae8ec.mo.sap.corp:30191/job/CPQEngine/job/PricingService/job/master/"
+              "url": "https://mo-9170ae8ec.mo.lmy.corp:30191/job/CPQEngine/job/PricingService/job/master/"
             }
           ],
           "nullPointMode": "connected",

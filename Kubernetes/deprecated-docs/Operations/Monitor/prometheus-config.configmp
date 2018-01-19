@@ -209,10 +209,10 @@ data:
       #ca_file:
         insecure_skip_verify: true
       scheme: https
-      proxy_url: http://proxy.wdf.sap.corp:8080
+      proxy_url: http://proxy.wdf.lmy.corp:8080
       metrics_path: /prometheus
       static_configs:
-         - targets: ['ems-admin-service-sandbox.cfapps.sap.hana.ondemand.com:443']
+         - targets: ['ems-admin-service-sandbox.cfapps.lmy.hana.ondemand.com:443']
 
 
 

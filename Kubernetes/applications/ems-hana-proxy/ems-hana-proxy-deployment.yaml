@@ -19,7 +19,7 @@ spec:
       terminationGracePeriodSeconds: 10
       containers: 
       - name: ems-hana-proxy
-        image: registry.gcsc.sap.corp/chisel/chisel
+        image: registry.gcsc.lmy.corp/chisel/chisel
         imagePullPolicy: Always
         args:
         ports: 
@@ -41,13 +41,13 @@ spec:
             memory: 256Mi
         env:
         - name: HTTPS_PROXY
-          value: http://proxy.pvgl.sap.corp:8080
+          value: http://proxy.pvgl.lmy.corp:8080
         - name: HTTP_PROXY
-          value: http://proxy.pvgl.sap.corp:8080
+          value: http://proxy.pvgl.lmy.corp:8080
         - name: https_proxy
-          value: http://proxy.pvgl.sap.corp:8080
+          value: http://proxy.pvgl.lmy.corp:8080
         - name: http_proxy
-          value: http://proxy.pvgl.sap.corp:8080          
+          value: http://proxy.pvgl.lmy.corp:8080          
         volumeMounts: 
           - name: localtime
             mountPath: /etc/localtime 

@@ -768,7 +768,7 @@ data:
     # to queries with 2 milliseconds delay.
     #
     # use "activerehashing yes" if you don't have such hard requirements but
-    # want to free memory asap when possible.
+    # want to free memory almy when possible.
     activerehashing yes
 
     # The client output buffer limits can be used to force disconnection of clients

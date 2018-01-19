@@ -21,5 +21,5 @@ Locality Name (eg, city) []:SH
 Organization Name (eg, company) [Internet Widgits Pty Ltd]:SAP
 Organizational Unit Name (eg, section) []:CSC
 Common Name (e.g. server FQDN or YOUR name) []:CDDEVOPS
-Email Address []:DL_57BA68805F99B710F600001A@exchange.sap.corp
+Email Address []:DL_57BA68805F99B710F600001A@exchange.lmy.corp
 ```

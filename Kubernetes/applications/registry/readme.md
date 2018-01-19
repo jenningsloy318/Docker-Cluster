@@ -20,12 +20,12 @@ subjectAltName = @alt_names
 [ v3_ca ]
 subjectAltName = @alternate_names
 [alt_names]
-DNS.1=registry.gcsc.sap.corp
+DNS.1=registry.gcsc.lmy.corp
 ```
 
 
 ```
-openssl req -new -key registry-key.pem -out registry.csr  -subj "/CN=registry.gcsc.sap.corp" -config openssl-registry.conf
+openssl req -new -key registry-key.pem -out registry.csr  -subj "/CN=registry.gcsc.lmy.corp" -config openssl-registry.conf
 ```
 3. verify the csr 
 ```

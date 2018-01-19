@@ -21,11 +21,11 @@ spec:
     port: 4300
     targetPort: 4300
     nodePort: 30081
-  - name: sapstartsrv-1
+  - name: lmystartsrv-1
     port: 50013
     targetPort: 50013
     nodePort: 30013
-  - name: sapstartsrv-2
+  - name: lmystartsrv-2
     port: 50114
     targetPort: 50114
     nodePort: 30014

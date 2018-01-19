@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: jnc-redis
-        image: registry.gcsc.sap.corp/redis/redis:v1
+        image: registry.gcsc.lmy.corp/redis/redis:v1
         imagePullPolicy: IfNotPresent
         env:
         - name: MASTER

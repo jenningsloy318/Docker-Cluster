@@ -41,7 +41,7 @@ data:
   ADMIRAL_URL: NA
   WITH_NOTARY: "False"
   RESET: "false"
-  EXT_ENDPOINT: "https://registry.gcsc.sap.corp"
+  EXT_ENDPOINT: "https://registry.gcsc.lmy.corp"
   TOKEN_URL: http://ui
   JSON_CFG_STORE_PATH: "/etc/config/config.json"
   SECRET_KEY: "uJwT9CBcpClCj8YA"

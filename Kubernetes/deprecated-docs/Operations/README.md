@@ -93,7 +93,7 @@ Here I listed the aspects about how to run k8s better.
 
 
 
-          -  copy the content of ```app.csr```, and paste it to [https://getcerts.wdf.global.corp.sap/pgwy/request/sapnetca_base64.html](https://getcerts.wdf.global.corp.sap/pgwy/request/sapnetca_base64.html) to get the certificate.
+          -  copy the content of ```app.csr```, and paste it to [https://getcerts.wdf.global.corp.lmy/pgwy/request/lmynetca_base64.html](https://getcerts.wdf.global.corp.lmy/pgwy/request/lmynetca_base64.html) to get the certificate.
 
           -  copy the content of the certificate and save to app-cert.pem
 

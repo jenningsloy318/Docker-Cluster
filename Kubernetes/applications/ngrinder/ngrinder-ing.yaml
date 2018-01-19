@@ -9,10 +9,10 @@
  spec:
    tls:
    - hosts:
-     - ngrinder.gcsc.sap.corp
+     - ngrinder.gcsc.lmy.corp
      secretName: ngrinder-secret
    rules:
-   - host: ngrinder.gcsc.sap.corp
+   - host: ngrinder.gcsc.lmy.corp
      http:
        paths:
        - path: /

@@ -19,7 +19,7 @@ spec:
       serviceAccountName: mongo-exporter
       containers:
       - name: mongo-exporter
-        image: registry.gcsc.sap.corp/mongodb/mongodb_exporter:v1.0.1
+        image: registry.gcsc.lmy.corp/mongodb/mongodb_exporter:v1.0.1
         imagePullPolicy: IfNotPresent
         args:
         - -mongodb.uri

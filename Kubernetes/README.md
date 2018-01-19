@@ -327,3 +327,7 @@
 24. [External loadbalancer](./LoadBalancer), if we don't deploy kubernetes cluster in cloud provider, we can't leverage loadbalancer service(Service objects with `spec.type=LoadBalancer`), so there is a project [metalLB](https://github.com/google/metallb), which can address this problem if we deploy it in bare metal environment. 
 
 25. for HA deployment, we will deploy multiple master nodes, so we will have proxy to mulitple apiserver, detail setup of [apiserver proxy](./applications/apiserver-proxy)
+
+
+26. [Service Mesh](./ServiceMesh) is a dedicated infrastructure layer for making service-to-service communication safe, fast, and reliable. If you’re building a cloud native application, you need a service mesh! now we have two candidates, [Istio](./ServiceMesh/istio) and [conduit](./ServiceMesh/conduit).
+

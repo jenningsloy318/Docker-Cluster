@@ -12,10 +12,10 @@ metadata:
 spec:
  tls:
  - hosts:
-   - registry.gcsc.sap.corp
+   - registry.gcsc.lmy.corp
    secretName: registry-secret
  rules:
-   - host: registry.gcsc.sap.corp
+   - host: registry.gcsc.lmy.corp
      http:
        paths:
          - path: /

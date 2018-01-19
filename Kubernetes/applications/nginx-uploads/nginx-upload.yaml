@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
       - name: nginx-php
-        image: registry.gcsc.sap.corp/library/nginx-upload:2.0
+        image: registry.gcsc.lmy.corp/library/nginx-upload:2.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80

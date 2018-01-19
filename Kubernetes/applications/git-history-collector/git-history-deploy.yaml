@@ -17,7 +17,7 @@ spec:
       #  kubernetes.io/hostname: mo-fb3741189
       containers:
       - name: git-history-collector
-        image: registry.gcsc.sap.corp/python/python3-flask-git-collector:1.0.9
+        image: registry.gcsc.lmy.corp/python/python3-flask-git-collector:1.0.9
         ports:
         - containerPort: 5000
         resources:

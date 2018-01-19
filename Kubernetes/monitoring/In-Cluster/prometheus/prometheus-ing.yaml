@@ -7,14 +7,14 @@ metadata:
  annotations:
 spec:
  rules:
-   - host: prometheus.gcsc.sap.corp
+   - host: prometheus.gcsc.lmy.corp
      http:
        paths:
          - path: /
            backend:
              serviceName: prometheus
              servicePort: 9090
-   - host: alertmanager.gcsc.sap.corp
+   - host: alertmanager.gcsc.lmy.corp
      http:
        paths:
          - path: /

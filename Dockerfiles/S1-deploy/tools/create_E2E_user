@@ -8,7 +8,7 @@
 
 export USER=${USER:=SYSTEM}
 export PASSWORD=Toor1234
-export HOST=${HOST:=sports-hana.mo.sap.corp}
+export HOST=${HOST:=sports-hana.mo.lmy.corp}
 export PORT=${PORT:=30827}
 export E2EPWD=${E2EPWD:=Toor1234}
 export E2ESPORTSTYPE=${E2ESPORTSTYPE:=Soccer}
@@ -18,7 +18,7 @@ export E2ESPORTSTYPES=${E2ESPORTSTYPES:="Soccer Handball Basketball IceHockey Sk
 
 export IS_CLOUD=$(echo $HOST | grep 'hana.ondemand.com')
 if [ -z "$IS_CLOUD" ]; then
-	export IS_CLOUD=$(echo $HOST | grep 'itc.sap.com')
+	export IS_CLOUD=$(echo $HOST | grep 'itc.lmy.com')
 fi
 
 if [ $PORT == "443" ]; then
@@ -38,14 +38,14 @@ function login {
 	echo
 
 	#returns "unsafe" token
-	token_string=$(curl -s -D - -H "x-csrf-token: Fetch" "${PROTOCOL}://${HOST}:${PORT}/sap/hana/xs/formLogin/token.xsjs" | grep "x-csrf-token")
+	token_string=$(curl -s -D - -H "x-csrf-token: Fetch" "${PROTOCOL}://${HOST}:${PORT}/lmy/hana/xs/formLogin/token.xsjs" | grep "x-csrf-token")
 	TOKEN=${token_string: 14:-1}
 
 	#do form based login
-	curl -X POST -s -c $COOKIE_PATH -H "x-csrf-token: $TOKEN" --data "xs-username=$USER&xs-password=$PASSWORD" "${PROTOCOL}://${HOST}:${PORT}/sap/hana/xs/formLogin/login.xscfunc"
+	curl -X POST -s -c $COOKIE_PATH -H "x-csrf-token: $TOKEN" --data "xs-username=$USER&xs-password=$PASSWORD" "${PROTOCOL}://${HOST}:${PORT}/lmy/hana/xs/formLogin/login.xscfunc"
 	
 	#get real csrf-token
-	token_string=$(curl -u $USER:$PASSWORD -b $COOKIE_PATH -s -D - -H "x-csrf-token: Fetch" "${PROTOCOL}://${HOST}:${PORT}/sap/hana/xs/formLogin/token.xsjs" | grep "x-csrf-token")
+	token_string=$(curl -u $USER:$PASSWORD -b $COOKIE_PATH -s -D - -H "x-csrf-token: Fetch" "${PROTOCOL}://${HOST}:${PORT}/lmy/hana/xs/formLogin/token.xsjs" | grep "x-csrf-token")
 	export TOKEN=${token_string: 14:-1}
 	echo
 	echo "x-csrf-token: $TOKEN"
@@ -56,7 +56,7 @@ function checkSportsType {
 	echo
 	echo "check SportsType for: ${E2ESPORTSTYPE}"
 	echo
-	sh /tools/execute_sql "select * from \"sap.sports.fnd.module.prosports.private.table::SPORTS_TYPES\" where SPORTS_TYPE = '${E2ESPORTSTYPE}'" "SELECT" > /tools/checkSportsType
+	sh /tools/execute_sql "select * from \"lmy.sports.fnd.module.prosports.private.table::SPORTS_TYPES\" where SPORTS_TYPE = '${E2ESPORTSTYPE}'" "SELECT" > /tools/checkSportsType
 	export CHECK=`cat /tools/checkSportsType | grep "rows" | sed -r s/.*\"rows\":/\#/g  | cut -c 1-2`
 }
 
@@ -66,9 +66,9 @@ function createTestUser {
 	echo
 	sh /tools/execute_sql "create user ${E2EUSER} password ${E2EPWD}" "UPDATE"
 	sh /tools/execute_sql "grant \"SAP_SPORTS_Admin\" to ${E2EUSER}" "UPDATE"
-	sh /tools/execute_sql "call \"sap.sports.fnd.db.schema.authorization::updateUserPrivileges\" ('${E2EUSER}')" "CALL"
-	sh /tools/execute_sql "upsert \"sap.sports.fnd.db.schema::PERSONS\" ( PERSON_ID, FIRST_NAME, LAST_NAME, GENDER, USER_ID ) VALUES ( '${E2EPERSON_ID}', '${E2ESPORTSTYPE}', 'Tester', 'MALE', '${E2EUSER}' ) with primary key" "UPDATE"
-	sh /tools/execute_sql "upsert \"sap.sports.fnd.module.prosports.private.table::USERS_CLUB_AND_SPORTS_TYPE\" ( USER_ID , SPORTS_TYPE, CLUB_ID ) values ( '${E2EUSER}', '${E2ESPORTSTYPE}' , null) with primary key" "UPDATE"
+	sh /tools/execute_sql "call \"lmy.sports.fnd.db.schema.authorization::updateUserPrivileges\" ('${E2EUSER}')" "CALL"
+	sh /tools/execute_sql "upsert \"lmy.sports.fnd.db.schema::PERSONS\" ( PERSON_ID, FIRST_NAME, LAST_NAME, GENDER, USER_ID ) VALUES ( '${E2EPERSON_ID}', '${E2ESPORTSTYPE}', 'Tester', 'MALE', '${E2EUSER}' ) with primary key" "UPDATE"
+	sh /tools/execute_sql "upsert \"lmy.sports.fnd.module.prosports.private.table::USERS_CLUB_AND_SPORTS_TYPE\" ( USER_ID , SPORTS_TYPE, CLUB_ID ) values ( '${E2EUSER}', '${E2ESPORTSTYPE}' , null) with primary key" "UPDATE"
 }
 
 # xs security authorization for user

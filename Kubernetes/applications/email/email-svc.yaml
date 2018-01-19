@@ -18,7 +18,7 @@ metadata:
   name: mail-ingress
 spec:
   rules:
-  - host: devops-owl-email.mo.sap.corp
+  - host: devops-owl-email.mo.lmy.corp
     http:
       paths:
       - path: /

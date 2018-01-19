@@ -8,7 +8,7 @@
      #nginx.ingress.kubernetes.io/ssl-passthrough: "true"
  spec:
    rules:
-   - host: mongo-ui.gcsc.sap.corp
+   - host: mongo-ui.gcsc.lmy.corp
      http:
        paths:
        - path: /

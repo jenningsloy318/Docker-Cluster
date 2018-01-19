@@ -9,10 +9,10 @@
  spec:
    tls:
    - hosts:
-     - jenkins.gcsc.sap.corp
+     - jenkins.gcsc.lmy.corp
      secretName: jenkins-tls
    rules:
-   - host: jenkins.gcsc.sap.corp
+   - host: jenkins.gcsc.lmy.corp
      http:
        paths:
        - path: /

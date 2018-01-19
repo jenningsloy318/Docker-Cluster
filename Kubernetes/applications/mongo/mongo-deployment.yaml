@@ -19,7 +19,7 @@ spec:
       serviceAccountName: mongo
       initContainers:
       - name: mongo-init
-        image: registry.gcsc.sap.corp/mongodb/mongo:3.4
+        image: registry.gcsc.lmy.corp/mongodb/mongo:3.4
         command:
         - /bin/bash 
         - /root/create-user.sh
@@ -31,7 +31,7 @@ spec:
           subPath: create-user.sh                   
       containers:
         - name: mongo
-          image: registry.gcsc.sap.corp/mongodb/mongo:3.4
+          image: registry.gcsc.lmy.corp/mongodb/mongo:3.4
           imagePullPolicy: IfNotPresent
           command:
             - mongod
@@ -65,7 +65,7 @@ spec:
             limits:
               memory: 2Gi              
         - name: mongo-express
-          image: registry.gcsc.sap.corp/mongodb/mongo-express:0.40
+          image: registry.gcsc.lmy.corp/mongodb/mongo-express:0.40
           imagePullPolicy: IfNotPresent
           env:
           - name: POD_IP

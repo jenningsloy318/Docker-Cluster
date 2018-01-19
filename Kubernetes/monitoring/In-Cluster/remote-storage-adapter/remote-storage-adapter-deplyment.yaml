@@ -17,7 +17,7 @@ spec:
       serviceAccountName: prometheus
       containers:
       - name: remote-storage-adapter
-        image: registry.gcsc.sap.corp/monitor/remote_storage_adapter:v1.0.1
+        image: registry.gcsc.lmy.corp/monitor/remote_storage_adapter:v1.0.1
         command:
         - /usr/bin/remote_storage_adapter
         - -influxdb-url

@@ -1,5 +1,5 @@
 {
-	"absoluteFunctionName":"sap.hana.ide.common.plugin.catalogsystem.server.common.sqlMultiExecute",
+	"absoluteFunctionName":"lmy.hana.ide.common.plugin.catalogsystem.server.common.sqlMultiExecute",
 	"inputObject":{
 		"statements":[
 			%%STATEMENTS%%

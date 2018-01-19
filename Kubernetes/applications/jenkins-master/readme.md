@@ -19,9 +19,9 @@ JENKINS_HOME /var/jenkins_home/
     ```
 -  create dashboard.csr
     ```
-    openssl req -new -key jenkins-key.pem -out jenkins.csr  -subj "/CN=jenkins.gcsc.sap.corp" -config openssl-jenkins.conf
+    openssl req -new -key jenkins-key.pem -out jenkins.csr  -subj "/CN=jenkins.gcsc.lmy.corp" -config openssl-jenkins.conf
     ```
-- get cert from https://getcerts.wdf.global.corp.sap/pgwy/request/sapnetca_base64.html and save the cert to jenkins-cert.pem
+- get cert from https://getcerts.wdf.global.corp.lmy/pgwy/request/lmynetca_base64.html and save the cert to jenkins-cert.pem
 
 - create secret 
     ```

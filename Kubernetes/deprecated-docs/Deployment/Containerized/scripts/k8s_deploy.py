@@ -175,7 +175,7 @@ if __name__ == '__main__':
     SVC_IP=SVC_CIDR.split('/')[0].replace('0.0','0.1')
     IPs=[SVC_IP]
     DNSs=['kubernetes','kubernetes.default','kubernetes.default.svc','kubernetes.default.svc.'+CLUSTER_DOMAIN]
-    #DNSs=['kubernetes.default.svc.mo.sap.corp']
+    #DNSs=['kubernetes.default.svc.mo.lmy.corp']
     for key in ALL_MASTER_ITEMS.keys():
         host_addr_re=re.compile(r'^.*_addr$')
         host_dns_re=re.compile(r'^.*dns$')

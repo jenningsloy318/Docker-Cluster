@@ -1,4 +1,4 @@
-FROM         registry.gcsc.sap.corp/base/debian:stretch
+FROM         registry.gcsc.lmy.corp/base/debian:stretch
 
 COPY remote_storage_adapter /usr/bin/remote_storage_adapter
 

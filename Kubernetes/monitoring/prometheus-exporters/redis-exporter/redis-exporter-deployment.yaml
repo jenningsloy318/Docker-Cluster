@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: redis-exporter
-        image: registry.gcsc.sap.corp/redis/redis_exporter
+        image: registry.gcsc.lmy.corp/redis/redis_exporter
         imagePullPolicy: IfNotPresent
         ports:
         - name: http 

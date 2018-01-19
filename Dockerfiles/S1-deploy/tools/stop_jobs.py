@@ -60,12 +60,12 @@ def httpCall(method, url, headers, payload, cookieFile):
     return data
 
 def getSchedules(protocol, host, port, cookieFile):
-    path = "/sap/hana/xs/admin/jobs/service/schedules.xsodata/Schedules?$filter=startswith(JOB_NAME,%27sap.sports%27)&$format=json"
+    path = "/lmy/hana/xs/admin/jobs/service/schedules.xsodata/Schedules?$filter=startswith(JOB_NAME,%27lmy.sports%27)&$format=json"
     url = protocol + "://" + host + ":" + port + path
     return httpCall("GET", url, {}, None, cookieFile)
 
 def updateSchedule(protocol, host, port, payload, token, cookieFile):
-    path = "/sap/hana/xs/admin/jobs/server/common/editSchedule.xsjs"
+    path = "/lmy/hana/xs/admin/jobs/server/common/editSchedule.xsjs"
     url = protocol + "://" + host + ":" + port + path
     headers = {
         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -83,7 +83,7 @@ def main(argv):
     obj = json.loads(res)
     schedules = buildSchedules(obj)
     for schedule in schedules:
-        if schedule["JOB"] == '/sap/sports/fnd/db/schema/authorization/generateAllUsersPrivileges.xsjob':
+        if schedule["JOB"] == '/lmy/sports/fnd/db/schema/authorization/generateAllUsersPrivileges.xsjob':
             continue
         print "Deactivate " + schedule["JOB"]
         try:

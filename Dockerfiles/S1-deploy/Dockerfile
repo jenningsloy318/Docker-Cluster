@@ -1,4 +1,4 @@
-FROM docker.wdf.sap.corp:50000/rhel:7.2_sap
+FROM docker.wdf.lmy.corp:50000/rhel:7.2_lmy
 
 
 ENV ARTIFACTIMPORTER_HOME /tools/artifactimporter/artifactimporter-0.8
@@ -9,9 +9,9 @@ RUN mv /root/.ssh/SAPNetCA_G2.crt /etc/pki/ca-trust/source/anchors && \
     yum -y upgrade nss  && \
     yum install unzip openssh-server -y && \
     mkdir -p /tools/artifactimporter && \
-    curl "https://nexus.wdf.sap.corp:8443/nexus/service/local/repositories/deploy.milestones/content/com/sap/prd/commonrepo/artifactimporter/com.sap.prd.commonrepo.artifactimporter.dist.cli/0.8/com.sap.prd.commonrepo.artifactimporter.dist.cli-0.8.zip" -o /tools/artifactimporter/com.sap.prd.commonrepo.artifactimporter.dist.cli-0.8.zip && \
-    unzip /tools/artifactimporter/com.sap.prd.commonrepo.artifactimporter.dist.cli-0.8.zip -d /tools/artifactimporter && \
-    rm /tools/artifactimporter/com.sap.prd.commonrepo.artifactimporter.dist.cli-0.8.zip && \
+    curl "https://nexus.wdf.lmy.corp:8443/nexus/service/local/repositories/deploy.milestones/content/com/lmy/prd/commonrepo/artifactimporter/com.lmy.prd.commonrepo.artifactimporter.dist.cli/0.8/com.lmy.prd.commonrepo.artifactimporter.dist.cli-0.8.zip" -o /tools/artifactimporter/com.lmy.prd.commonrepo.artifactimporter.dist.cli-0.8.zip && \
+    unzip /tools/artifactimporter/com.lmy.prd.commonrepo.artifactimporter.dist.cli-0.8.zip -d /tools/artifactimporter && \
+    rm /tools/artifactimporter/com.lmy.prd.commonrepo.artifactimporter.dist.cli-0.8.zip && \
     yum -y install java-1.7.0-openjdk.x86_64 java-1.7.0-openjdk-devel.x86_64; yum clean all && \
     echo "root:Toor1234"|chpasswd && ssh-keygen -A 
 

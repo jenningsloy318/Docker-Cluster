@@ -18,8 +18,8 @@ DNS.1 = kubernetes
 DNS.2 = kubernetes.default
 DNS.3 = kubernetes.default.svc
 DNS.4 = kubernetes.default.svc.cluster.local
-DNS.5=cnpvgl56588417.pvg.global.corp.sap
-DNS.6=cnpvgl56588418.pvg.global.corp.sap
+DNS.5=cnpvgl56588417.pvg.global.corp.lmy
+DNS.6=cnpvgl56588418.pvg.global.corp.lmy
 IP.1 = 192.168.0.1
 IP.2=10.58.137.243
 IP.3=10.58.137.244
@@ -27,7 +27,7 @@ IP.4=127.0.0.1
 ```
 3. create sing request 
 ```
-openssl req -new -key apiserver-key.pem -out apiserver.csr -subj "/CN=cnpvgl56588417.pvg.global.corp.sap" -config openssl-k8s.conf 
+openssl req -new -key apiserver-key.pem -out apiserver.csr -subj "/CN=cnpvgl56588417.pvg.global.corp.lmy" -config openssl-k8s.conf 
 
 ```
 

@@ -31,4 +31,4 @@ cd /gen/artifacts
 files="$(ls | egrep '^.*\.tgz$' | xargs)"
 
 touch "/gen/hdbalm.log"
-/usr/sap/hdbclient/hdbalm --certs=/root/.ssh/hana_ondemand_com.crt ${HTTPS} -y -v import -l "/gen/hdbalm.log" $files
+/usr/lmy/hdbclient/hdbalm --certs=/root/.ssh/hana_ondemand_com.crt ${HTTPS} -y -v import -l "/gen/hdbalm.log" $files

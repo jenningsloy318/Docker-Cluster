@@ -7,14 +7,14 @@ metadata:
  annotations:
 spec:
  rules:
-   - host: influxdb.gcsc.sap.corp
+   - host: influxdb.gcsc.lmy.corp
      http:
        paths:
          - path: /
            backend:
              serviceName: influxdb
              servicePort: 8083
-   - host: influxdb-api.gcsc.sap.corp
+   - host: influxdb-api.gcsc.lmy.corp
      http:
        paths:
          - path: /

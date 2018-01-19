@@ -20,7 +20,7 @@ spec:
       terminationGracePeriodSeconds: 300
       containers:      	
       - name: sp1-hana122
-        image: registry.gcsc.sap.corp/hana/hana-for-s1:v122.08 
+        image: registry.gcsc.lmy.corp/hana/hana-for-s1:v122.08 
         imagePullPolicy: Always
         env:
         - name: SID
@@ -37,19 +37,19 @@ spec:
         - name: webdispatche2
           containerPort: 4300
           hostPort: 4300
-        - name: sapstartsrv1
+        - name: lmystartsrv1
           containerPort: 50013
           hostPort: 50013
-        - name: sapstartsrv2
+        - name: lmystartsrv2
           containerPort: 50014
           hostPort: 50014
         - name: indexsrv
           containerPort: 30015
           hostPort: 30015
-        - name: saphostctrl
+        - name: lmyhostctrl
           containerPort: 1128
           hostPort: 1128
-        - name: saphostctrls
+        - name: lmyhostctrls
           containerPort: 1129
           hostPort: 1129
 
@@ -67,9 +67,9 @@ spec:
         - mountPath: /hana/shared
           name: hana-data
           subPath: shared          
-        - mountPath: /usr/sap
+        - mountPath: /usr/lmy
           name: hana-data
-          subPath: sap
+          subPath: lmy
         lifecycle:
           preStop:
             exec:

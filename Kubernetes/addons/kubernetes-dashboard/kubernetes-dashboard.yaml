@@ -159,10 +159,10 @@ metadata:
 spec:
  tls:
  - hosts:
-   - k8s.gcsc.sap.corp
+   - k8s.gcsc.lmy.corp
    secretName: dashboard-ingress-secret
  rules: 
-   - host: k8s.gcsc.sap.corp
+   - host: k8s.gcsc.lmy.corp
      http:
        paths:
          - path: /

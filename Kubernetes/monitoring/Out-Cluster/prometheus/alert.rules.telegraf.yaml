@@ -1,0 +1,93 @@
+groups:
+- name: Basic alerts
+  rules:
+  - alert: High CPU usage (warning)
+    expr: cpu_usage_idle < 70
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      description: '{{$labels.host}}({{$labels.instance}}): has really high CPU usage for over 5m'
+      summary: 'High CPU Usage detected!'
+  - alert: High CPU usage (critical)
+    expr: cpu_usage_idle < 60
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      description: '{{$labels.host}}({{$labels.instance}}): has really high CPU usage for over 5m'
+      summary: 'High CPU Usage detected!'
+  - alert: High Disk Usage (warning)
+    expr: disk_used_percent > 85
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      description: '{{$labels.host}}({{$labels.instance}}): Mount Point {{ $labels.path}}  is used above 85% (current value is: {{ $value }})'
+      summary: 'Low data disk space detected'
+  - alert: High Disk Usage (critical)
+    expr: disk_used_percent > 90
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      description: '{{$labels.host}}({{$labels.instance}}): Mount Point {{ $labels.path}}  is used above 90% (current value is: {{ $value }})'
+      summary: 'Low data disk space detected'
+  - alert: High Memory usage (warning)
+    expr: mem_used_percent > 85
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      description: '{{$labels.host}}({{$labels.instance}}): Memory usage is above 75% (current value is: {{ $value }})'
+      summary: 'High memory usage detected'
+
+  - alert: High Memory usage (critical)
+    expr: mem_used_percent > 90
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      description: '{{$labels.host}}({{$labels.instance}}): Memory usage is above 90% (current value is: {{ $value }})'
+      summary: 'High memory usage detected'
+
+  - alert: High node Load Average (warning)
+    expr: system_load5 > 0.7
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      description: '{{$labels.host}}({{$labels.instance}}): Average Load is high'
+      summary: 'High Average Load detected'
+  - alert: High node Load Average (critical)
+    expr: system_load5 > 1
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      description: '{{$labels.host}}({{$labels.instance}}): Average Load is high'
+      summary: 'High Average Load detected'
+
+  - alert: High Swap Usage (warning)
+    expr: swap_used_percent > 50
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      description: '{{$labels.host}}({{$labels.instance}}): Swap usage usage is above 50% (current value is: {{ $value }})'
+      summary: 'High Swap usage detected'
+  - alert: High Swap Usage (critical)
+    expr: swap_used_percent > 75
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      description: '{{$labels.host}}({{$labels.instance}}): Swap usage usage is above 75% (current value is: {{ $value }})'
+  - alert: Instance is Down
+    expr: up == 0
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      description: '{{$labels.instance}} of job {{$labels.job}} has been down for  more than 2 minutes.'
+      summary: Instance down

@@ -68,8 +68,7 @@
 2. Deploy and configure docker engine
 
     2.1 get the docker-engine file 
-    - for deb from [http://apt.dockerproject.org](http://apt.dockerproject.org/repo/pool/main/d/docker-engine/)
-    - for rpm from [http://yum.dockerproject.org](http://yum.dockerproject.org)
+    - for deb from [https://download.docker.com/linux/](https://download.docker.com/linux/)
 
     2.2 install docker-engine 
 

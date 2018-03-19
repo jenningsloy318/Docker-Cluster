@@ -47,7 +47,10 @@ RUN  apt-get update && \
      npm install -g gulp  &&\
      npm install -g yarn && \
      rm -rf /var/lib/apt/lists/*  /var/cache/apt/archives/* && \
-     rm -rf /var/cache/oracle-jdk8-installer  
+     rm -rf /var/cache/oracle-jdk8-installer    && \
+     curl -SL http://aia.pki.co.sap.com/aia/SAPNetCA_G2.crt -o /usr/share/ca-certificates/SAPNetCA_G2.crt  && \
+     echo 'SAPNetCA_G2.crt' >>/etc/ca-certificates.conf && \
+     update-ca-certificates
 
 ENV AGENT_WORKDIR=/home/jenkins/agent
 

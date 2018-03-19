@@ -2,6 +2,7 @@
 
 
 from kubernetes.client import *
+import json
 
 # Configs can be set in Configuration class directly
 configuration=Configuration()
@@ -17,10 +18,13 @@ configuration.assert_hostname = False
 apiClient=ApiClient(configuration)
 coreV1Api=CoreV1Api(apiClient)
 extensionsV1beta1Api=ExtensionsV1beta1Api(apiClient)
-## list the objects in API instance
+Version=VersionApi(apiClient)
 
 
-print(coreV1Api.list_node(pretty=True))
-print(extensionsV1beta1Api.list_deployment_for_all_namespaces())
+## list/get the objects in API instance
+
+print(Version.get_code().git_version)
+#print(coreV1Api.list_node(pretty=True).items)
+#print(extensionsV1beta1Api.list_deployment_for_all_namespaces())
 
 

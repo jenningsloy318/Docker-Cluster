@@ -6,7 +6,6 @@ import json
 from os import environ
 from str2bool import str2bool
 import requests
-import argparse
 import logging
 
 

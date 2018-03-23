@@ -23,15 +23,15 @@ spec:
       --tls-cert-file=/srv/kubernetes/apiserver.pem --tls-private-key-file=/srv/kubernetes/apiserver-key.pem
       --token-auth-file=/srv/kubernetes/token.csv  --basic-auth-file=/srv/kubernetes/basic.csv
       --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname --anonymous-auth=false
-      --secure-port=6443   --v=5
+      --secure-port=6443  --bind-address=<external IP address>  --v=5
       --allow-privileged=true 
       --requestheader-client-ca-file=/srv/kubernetes/ca.pem
       --requestheader-allowed-names=system:kube-controller-manager,system:kube-proxy,system:kube-scheduler,system:node:cnpvgl56588417,system:node:cnpvgl56588418
       --requestheader-extra-headers-prefix=X-Remote-Extra-
       --requestheader-group-headers=X-Remote-Group
       --requestheader-username-headers=X-Remote-User
-      --proxy-client-cert-file=/srv/kubernetes/kubelet-cnpvgl56588417.pem
-      --proxy-client-key-file=/srv/kubernetes/kubelet-key.pem
+      --proxy-client-cert-file=/srv/kubernetes/apiserver.pem 
+      --proxy-client-key-file=/srv/kubernetes/apiserver-key.pem
 
     ports:
     - containerPort: 6443

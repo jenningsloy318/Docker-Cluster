@@ -3,6 +3,8 @@ Tips
 
 1. use subPath to mount secret/configmap as subPath under one directory.
 
+    Basically, any volumes will be mount at root of the mountPath, but we can add a subPath to enable it mounted at the subPath of the mountPath
+
     Cases when the target mount point is already exist, and we don't want to overwrite the whole content of the directory, when need to use subPath to specify the exact mount path of the secret/configmap. 
 
     - case1: mount configmap which contains supervisord.conf to `/etc/supervisord.conf`. 

@@ -1,20 +1,21 @@
-1. 
-```
---requestheader-client-ca-file=/srv/kubernetes/ca.pem
---requestheader-allowed-names=system:kube-controller-manager,system:kube-proxy,system:kube-scheduler,system:node:cnpvgl56588417,system:node:cnpvgl56588418
---requestheader-extra-headers-prefix=X-Remote-Extra-
---requestheader-group-headers=X-Remote-Group
---requestheader-username-headers=X-Remote-User
-```
+1. The API aggregator is integrated into the main Kubernetes API server,in order for the aggregator to work properly, it needs to have the appropriate certificates.These certificates must be passed to the main Kubernetes API server using the flags `--proxy-client-cert-file` and `--proxy-client-key-file`.  This allows the aggregator to identify itself when making requests, so that addon API servers can use its delegated RequestHeader authentication.
 
-- `--requestheader-allowed-names=`: will allow these users to access `/apis/metrics.k8s.io/v1beta1` on apiserver. 
-- all these options are used to set the permission to access `/apis/metrics.k8s.io/v1beta1`, which these metrics are register into  apiserver by metrics-server. details described [here](https://github.com/kubernetes-incubator/apiserver-builder/blob/master/docs/concepts/aggregation.md)
+2. apiserver can serve as api Discovery, but these apis that can be discovery must firstly register it into apiserver with aggregator.
+
+3. api aggregator is also served as a proxy,When the aggregator receives a request that it needs to proxy( for example, to metrics api `/apis/metrics.k8s.io/v1beta1` which is not apiserver native api, registered into apiserver via api aggregator from metrics-server), it first performs authentication using the authentication methods configured for the main Kubernetes API server, as well as authorization. Once it has completed authentication, it records the authentication information in headers, and forwards the request to the appropriate addon API server.The aggregator will verify the certificates, strip them from the request, and add the` <X-Remote-User: system:node:cnpvgl56588418> `header. so following parameters are configured.
+  ```
+  --requestheader-client-ca-file=/srv/kubernetes/ca.pem
+  --requestheader-allowed-names=system:kube-controller-manager,system:kube-proxy,  system:kube-scheduler,system:node:cnpvgl56588417,system:node:cnpvgl56588418
+  --requestheader-extra-headers-prefix=X-Remote-Extra-
+  --requestheader-group-headers=X-Remote-Group
+  --requestheader-username-headers=X-Remote-User
+  ```
+        details described [here](https://github.com/kubernetes-incubator/apiserver-builder/blob/master/docs/concepts/aggregation.md)
 
 
-2. we can set the `--bind-address` to its one external address of the master node, since we will running a pod of apiserver-proxy which serves on `127.0.0.1:6443`
+4. we can set the `--bind-address` to its one external address of the master node, since we will running a pod of apiserver-proxy which serves on `127.0.0.1:6443`
 
 
-3. The API aggregator is integrated into the main Kubernetes API server,in order for the aggregator to work properly, it needs to have the appropriate certificates.These certificates must be passed to the main Kubernetes API server using the flags `--proxy-client-cert-file` and `--proxy-client-key-file`.  This allows the aggregator to identify itself when making requests, so that addon API servers can use its delegated RequestHeader authentication.
 
 
 flag| kind |from| to |notes

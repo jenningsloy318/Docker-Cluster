@@ -11,6 +11,7 @@ vts port is 18080, the ingress nginx controller use https://github.com/vozlt/ngi
 4. enable TCP loadbalancing by creating [tcp configmap](./tcp-configmap.yaml) and pass the parameter `--tcp-services-configmap=$(POD_NAMESPACE)/tcp-configmap` to ingress controller. official [example](https://github.com/kubernetes/ingress/tree/master/examples/tcp/nginx).
 
 5. create [rbac](https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/rbac.yaml)
+
 Note:
 
 1. more conf https://github.com/kubernetes/ingress-nginx/tree/master/docs

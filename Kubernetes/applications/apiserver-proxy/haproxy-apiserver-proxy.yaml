@@ -1,40 +1,26 @@
-apiVersion: extensions/v1beta1
-kind: DaemonSet
+apiVersion: v1
+kind: Pod
 metadata:
-  name: haproxy-apiserver-proxy
-  labels:
-    app: haproxy-apiserver-proxy
-  namespace: kube-system
+  name: nginx-apiserver-proxy
 spec:
-  template:
-    metadata:
-      labels:
-        app: haproxy-apiserver-proxy
-      annotations:
-    spec:
-      hostNetwork: true
-      terminationGracePeriodSeconds: 60
-      containers:
-      - image:  haproxy
-        name: haproxy-apiserver-proxy
-        command: ["haproxy","-f","/usr/local/etc/haproxy/haproxy.cfg"]
-        resources:
-          limits:
-            memory: "1024Mi"
-            cpu: 1024m
-        volumeMounts:
-          - name: localtime
-            mountPath: /etc/localtime
-          - name: haproxy-conf
-            mountPath: /usr/local/etc/haproxy/haproxy.cfg
-            subPath: haproxy.cfg
-      volumes:
-        - name: localtime
-          hostPath:
-            path: /etc/localtime
-        - name: haproxy-conf
-          configMap:
-            name: haproxy-apiserver-proxy-conf
-            items:
-            - key: haproxy.cfg
-              path: haproxy.cfg
+  hostNetwork: true
+  containers:
+  - image:  haproxy
+    name: haproxy-apiserver-proxy
+    command: ["haproxy","-f","/usr/local/etc/haproxy/haproxy.cfg"]
+    ports:
+    - containerPort: 6443
+      hostPort: 6443
+      name: https    
+    volumeMounts:
+      - name: localtime
+        mountPath: /etc/localtime
+      - name: haproxy-conf
+        mountPath: /usr/local/etc/haproxy/haproxy.cfg
+  volumes:
+    - name: localtime
+      hostPath:
+        path: /etc/localtime
+    - name: haproxy-conf
+      hostPath:
+        path: haproxy.cfg

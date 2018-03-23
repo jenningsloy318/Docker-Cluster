@@ -1,4 +1,4 @@
-1. The API aggregator is integrated into the main Kubernetes API server,in order for the aggregator to work properly, it needs to have the appropriate certificates.These certificates must be passed to the main Kubernetes API server using the flags `--proxy-client-cert-file` and `--proxy-client-key-file`.  This allows the aggregator to identify itself when making requests, so that addon API servers can use its delegated RequestHeader authentication.
+1. The API aggregator is integrated into the main Kubernetes API server,in order for the aggregator to work properly, it needs to have the appropriate certificates.These certificates must be passed to the main Kubernetes API server using the flags `--proxy-client-cert-file` and `--proxy-client-key-file`.  This allows the aggregator(apiserver) to identify itself when making requests, so that addon API servers can use its delegated RequestHeader authentication, and  `--proxy-client-cert-file` is signed by `--requestheader-client-ca-file`.
 
 2. apiserver can serve as api Discovery, but these apis that can be discovery must firstly register it into apiserver with aggregator.
 

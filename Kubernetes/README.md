@@ -190,6 +190,9 @@
 
     - `--enforce-node-allocatable=pods,system-reserved,kube-reserved`: this will garentee that pod,system processes and kubelet/rkt process are all existing in the system, prevent any crashes due to lack of the resources.
 
+    - for the cert used in kubelet, we should  set its org and CN ` O=system:nodes/CN=system:node:<node-name>`, it is related with RBAC
+
+    - the kubeconfig used in kubelet, since we have have configured [apiserver proxy](.//applications/apiserver-proxy) on each node, the apiserver host can be set to `https://localhost:6443`
 
 7. prepare the static pod manifests,[etcd.yaml](./manifests/etcd.yaml), [kube-apiserver.yaml](./manifests/kube-apiserver.yaml),[kube-controller-manager.yaml](./manifests/kube-controller-manager.yaml) and [kube-scheduler.yaml](kube-scheduler.yaml)
 

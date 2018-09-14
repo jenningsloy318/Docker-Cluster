@@ -1,18 +1,46 @@
 {
-    "debug": true,
-    "exec-opts": ["native.cgroupdriver=systemd"],
     "cgroup-parent": "container.slice",
-    "hosts": ["tcp://0.0.0.0:2376","unix:///var/run/docker.sock"],
+    "data-root": "/data/docker",
+    "debug": true,
+    "default-ulimits": {
+        "nofile": {
+            "Hard": 65536,
+            "Name": "nofile",
+            "Soft": 65536
+        }
+    },
+    "exec-opts": [
+        "native.cgroupdriver=systemd"
+    ],
+    "experimental": true,
+    "hosts": [
+        "unix:///var/run/docker.sock",
+        "tcp://0.0.0.0:2376"
+    ],
+    "icc": true,
+    "insecure-registries": [
+        "docker.wdf.sap.corp:50000",
+        "gcr.io",
+        "10.180.177.57:5000"
+    ],
     "ip": "0.0.0.0",
-    "log-driver": "journald",
-    "log-opts":  {"tag":"docker_{{.Name}}_{{.ID}}"},
-    "tlsverify" : true,
-    "tlscacert": "/etc/docker/ssl/ca.pem",
-    "tlscert": "/etc/docker/ssl/docker.pem",
-    "tlskey": "/etc/docker/ssl/docker-key.pem",
-    "metrics-addr" : "0.0.0.0:9323",
-    "experimental" : true,
-    "insecure-registries" : ["myregistrydomain.com:5000"]
-  
-
+    "live-restore": true,
+    "log-driver": "json-file",
+    "log-level": "info",
+    "log-opts": {
+        "max-size": "100m"
+    },
+    "metrics-addr": "0.0.0.0:9323",
+    "storage-driver": "devicemapper",
+    "storage-opts": [
+        "dm.basesize=30G",
+        "dm.thinpooldev=/dev/mapper/docker-thinpool",
+        "dm.use_deferred_removal=true",
+        "dm.use_deferred_deletion=true"
+    ],
+    "userland-proxy": false,
+    "tlsverify": true,
+    "tlscacert": "/etc/docker/tls/DockerCA.pem",
+    "tlscert": "/etc/docker/tls/docker-server.pem",
+    "tlskey": "/etc/docker/tls/docker-server-key.pem"
 }

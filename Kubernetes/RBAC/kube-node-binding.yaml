@@ -9,7 +9,14 @@ roleRef:
 subjects:
 - apiGroup: rbac.authorization.k8s.io
   kind: User
-  name: system:node:cnpvgl56588417
+  name: system:node:192.168.59.201
 - apiGroup: rbac.authorization.k8s.io
   kind: User
-  name: system:node:cnpvgl56588418
+  name: system:node:192.168.59.202
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: system:node:192.168.59.203
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: system:node:192.168.59.204
+      

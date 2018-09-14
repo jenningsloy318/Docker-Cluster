@@ -5,14 +5,20 @@
 
   1. check the docker and other componenet requirements before deploying the cluster, visit the [Kubernetes CHANGELOG](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG.md), and find the section `External Dependency Version Information`.
   2. build docker images with `docker build --rm --force-rm  --no-cache --tag XXX . `
-  3. configure systemd to enable more cgroup controllers, since kubelet (https://github.com/kubernetes/kubernetes/blob/release-1.7/pkg/kubelet/cm/cgroup_manager_linux.go, line 236) will check if `"cpu", "cpuacct", "cpuset", "memory", "hugetlb", "systemd"`  exist in the cgroup hierarchy. edit `/etc/systemd/system.conf`:
+  3. configure systemd to enable more cgroup controllers, since kubelet (https://github.com/kubernetes/kubernetes/blob/release-1.7/pkg/kubelet/cm/cgroup_manager_linux.go, to check the keyword 'whitelistControllers' ) will check if  `"cpu", "cpuacct", "cpuset", "memory", "hugetlb", "systemd"`  exist in the cgroup hierarchy. edit `/etc/systemd/system.conf`:
+    
     
   ```
   JoinControllers=cpu,cpuacct,cpuset,net_cls,net_prio,hugetlb,memory
   ```
     This will resove the error `failed to run Kubelet: invalid configuration: cgroup-root "/container.slice/" doesn't exist:`, when specified `--cgroup-root=/container.slice/` in kubelet.service.
 
-  4. check for the kernel, for ubuntu 16.04.3, install latest kernel `apt install  linux-image-generic-hwe-16.04 linux-headers-generic-hwe-16.04 -y` 
+  4. enable CPUAccounting  and MemoryAccounting  by modify `/etc/systemd/system.conf`:
+  ```
+  DefaultCPUAccounting=true 
+  DefaultMemoryAccounting=true
+  ```
+  5. check for the kernel, for ubuntu 16.04.3, install latest kernel `apt install  linux-image-generic-hwe-16.04 linux-headers-generic-hwe-16.04 -y` 
 # Deployment #
 1. create cgroup slices
     
@@ -73,13 +79,13 @@
     2.2 install docker-engine 
 
       ```
-      # dpkg -i docker-engine_1.12.6-0~ubuntu-xenial_amd64.deb 
+      # dpkg -i docker-ce_17.03.2~ce-0~ubuntu-xenial_amd64.deb 
       # apt install -f 
       ```
       or
 
       ```
-      #yum install http://yum.dockerproject.org/repo/main/centos/7/Packages/docker-engine-1.12.6-1.el7.centos.x86_64.rpm
+      #yum install https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-17.03.2.ce-1.el7.centos.x86_64.rpm
       ``` 
     
     2.3 modify systemd service file [docker.service](./systemd/docker.service)
@@ -174,7 +180,7 @@
     - **make sure the dir /var/log/journal exists**
 
 
-4. create SSL keys for etcd, docker and kubernetes, details in [SSL](./SSL); here etcd and docker certs can share same certs, so create once and used in both etcd and docker. for k8s, for enabled RBAC, thus for each kubelet cert with its individual cert. 
+4. create SSL keys for etcd, docker and kubernetes, details in [SSL](./SSL); . now we will create one bundle of 3 CA certs which can be used in the cluster, also docker and etcd have their individual CA certs.
 
     NOTE: we can also use TLS bootstraping for kubelet, thus we don't need to create certificates for each node when joining into the cluster, details steps in [TLS Booststraping](./TLS_Bootstrapping)
 
@@ -182,19 +188,38 @@
 
 6. prepare [kubelet.service](./systemd/kubelet.service).
 
-    -  add `Slice=kubesvc.slice` into the `[service]` section, this will place kubelet service in kubesvc.slice.
-
-    - `--cgrout-root=/container.slice`:  this will place all pods under `/container.slice/kubepods.slice`
-
-    - `--kube-reserved=cpu=2,memory=4Gi --kube-reserved-cgroup=/kubesvc.slice   --system-reserved=cpu=2,memory=4Gi --system-reserved-cgroup=/system.slice`:  these parameter will limit the kube process and other process resouce.
-
-    - `--enforce-node-allocatable=pods,system-reserved,kube-reserved`: this will garentee that pod,system processes and kubelet/rkt process are all existing in the system, prevent any crashes due to lack of the resources.
 
     - for the cert used in kubelet, we should  set its org and CN ` O=system:nodes/CN=system:node:<node-name>`, it is related with RBAC
 
-    - the kubeconfig used in kubelet, since we have have configured [apiserver proxy](.//applications/apiserver-proxy) on each node, the apiserver host can be set to `https://localhost:6443`
+    - the kubeconfig used in kubelet, since we have have configured [apiserver proxy](./applications/apiserver-proxy) via haproxy or nginx on each node, which listens on https://0.0.0.0:8443 and proxy all apiserver request to the real apiservers, hence the apiserver configure in kubeconfig can be set to `https://localhost:8443`
 
-7. prepare the static pod manifests,[etcd.yaml](./manifests/etcd.yaml), [kube-apiserver.yaml](./manifests/kube-apiserver.yaml),[kube-controller-manager.yaml](./manifests/kube-controller-manager.yaml) and [kube-scheduler.yaml](kube-scheduler.yaml)
+    - Create cni conf on the nodes running kubelet service, starting from v1.7.2, kubelet has an issue that when it starts it will check if the cni configure exists in /etc/cni/net.d. if not, it fails to start. so we need to create CNI conf before we start kubelet on each node and then install calico network.
+
+    - now, many kubelet flags are moved to a config file, we need to create it first, and set it via `--config=/var/lib/kubelet/kubelet.config`:
+    
+    ```
+    kind: KubeletConfiguration
+    apiVersion: kubelet.config.k8s.io/v1beta1
+    CgroupDriver: "systemd"
+    ClusterDNS: ["192.168.0.10"]
+    ClusterDomain: "cluster.local"
+    StaticPodPath: "/var/lib/kubernetes/manifests"
+    EvictionHard:
+        memory.available": "300Mi"
+        nodefs.available:  "10%"
+    EvictionSoft:
+        memory.available": "600Mi"
+        nodefs.available:  "15%"
+    SystemReserved: "cpu=200m,memory=10G,nodefs=10G"
+    SystemReservedCgroup: "/system.slice"
+    KubeReserved: "cpu=200m,memory=5G,nodefs=10G"
+    KubeReservedCgroup: "/kubesvc.slice"
+    EnforceNodeAllocatable: "system-reserved,kube-reserved,pod"
+    ```
+
+    details are list in the source code： https://github.com/kubernetes/kubernetes/blob/master/pkg/kubelet/apis/kubeletconfig/v1beta1/types.go
+
+7. prepare the static pod manifests,[etcd.yaml](./manifests/etcd.yaml), [kube-apiserver.yaml](./manifests/kube-apiserver.yaml),[kube-controller-manager.yaml](./manifests/kube-controller-manager.yaml) , [kube-scheduler.yaml](kube-scheduler.yaml) and [apiserver-proxy](./applications/apiserver-proxy)
 
     ## Note:
     -  etcd add tls cert
@@ -203,9 +228,9 @@
     `--use-service-account-credentials`, the details explanation, please refer to [link](https://kubernetes.io/docs/admin/authorization/rbac/#controller-roles). if don't add this parameter, we may encounter permission `DENY` issue.
   
 
-8. get [kubernetes node binaries](https://dl.k8s.io/v1.7.2/kubernetes-node-linux-amd64.tar.gz), this is v1.7.2, now this version of kubelet has an issue that when it starts it will check if the cni configure exists in /etc/cni/net.d. if not, it fails to start. I had to use v1.5.x to start kubelet, and then install calico network, after that reinstall v.17.x version of kubelet.
+8. get [kubernetes node binaries](https://dl.k8s.io//v1.10.0/kubernetes-node-linux-amd64.tar.gz), 
 
-9. start kubernetes cluster via starting `kubelet.service`.
+9. start kubernetes nodes via starting `kubelet.service`.
 
 10. when started, we may got some errors show that `system:node:cnpvgl56588417 don't have permission to update node status ...., permission DENY....`. Here we need to update the rolebinding for this account, refer to [kube-node-binding](./RBAC/kube-node-binding.yaml)
 
@@ -214,6 +239,8 @@
     *if we need to append certs in the secret, just  base64 -w 0 ./ca.pem then add the result to the secret value if neccessary both in calico and cilium*
 
     - Calico
+
+        0. install [calico cni conf](./network/calico/10-calico.conf) into  /etc/cni/net.d on each node
     
         1. create configmap to storate the etcd TLS certs and ca certs, describe in [calico](./network/calico/readme.md)
 
@@ -221,7 +248,7 @@
         - calico-config
 
         ```
-        etcd_endpoints: "https://10.58.137.243:2379"
+        etcd_endpoints: "https://192.168.59.201:2379,https://192.168.59.202:2379,https://192.168.59.203:2379"
         ```
 
         and 
@@ -241,20 +268,23 @@
 
 
         - remove the configmap for creating calico-etcd-secrets, since  we created it manually.
+        - remove all entries about colico-cni-conf, and mount it from hostPath
 
         3. create role and rolebinding for calico via     [calico-rbac.yaml](./network/calico/calico-rbac.yaml)
 
         4. create calico via [calico.yaml](./network/calico/calico.yaml)
 
     - Cilium
+        - before install this plugin, install [cilium cni conf](./network/cilium/10-cilium.conf) into  /etc/cni/net.d on each node
 
-        we will still consider using [cilium]   (https://github.com/cilium/cilium), it has many advanced   features, it will implement kube-proxy function, and use bpf to   replace iptables thus has higher performance, but now it lacks    some functionality, such as NodePort, ingress,..etcd.
+        - we will still consider using [cilium]   (https://github.com/cilium/cilium), it has many advanced   features, it will implement kube-proxy function, and use bpf to   replace iptables thus has higher performance, but now it lacks some functionality, such as NodePort, ingress,..etcd.
 
         full deployment of cilium, refer to [cilium deployment](./network/cilium).
 
 
 
-12. install [kube-proxy](./addons/kube-proxy/kube-proxy.yaml) via daemonset, but before that created a configmap to store `kube-proxy.kubeconfig`, and then mount in the kube-proxy pods. or we can start it as a static pod 
+12. install [kube-proxy](./addons/kube-proxy/kube-proxy.yaml) via daemonset, but before that created a configmap to store `kube-proxy.kubeconfig`, and then mount in the kube-proxy pods. or we can start it as a static pod, now kube-proxy can be running in ipvs mode which may be more performant than iptables. 
+
 
 13. install [kube-dns](./addons/kube-dns/kube-dns.yaml), this file contains a configmap to store some addtional config of `upstreamNameservers`, and modify the DNS domains and DNS  service IP `clusterIP: 192.168.0.10`, also enable prometheus monitoring on service and exposes coresponding ports.
 ```
@@ -317,6 +347,11 @@
 19. Create default [ResourceLimt and Quota](./ResourceLimitQuota).
 
 20. deploy multiple [applications](./applications) and [kubernetes addons](./addons)
+
+    ## To enforce scheduler pods on master nodes, label the maste node as:
+    ```
+    kubectl label nodes 192.168.59.201 dedicated=master
+    ```
     
 21. define some [autoscaler](./Autoscaler) rules, details refer to [AutoScaler](https://github.com/kubernetes/autoscaler), there are four types of autoscaler
     - [Cluster Autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler)

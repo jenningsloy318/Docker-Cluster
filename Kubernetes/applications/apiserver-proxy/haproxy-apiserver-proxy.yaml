@@ -9,8 +9,8 @@ spec:
     name: haproxy-apiserver-proxy
     command: ["haproxy","-f","/usr/local/etc/haproxy/haproxy.cfg"]
     ports:
-    - containerPort: 6443
-      hostPort: 6443
+    - containerPort: 8443
+      hostPort: 8443
       name: https    
     volumeMounts:
       - name: localtime

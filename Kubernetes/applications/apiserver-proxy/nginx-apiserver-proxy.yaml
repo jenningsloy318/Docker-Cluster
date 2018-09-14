@@ -8,8 +8,8 @@ spec:
   - image:  nginx:stable
     name: nginx-apiserver
     ports:
-    - containerPort: 6443
-      hostPort: 6443
+    - containerPort: 8443
+      hostPort: 8443
       name: https
     volumeMounts:
     - name: localtime

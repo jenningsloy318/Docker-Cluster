@@ -1,5 +1,5 @@
-# Calico Version v3.0.0-beta1
-# https://docs.projectcalico.org/v3.0/releases#v3.0.0-beta1
+# Calico Version v3.0.4
+# https://docs.projectcalico.org/v3.0/releases#v3.0.4
 
 ---
 
@@ -7,6 +7,7 @@ kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: calico-kube-controllers
+  namespace: kube-system
 rules:
   - apiGroups:
     - ""
@@ -24,6 +25,7 @@ kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: calico-kube-controllers
+  namespace: kube-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -39,6 +41,7 @@ kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: calico-node
+  namespace: kube-system
 rules:
   - apiGroups: [""]
     resources:
@@ -53,6 +56,7 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
   name: calico-node
+  namespace: kube-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

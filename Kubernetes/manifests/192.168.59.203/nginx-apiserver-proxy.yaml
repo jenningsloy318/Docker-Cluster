@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-apiserver-proxy
+spec:
+  hostNetwork: true
+  containers:
+  - image:  nginx:stable
+    name: nginx-apiserver
+    ports:
+    - containerPort: 8443
+      hostPort: 8443
+      name: https
+    volumeMounts:
+    - name: localtime
+      mountPath: /etc/localtime
+    - name: nginx-conf
+      mountPath: /etc/nginx/nginx.conf
+  volumes:
+  - name: localtime
+    hostPath:
+      path: /etc/localtime
+  - name: nginx-conf
+    hostPath:
+      path: /etc/nginx/nginx.conf              

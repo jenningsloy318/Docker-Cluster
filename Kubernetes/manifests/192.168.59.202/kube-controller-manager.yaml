@@ -1,0 +1,100 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kube-controller-manager
+spec:
+  containers:
+  - name: kube-controller-manager
+    image: gcr.io/google_containers/kube-controller-manager:v1.10.0
+    imagePullPolicy: IfNotPresent
+    command:
+    - /bin/sh
+    - -c
+    - /usr/local/bin/kube-controller-manager --kubeconfig=/var/lib/kubernetes/kubeconfig/kube-controller-manager.kubeconfig
+      --cluster-cidr=192.188.0.0/16 --allocate-node-cidrs=true  
+      --service-account-private-key-file=/var/lib/kubernetes/certs/kube-apiserver-key.pem
+      --v=5 --leader-elect=true 
+      --root-ca-file=/var/lib/kubernetes/certs/RootCA.pem
+      --cluster-signing-key-file=/var/lib/kubernetes/certs/ClientCA.pem
+      --cluster-signing-cert-file=/var/lib/kubernetes/certs/ClientCA.pem
+      --controllers=*-csrsigning
+    #  --use-service-account-credentials
+    livenessProbe:
+      httpGet:
+        path: /healthz
+        port: 10252
+      initialDelaySeconds: 15
+      timeoutSeconds: 1
+    volumeMounts:
+    - mountPath: /var/lib/kubernetes/certs/
+      name: certs
+      readOnly: true
+    - mountPath: /var/lib/kubernetes/kubeconfig/
+      name: kubeconfig
+      readOnly: true      
+    - mountPath: /var/log/
+      name: logfile
+    - mountPath: /etc/ssl
+      name: etcssl
+      readOnly: true
+    - mountPath: /usr/share/ssl
+      name: usrsharessl
+      readOnly: true
+    - mountPath: /var/ssl
+      name: varssl
+      readOnly: true
+    - mountPath: /usr/ssl
+      name: usrssl
+      readOnly: true
+    - mountPath: /usr/lib/ssl
+      name: usrlibssl
+      readOnly: true
+    - mountPath: /usr/local/openssl
+      name: usrlocalopenssl
+      readOnly: true
+    - mountPath: /etc/openssl
+      name: etcopenssl
+      readOnly: true
+    - mountPath: /etc/pki/tls
+      name: etcpkitls
+      readOnly: true
+    - name: localtime
+      mountPath: /etc/localtime         
+  hostNetwork: true
+  volumes:
+  - hostPath:
+      path: /var/lib/kubernetes/certs/
+    name: certs
+  - hostPath:
+      path: /var/lib/kubernetes/kubeconfig/
+    name: kubeconfig
+  - hostPath:
+      path: /var/log/
+    name: logfile
+  - hostPath:
+      path: /etc/ssl
+    name: etcssl
+  - hostPath:
+      path: /usr/share/ssl
+    name: usrsharessl
+  - hostPath:
+      path: /var/ssl
+    name: varssl
+  - hostPath:
+      path: /usr/ssl
+    name: usrssl
+  - hostPath:
+      path: /usr/lib/ssl
+    name: usrlibssl
+  - hostPath:
+      path: /usr/local/openssl
+    name: usrlocalopenssl
+  - hostPath:
+      path: /etc/openssl
+    name: etcopenssl
+  - hostPath:
+      path: /etc/pki/tls
+    name: etcpkitls
+  - name: localtime
+    hostPath:
+      path: /etc/localtime  

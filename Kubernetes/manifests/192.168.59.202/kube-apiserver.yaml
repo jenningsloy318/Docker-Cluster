@@ -6,33 +6,33 @@ spec:
   hostNetwork: true
   containers:
   - name: kube-apiserver
-    image: gcr.io/google_containers/kube-apiserver:v1.7.0
-    imagePullPolicy: Always
+    image: gcr.io/google_containers/kube-apiserver:v1.10.0
+    imagePullPolicy: IfNotPresent
     command:
     - /bin/sh
     - -c
     - /usr/local/bin/kube-apiserver 
-      --etcd-servers=https://10.58.137.243:2379 
-      --etcd-cafile=/srv/kubernetes/ca.pem 
-      --etcd-certfile=/srv/kubernetes/etcdclient.pem --etcd-keyfile=etcdclient-key.pem
+      --etcd-servers=https://192.168.59.201:2379,https://192.168.59.202:2379,https://192.168.59.203:2379
+      --etcd-cafile=/var/lib/kubernetes/certs/EtcdCA.pem
+      --etcd-certfile=/var/lib/kubernetes/certs/etcd-client.pem --etcd-keyfile=/var/lib/kubernetes/certs/etcd-client-key.pem
       --authorization-mode=Node,RBAC
       --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,ResourceQuota,NodeRestriction
-      --service-cluster-ip-range=192.168.0.0/16
-      --service-account-key-file=/srv/kubernetes/apiserver-key.pem
-      --client-ca-file=/srv/kubernetes/ca.pem
-      --tls-cert-file=/srv/kubernetes/apiserver.pem --tls-private-key-file=/srv/kubernetes/apiserver-key.pem
-      --token-auth-file=/srv/kubernetes/token.csv  --basic-auth-file=/srv/kubernetes/basic.csv
+      --service-cluster-ip-range=192.168.0.0/24
+      --service-account-key-file=/var/lib/kubernetes/certs/kube-apiserver-key.pem
+      --client-ca-file=/var/lib/kubernetes/certs/ClientCA.pem
+      --tls-cert-file=/var/lib/kubernetes/certs/kube-apiserver.pem --tls-private-key-file=/var/lib/kubernetes/certs/kube-apiserver-key.pem
+      --token-auth-file=/var/lib/kubernetes/certs/token.csv  --basic-auth-file=/var/lib/kubernetes/certs/basic.csv
       --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname --anonymous-auth=false
-      --secure-port=6443  --bind-address=<external IP address>  --v=5
+      --secure-port=6443  --bind-address=192.168.59.202  --v=5
       --allow-privileged=true 
-      --requestheader-client-ca-file=/srv/kubernetes/ca.pem
-      --requestheader-allowed-names=system:kube-controller-manager,system:kube-proxy,system:kube-scheduler,system:node:cnpvgl56588417,system:node:cnpvgl56588418
+      --requestheader-client-ca-file=/var/lib/kubernetes/certs/RequestHeaderClientCA.pem
+      --requestheader-allowed-names=system:kube-apiserver
       --requestheader-extra-headers-prefix=X-Remote-Extra-
       --requestheader-group-headers=X-Remote-Group
       --requestheader-username-headers=X-Remote-User
-      --proxy-client-cert-file=/srv/kubernetes/apiserver.pem 
-      --proxy-client-key-file=/srv/kubernetes/apiserver-key.pem
-
+      --proxy-client-cert-file=/var/lib/kubernetes/certs/RHClient-apiserver.pem
+      --proxy-client-key-file=/var/lib/kubernetes/certs/RHClient-apiserver-key.pem
+      --feature-gates=CustomResourceValidation=true
     ports:
     - containerPort: 6443
       hostPort: 6443
@@ -43,7 +43,7 @@ spec:
     volumeMounts:
     - mountPath: /var/log/
       name: logfile
-    - mountPath: /srv/kubernetes/
+    - mountPath: /var/lib/kubernetes/certs/
       name: certs
       readOnly: true
     - mountPath: /usr/share/ssl
@@ -74,7 +74,7 @@ spec:
       path: /var/log/
     name: logfile
   - hostPath:
-      path: /srv/kubernetes/
+      path: /var/lib/kubernetes/certs/
     name: certs
   - hostPath:
       path: /usr/share/ssl

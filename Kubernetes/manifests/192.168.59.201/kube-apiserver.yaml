@@ -1,0 +1,102 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kube-apiserver
+spec:
+  hostNetwork: true
+  containers:
+  - name: kube-apiserver
+    image: gcr.io/google_containers/kube-apiserver:v1.10.0
+    imagePullPolicy: IfNotPresent
+    command:
+    - /bin/sh
+    - -c
+    - /usr/local/bin/kube-apiserver 
+      --etcd-servers=https://192.168.59.201:2379,https://192.168.59.202:2379,https://192.168.59.203:2379
+      --etcd-cafile=/var/lib/kubernetes/certs/EtcdCA.pem
+      --etcd-certfile=/var/lib/kubernetes/certs/etcd-client.pem --etcd-keyfile=/var/lib/kubernetes/certs/etcd-client-key.pem
+      --authorization-mode=Node,RBAC
+      --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,ResourceQuota,NodeRestriction
+      --service-cluster-ip-range=192.168.0.0/24
+      --service-account-key-file=/var/lib/kubernetes/certs/kube-apiserver-key.pem
+      --client-ca-file=/var/lib/kubernetes/certs/ClientCA.pem
+      --tls-cert-file=/var/lib/kubernetes/certs/kube-apiserver.pem --tls-private-key-file=/var/lib/kubernetes/certs/kube-apiserver-key.pem
+      --token-auth-file=/var/lib/kubernetes/certs/token.csv  --basic-auth-file=/var/lib/kubernetes/certs/basic.csv
+      --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname --anonymous-auth=false
+      --secure-port=6443  --bind-address=192.168.59.201  --v=5
+      --allow-privileged=true 
+      --requestheader-client-ca-file=/var/lib/kubernetes/certs/RequestHeaderClientCA.pem
+      --requestheader-allowed-names=system:kube-apiserver
+      --requestheader-extra-headers-prefix=X-Remote-Extra-
+      --requestheader-group-headers=X-Remote-Group
+      --requestheader-username-headers=X-Remote-User
+      --proxy-client-cert-file=/var/lib/kubernetes/certs/RHClient-apiserver.pem
+      --proxy-client-key-file=/var/lib/kubernetes/certs/RHClient-apiserver-key.pem
+      --feature-gates=CustomResourceValidation=true
+    ports:
+    - containerPort: 6443
+      hostPort: 6443
+      name: https
+    - containerPort: 8080
+      hostPort: 8080
+      name: local
+    volumeMounts:
+    - mountPath: /var/log/
+      name: logfile
+    - mountPath: /var/lib/kubernetes/certs/
+      name: certs
+      readOnly: true
+    - mountPath: /usr/share/ssl
+      name: usrsharessl
+      readOnly: true
+    - mountPath: /var/ssl
+      name: varssl
+      readOnly: true
+    - mountPath: /usr/ssl
+      name: usrssl
+      readOnly: true
+    - mountPath: /usr/lib/ssl
+      name: usrlibssl
+      readOnly: true
+    - mountPath: /usr/local/openssl
+      name: usrlocalopenssl
+      readOnly: true
+    - mountPath: /etc/openssl
+      name: etcopenssl
+      readOnly: true
+    - mountPath: /etc/pki/tls
+      name: etcpkitls
+      readOnly: true
+    - name: localtime
+      mountPath: /etc/localtime            
+  volumes:
+  - hostPath:
+      path: /var/log/
+    name: logfile
+  - hostPath:
+      path: /var/lib/kubernetes/certs/
+    name: certs
+  - hostPath:
+      path: /usr/share/ssl
+    name: usrsharessl
+  - hostPath:
+      path: /var/ssl
+    name: varssl
+  - hostPath:
+      path: /usr/ssl
+    name: usrssl
+  - hostPath:
+      path: /usr/lib/ssl
+    name: usrlibssl
+  - hostPath:
+      path: /usr/local/openssl
+    name: usrlocalopenssl
+  - hostPath:
+      path: /etc/openssl
+    name: etcopenssl
+  - hostPath:
+      path: /etc/pki/tls
+    name: etcpkitls
+  - name: localtime
+    hostPath:
+      path: /etc/localtime  

@@ -7,11 +7,11 @@ spec:
   containers:
   - name: kube-scheduler
     image: gcr.io/google_containers/kube-scheduler:v1.10.0
-    imagePullPolicy: Always
+    imagePullPolicy: IfNotPresent
     command:
     - /bin/sh
     - -c
-    - /usr/local/bin/kube-scheduler --kubeconfig=/var/lib/kubernetes/certs/kube-scheduler.kubeconfig
+    - /usr/local/bin/kube-scheduler --kubeconfig=/var/lib/kubernetes/kubeconfig/kube-scheduler.kubeconfig
       --v=5 --leader-elect=true 
     livenessProbe:
       httpGet:
@@ -22,18 +22,23 @@ spec:
     volumeMounts:
     - mountPath: /var/log/
       name: logfile
+    - name: localtime
+      mountPath: /etc/localtime       
+    - mountPath: /var/lib/kubernetes/kubeconfig/
+      name: kubeconfig      
     - mountPath: /var/lib/kubernetes/certs/
       name: certs
-      readonly: true
-    - name: localtime
-      mountPath: /etc/localtime         
+      readOnly: true        
   volumes:
   - hostPath:
       path: /var/log/
     name: logfile
-  - hostPath:
-      path: /var/lib/kubernetes/certs/
-    name: certs
   - name: localtime
     hostPath:
       path: /etc/localtime  
+  - hostPath:
+      path: /var/lib/kubernetes/kubeconfig/
+    name: kubeconfig
+  - hostPath:
+      path: /var/lib/kubernetes/certs/
+    name: certs    

@@ -1,0 +1,16 @@
+{
+    "CN": "etcd-client",
+    "key": {
+      "algo": "rsa",
+      "size": 4096
+    },
+    "names": [
+              {
+                  "C": "CN",
+                  "ST": "SC",
+                  "L": "Chengdu",
+                  "O": "lmy.com .ltd",
+                  "OU": "DevOps"
+              }
+    ]
+  }

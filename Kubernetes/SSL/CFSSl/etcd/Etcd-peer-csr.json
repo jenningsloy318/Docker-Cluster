@@ -1,0 +1,24 @@
+{
+    "CN": "etcd-peer",
+    "hosts": [
+      "192.168.59.201",
+      "192.168.59.202",
+      "192.168.59.203",
+      "kube-master1",
+      "kube-master2",
+      "kube-master3"
+    ],
+    "key": {
+      "algo": "rsa",
+      "size": 4096
+    },
+    "names": [
+              {
+                  "C": "CN",
+                  "ST": "SC",
+                  "L": "Chengdu",
+                  "O": "lmy.com .ltd",
+                  "OU": "DevOps"
+              }
+    ]
+  }

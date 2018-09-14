@@ -3,6 +3,9 @@ global:
   smtp_smarthost: 'mail.lmy.com:25'
   smtp_from: 'admin@lmy.com'
   smtp_require_tls: false
+  smtp_auth_username: 
+  smtp_auth_password:  
+
   # the slack Incoming WebHooks url
   slack_api_url: 'https://hooks.slack.com/services/xxxx'  
 

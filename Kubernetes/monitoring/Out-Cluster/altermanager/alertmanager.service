@@ -3,7 +3,8 @@ Description=alertmanager  service
 
 [Service]
 Slice=container.slice
-ExecStart=/usr/bin/alertmanager -config.file=/etc/prometheus/alertmanager.yml  -storage.path=/data/monitoring/alertmanager -web.external-url=http://{{ip addr}}:9093
+ExecStart=/usr/bin/alertmanager --config.file=/etc/alertmanager/alertmanager.yml  --storage.path=/data/monitoring/alertmanager --web.external-url=http://{{ alertmanager_ext_addr }}:9093  --cluster.listen-address=0.0.0.0:9094  --cluster.peer=<alertmanager-peer:9094,this option can repeat muliple times>
+
 Restart=always
 RestartSec=2s
 StartLimitInterval=0
